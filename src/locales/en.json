@@ -1,19 +1,16 @@
 {
-  "nav": {
+  "navigation": {
     "home": "Home",
-    "events": "Events Calendar",
-    "travel": "Travel Guide",
-    "help": "Help Center",
-    "about": "About Us"
+    "events": "Events",
+    "travel": "Travel",
+    "help": "Help",
+    "about": "About"
   },
   "events": {
-    "calendar": "Events Calendar",
-    "totalEvents": "Total Events: {count}",
-    "timeline": "Today's Timeline",
-    "noEvents": "No events found",
-    "tryOtherDate": "Try selecting another date",
+    "title": "Event Calendar",
+    "subtitle": "Browse events and plan your day",
     "filters": {
-      "title": "Filter Results",
+      "title": "Filters",
       "eventType": "Event Type",
       "venue": "Venue",
       "price": "Price",
@@ -22,29 +19,76 @@
       "allVenues": "All Venues",
       "allPrices": "All Prices",
       "allAudience": "All Audiences",
-      "apply": "Apply Filters"
+      "apply": "Apply Filters",
+      "clear": "Clear Filters"
+    },
+    "types": {
+      "concert": "Concert",
+      "sports": "Sports Event",
+      "exhibition": "Exhibition"
+    },
+    "venues": {
+      "stadium": "Stadium",
+      "theater": "Theater",
+      "gallery": "Gallery"
+    },
+    "prices": {
+      "free": "Free",
+      "paid": "Paid"
+    },
+    "audience": {
+      "family": "Family",
+      "adult": "Adult",
+      "children": "Children"
     },
     "calendar": {
-      "april": "April",
-      "may": "May",
-      "june": "June",
-      "july": "July",
-      "august": "August",
-      "september": "September",
-      "october": "October",
-      "november": "November",
-      "december": "December",
-      "sun": "Sun",
+      "previous": "Previous Month",
+      "next": "Next Month",
+      "noEvents": "No Events Found",
+      "tryOther": "Try another date",
       "mon": "Mon",
       "tue": "Tue",
       "wed": "Wed",
       "thu": "Thu",
       "fri": "Fri",
-      "sat": "Sat"
+      "sat": "Sat",
+      "sun": "Sun",
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      }
     },
-    "eventsFound": "events found",
-    "clearFilters": "Clear Filters",
-    "bookTickets": "Book Tickets",
-    "moreInfo": "More Info"
+    "actions": {
+      "viewDetails": "View Details",
+      "bookTickets": "Book Tickets",
+      "moreInfo": "More Info",
+      "getTravelGuide": "Get Travel Guide"
+    }
+  },
+  "travel": {
+    "title": "Travel Guide",
+    "transportMode": "Transport Mode",
+    "publicTransport": "Public Transport",
+    "walking": "Walking",
+    "driving": "Driving",
+    "routeInfo": {
+      "estimatedTime": "Estimated Time",
+      "distance": "Distance",
+      "arrival": "Arrival Time"
+    },
+    "actions": {
+      "getDirections": "Get Directions",
+      "savePDF": "Save PDF"
+    }
   }
 } 

@@ -1,0 +1,94 @@
+{
+  "navigation": {
+    "home": "Trang chủ",
+    "events": "Sự kiện",
+    "travel": "Di chuyển",
+    "help": "Trợ giúp",
+    "about": "Giới thiệu"
+  },
+  "events": {
+    "title": "Lịch sự kiện",
+    "subtitle": "Duyệt các hoạt động và lên kế hoạch cho ngày của bạn",
+    "filters": {
+      "title": "Bộ lọc",
+      "eventType": "Loại sự kiện",
+      "venue": "Địa điểm",
+      "price": "Giá",
+      "audience": "Đối tượng",
+      "allEvents": "Tất cả sự kiện",
+      "allVenues": "Tất cả địa điểm",
+      "allPrices": "Tất cả giá",
+      "allAudience": "Tất cả đối tượng",
+      "apply": "Áp dụng bộ lọc",
+      "clear": "Xóa bộ lọc"
+    },
+    "types": {
+      "concert": "Hòa nhạc",
+      "sports": "Sự kiện thể thao",
+      "exhibition": "Triển lãm"
+    },
+    "venues": {
+      "stadium": "Sân vận động",
+      "theater": "Nhà hát",
+      "gallery": "Phòng trưng bày"
+    },
+    "prices": {
+      "free": "Miễn phí",
+      "paid": "Có phí"
+    },
+    "audience": {
+      "family": "Gia đình",
+      "adult": "Người lớn",
+      "children": "Trẻ em"
+    },
+    "calendar": {
+      "previous": "Tháng trước",
+      "next": "Tháng sau",
+      "noEvents": "Không tìm thấy sự kiện",
+      "tryOther": "Hãy chọn ngày khác",
+      "mon": "T2",
+      "tue": "T3",
+      "wed": "T4",
+      "thu": "T5",
+      "fri": "T6",
+      "sat": "T7",
+      "sun": "CN",
+      "months": {
+        "january": "Tháng 1",
+        "february": "Tháng 2",
+        "march": "Tháng 3",
+        "april": "Tháng 4",
+        "may": "Tháng 5",
+        "june": "Tháng 6",
+        "july": "Tháng 7",
+        "august": "Tháng 8",
+        "september": "Tháng 9",
+        "october": "Tháng 10",
+        "november": "Tháng 11",
+        "december": "Tháng 12"
+      }
+    },
+    "actions": {
+      "viewDetails": "Xem chi tiết",
+      "bookTickets": "Đặt vé",
+      "moreInfo": "Thêm thông tin",
+      "getTravelGuide": "Xem hướng dẫn di chuyển"
+    }
+  },
+  "travel": {
+    "title": "Hướng dẫn di chuyển",
+    "transportMode": "Phương thức di chuyển",
+    "publicTransport": "Phương tiện công cộng",
+    "walking": "Đi bộ",
+    "driving": "Lái xe",
+    "routeInfo": {
+      "estimatedTime": "Thời gian dự kiến",
+      "distance": "Khoảng cách",
+      "arrival": "Thời gian đến"
+    },
+    "actions": {
+      "getDirections": "Xem chỉ đường",
+      "savePDF": "Lưu PDF"
+    }
+  }
+} 

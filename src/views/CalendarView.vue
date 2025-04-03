@@ -6,7 +6,7 @@
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <p class="text-sm font-semibold uppercase tracking-wider">What's On</p>
         <h1 class="mt-2 text-4xl font-bold sm:text-5xl">Event Calendar</h1>
-        <p class="mt-3 text-gray-300">The Production Company</p>
+        <p class="mt-3 text-gray-300">vv</p>
       </div>
     </div>
 

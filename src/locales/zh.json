@@ -1,50 +1,94 @@
 {
-  "nav": {
+  "navigation": {
     "home": "首页",
-    "events": "活动日历",
-    "travel": "旅行指南",
-    "help": "帮助中心",
-    "about": "关于我们"
+    "events": "活动",
+    "travel": "出行",
+    "help": "帮助",
+    "about": "关于"
   },
   "events": {
-    "calendar": "活动日历",
-    "totalEvents": "总活动数：{count}",
-    "timeline": "今日时间表",
-    "noEvents": "暂无活动",
-    "tryOtherDate": "请选择其他日期",
+    "title": "活动日历",
+    "subtitle": "浏览活动并规划您的行程",
     "filters": {
-      "title": "筛选结果",
+      "title": "筛选",
       "eventType": "活动类型",
-      "venue": "活动场地",
+      "venue": "场地",
       "price": "价格",
-      "audience": "适合人群",
+      "audience": "观众",
       "allEvents": "所有活动",
       "allVenues": "所有场地",
       "allPrices": "所有价格",
-      "allAudience": "所有人群",
-      "apply": "应用筛选"
+      "allAudience": "所有观众",
+      "apply": "应用筛选",
+      "clear": "清除筛选"
+    },
+    "types": {
+      "concert": "音乐会",
+      "sports": "体育赛事",
+      "exhibition": "展览"
+    },
+    "venues": {
+      "stadium": "体育场",
+      "theater": "剧院",
+      "gallery": "画廊"
+    },
+    "prices": {
+      "free": "免费",
+      "paid": "付费"
+    },
+    "audience": {
+      "family": "家庭",
+      "adult": "成人",
+      "children": "儿童"
     },
     "calendar": {
-      "april": "四月",
-      "may": "五月",
-      "june": "六月",
-      "july": "七月",
-      "august": "八月",
-      "september": "九月",
-      "october": "十月",
-      "november": "十一月",
-      "december": "十二月",
-      "sun": "周日",
+      "previous": "上个月",
+      "next": "下个月",
+      "noEvents": "未找到活动",
+      "tryOther": "请选择其他日期",
       "mon": "周一",
       "tue": "周二",
       "wed": "周三",
       "thu": "周四",
       "fri": "周五",
-      "sat": "周六"
+      "sat": "周六",
+      "sun": "周日",
+      "months": {
+        "january": "一月",
+        "february": "二月",
+        "march": "三月",
+        "april": "四月",
+        "may": "五月",
+        "june": "六月",
+        "july": "七月",
+        "august": "八月",
+        "september": "九月",
+        "october": "十月",
+        "november": "十一月",
+        "december": "十二月"
+      }
     },
-    "eventsFound": "个活动",
-    "clearFilters": "清除筛选",
-    "bookTickets": "预订门票",
-    "moreInfo": "更多信息"
+    "actions": {
+      "viewDetails": "查看详情",
+      "bookTickets": "预订门票",
+      "moreInfo": "更多信息",
+      "getTravelGuide": "获取出行指南"
+    }
+  },
+  "travel": {
+    "title": "出行指南",
+    "transportMode": "交通方式",
+    "publicTransport": "公共交通",
+    "walking": "步行",
+    "driving": "驾车",
+    "routeInfo": {
+      "estimatedTime": "预计时间",
+      "distance": "距离",
+      "arrival": "到达时间"
+    },
+    "actions": {
+      "getDirections": "获取路线",
+      "savePDF": "保存PDF"
+    }
   }
 } 

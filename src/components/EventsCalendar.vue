@@ -6,7 +6,9 @@
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <p class="text-sm font-semibold uppercase tracking-wider">What's On</p>
         <h1 class="mt-2 text-4xl font-bold sm:text-5xl">Event Calendar</h1>
-        <p class="mt-3 text-gray-300">The Production Company</p>
+        <p class="mt-3 text-gray-300">vv
+          
+        </p>
       </div>
     </div>
 
@@ -16,28 +18,33 @@
         <!-- Month Navigation -->
         <div class="flex flex-wrap items-center justify-center text-sm text-gray-600 py-4 border-b border-t border-gray-200 bg-gray-100">
           <div class="grid grid-cols-12 gap-1 w-full max-w-4xl">
-            <div class="col-span-2 text-center">
-              <button @click="previousMonth" class="p-2 text-gray-500">
-                <span>←</span>
+            <div class="col-span-2 flex items-center justify-end pr-4">
+              <button @click="previousMonth" class="p-2 text-gray-500 hover:text-gray-700">
+                <span class="text-2xl font-bold">←</span>
               </button>
             </div>
             
-            <div class="col-span-8 flex justify-center space-x-2 overflow-x-auto">
-              <template v-for="(month, index) in monthsList" :key="index">
-                <button 
-                  @click="selectMonth(month.value)" 
-                  :class="[
-                    'px-2 py-1 rounded-sm', 
-                    currentDate.getMonth() === month.value ? 'font-bold text-white bg-green-700' : 'hover:underline'
-                  ]">
-                  {{ month.label }}
-                </button>
-              </template>
+            <div class="col-span-8">
+              <div class="text-center mb-2">
+                <span class="text-lg font-semibold text-gray-700">2025</span>
+              </div>
+              <div class="flex justify-center space-x-2 overflow-x-auto px-4">
+                <template v-for="(month, index) in monthsList" :key="index">
+                  <button 
+                    @click="selectMonth(month.value)" 
+                    :class="[
+                      'px-4 py-2 rounded-md text-sm whitespace-nowrap', 
+                      currentDate.getMonth() === month.value ? 'font-bold text-white bg-green-700' : 'hover:bg-gray-200'
+                    ]">
+                    {{ month.label }}
+                  </button>
+                </template>
+              </div>
             </div>
             
-            <div class="col-span-2 text-center">
-              <button @click="nextMonth" class="p-2 text-gray-500">
-                <span>→</span>
+            <div class="col-span-2 flex items-center justify-start pl-4">
+              <button @click="nextMonth" class="p-2 text-gray-500 hover:text-gray-700">
+                <span class="text-2xl font-bold">→</span>
               </button>
             </div>
           </div>
@@ -241,8 +248,10 @@
                 
                 <!-- Action Buttons -->
                 <div class="flex space-x-2">
-                  <button class="flex-1 bg-black text-white text-xs px-3 py-2 rounded hover:bg-gray-800 transition-colors">{{ $t('events.bookTickets') }}</button>
-                  <button class="flex-1 border border-gray-300 text-gray-700 text-xs px-3 py-2 rounded hover:bg-gray-50 transition-colors">{{ $t('events.moreInfo') }}</button>
+                  <router-link :to="`/navigation/${event.id}`" class="flex-1">
+                    <button class="w-full bg-black text-white text-xs px-3 py-2 rounded hover:bg-gray-800 transition-colors">Navigate</button>
+                  </router-link>
+                  <button class="flex-1 border border-gray-300 text-gray-700 text-xs px-3 py-2 rounded hover:bg-gray-50 transition-colors">More Info</button>
                 </div>
               </div>
             </div>
@@ -267,7 +276,7 @@ const currentLocale = ref(locale.value)
 const showFilters = ref(false)
 
 // Calendar state
-const currentDate = ref(new Date())
+const currentDate = ref(new Date('2025-04-01'))
 const selectedDate = ref(null)
 
 // Filters
@@ -308,8 +317,34 @@ const audiences = [
 const events = [
   {
     id: 1,
+    title: 'Spring Music Festival 2025',
+    date: '2025-04-10',
+    time: '14:00 - 22:00',
+    location: 'Central Park',
+    category: 'Music',
+    price: 'Free',
+    audience: 'All Ages',
+    description: 'Annual spring music festival featuring local bands and international artists',
+    image: 'https://placehold.co/400x240?text=Music+Festival',
+    tags: ['Live Music', 'Food Stalls', 'Family Friendly']
+  },
+  {
+    id: 2,
+    title: 'Cultural Art Exhibition',
+    date: '2025-04-10',
+    time: '10:00 - 18:00',
+    location: 'City Gallery',
+    category: 'Art',
+    price: '$15',
+    audience: 'Adults',
+    description: 'Featuring contemporary artworks from local and international artists',
+    image: 'https://placehold.co/400x240?text=Art+Exhibition',
+    tags: ['Art', 'Culture', 'Exhibition']
+  },
+  {
+    id: 3,
     title: 'Musical Theatre Vocals with Vicky Jacobs',
-    date: '2024-04-08',
+    date: '2025-04-08',
     time: '10:00 AM - 10:30 AM',
     location: 'The Channel',
     category: 'Workshop',
@@ -317,21 +352,23 @@ const events = [
     audience: 'Adults',
     venue: 'The Channel',
     image: 'https://placehold.co/400x240?text=Music+Workshop'
-  },
-  // ... 其他事件数据 ...
+  }
 ]
 
 // 月份列表
 const monthsList = [
-  { label: t('events.calendar.april'), value: 3 },
-  { label: t('events.calendar.may'), value: 4 },
-  { label: t('events.calendar.june'), value: 5 },
-  { label: t('events.calendar.july'), value: 6 },
-  { label: t('events.calendar.august'), value: 7 },
-  { label: t('events.calendar.september'), value: 8 },
-  { label: t('events.calendar.october'), value: 9 },
-  { label: t('events.calendar.november'), value: 10 },
-  { label: t('events.calendar.december'), value: 11 }
+  { label: 'January', value: 0 },
+  { label: 'February', value: 1 },
+  { label: 'March', value: 2 },
+  { label: 'April', value: 3 },
+  { label: 'May', value: 4 },
+  { label: 'June', value: 5 },
+  { label: 'July', value: 6 },
+  { label: 'August', value: 7 },
+  { label: 'September', value: 8 },
+  { label: 'October', value: 9 },
+  { label: 'November', value: 10 },
+  { label: 'December', value: 11 }
 ]
 
 // Computed properties
@@ -372,24 +409,39 @@ const calendarDays = computed(() => {
   return days
 })
 
+const getEventsForDate = (date) => {
+  if (!date) return [];
+  return events.filter(event => {
+    const eventDate = new Date(event.date);
+    return isSameDay(eventDate, date);
+  });
+};
+
 const filteredEvents = computed(() => {
-  if (!selectedDate.value) return []
+  if (!selectedDate.value) return [];
+  const dateEvents = getEventsForDate(selectedDate.value);
   
-  let filtered = events.filter(event => {
-    const eventDate = new Date(event.date)
-    return isSameDay(eventDate, selectedDate.value)
-  })
-
+  // 应用其他过滤条件
+  let filtered = dateEvents;
+  
   if (selectedEventType.value) {
-    filtered = filtered.filter(event => event.category.toLowerCase().includes(selectedEventType.value.toLowerCase()))
+    filtered = filtered.filter(event => event.category.toLowerCase() === selectedEventType.value.toLowerCase());
   }
-
+  
   if (selectedVenue.value) {
-    filtered = filtered.filter(event => event.location.toLowerCase().includes(selectedVenue.value.toLowerCase()))
+    filtered = filtered.filter(event => event.location.toLowerCase().includes(selectedVenue.value.toLowerCase()));
   }
-
-  return filtered
-})
+  
+  if (selectedPrice.value) {
+    filtered = filtered.filter(event => event.price.toLowerCase().includes(selectedPrice.value.toLowerCase()));
+  }
+  
+  if (selectedAudience.value) {
+    filtered = filtered.filter(event => event.audience.toLowerCase().includes(selectedAudience.value.toLowerCase()));
+  }
+  
+  return filtered;
+});
 
 // Methods
 function hasEventsOnDate(date) {
@@ -400,25 +452,35 @@ function hasEventsOnDate(date) {
 }
 
 function isSameDay(date1, date2) {
-  return date1.getFullYear() === date2.getFullYear() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getDate() === date2.getDate()
+  if (!date1 || !date2) return false;
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  return d1.getDate() === d2.getDate() &&
+         d1.getMonth() === d2.getMonth() &&
+         d1.getFullYear() === d2.getFullYear();
 }
 
-function selectDate(date) {
-  selectedDate.value = date.date
+function selectDate(dateObj) {
+  selectedDate.value = dateObj.date;
+  showFilters.value = false; // 选择日期时自动隐藏过滤器
 }
 
 function selectMonth(monthIndex) {
-  currentDate.value = new Date(currentDate.value.getFullYear(), monthIndex, 1)
+  currentDate.value = new Date(2025, monthIndex, 1)
 }
 
 function previousMonth() {
-  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1)
+  const newDate = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1)
+  if (newDate.getFullYear() === 2025) {
+    currentDate.value = newDate
+  }
 }
 
 function nextMonth() {
-  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1)
+  const newDate = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1)
+  if (newDate.getFullYear() === 2025) {
+    currentDate.value = newDate
+  }
 }
 
 function formatDate(date) {
@@ -487,14 +549,6 @@ function createDayObject(date) {
     topCategories: topCategories,
     isToday: isSameDay(date, new Date())
   }
-}
-
-// 获取特定日期的事件
-function getEventsForDate(date) {
-  return events.filter(event => {
-    const eventDate = new Date(event.date)
-    return isSameDay(eventDate, date)
-  })
 }
 
 // 获取事件数量的颜色
