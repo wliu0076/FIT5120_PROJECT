@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "home": "Home",
+    "events": "Event Calendar",
+    "community": "Community",
+    "profile": "Profile"
+  },
+  "hero": {
+    "title": "Explore Rural Beauty with Fellow Travelers",
+    "subtitle": "Discover amazing hidden spots, join local events, and connect with like-minded travelers",
+    "cta": "Join Us"
+  },
+  "calendar": {
+    "title": "Event Calendar",
+    "monthNames": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "weekdayNames": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    "weekdayShort": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "today": "Today",
+    "noEvents": "No events for this date",
+    "selectDateToSeeEvents": "Select a date to see events",
+    "filterPrompt": "Filter events",
+    "filterAll": "All events",
+    "addEvent": "Add Event",
+    "eventCount": "{count} event(s)"
+  },
+  "categories": {
+    "meeting": "Meeting",
+    "event": "Event",
+    "deadline": "Deadline",
+    "reminder": "Reminder",
+    "personal": "Personal"
+  },
+  "actions": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back"
+  }
+} 

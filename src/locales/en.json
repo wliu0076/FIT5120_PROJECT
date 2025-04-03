@@ -1,0 +1,50 @@
+{
+  "nav": {
+    "home": "Home",
+    "events": "Events Calendar",
+    "travel": "Travel Guide",
+    "help": "Help Center",
+    "about": "About Us"
+  },
+  "events": {
+    "calendar": "Events Calendar",
+    "totalEvents": "Total Events: {count}",
+    "timeline": "Today's Timeline",
+    "noEvents": "No events found",
+    "tryOtherDate": "Try selecting another date",
+    "filters": {
+      "title": "Filter Results",
+      "eventType": "Event Type",
+      "venue": "Venue",
+      "price": "Price",
+      "audience": "Audience",
+      "allEvents": "All Events",
+      "allVenues": "All Venues",
+      "allPrices": "All Prices",
+      "allAudience": "All Audiences",
+      "apply": "Apply Filters"
+    },
+    "calendar": {
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December",
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
+    "eventsFound": "events found",
+    "clearFilters": "Clear Filters",
+    "bookTickets": "Book Tickets",
+    "moreInfo": "More Info"
+  }
+} 

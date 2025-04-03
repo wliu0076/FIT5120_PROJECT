@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "home": "首页",
+    "events": "活动日历",
+    "community": "社区",
+    "profile": "个人资料"
+  },
+  "hero": {
+    "title": "与同行者一起探索乡村之美",
+    "subtitle": "发现令人惊叹的隐藏景点、参加当地活动，并与志同道合的旅行者建立联系",
+    "cta": "加入我们"
+  },
+  "calendar": {
+    "title": "活动日历",
+    "monthNames": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+    "weekdayNames": ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+    "weekdayShort": ["日", "一", "二", "三", "四", "五", "六"],
+    "today": "今天",
+    "noEvents": "该日期没有活动",
+    "selectDateToSeeEvents": "请选择一个日期查看活动",
+    "filterPrompt": "筛选活动",
+    "filterAll": "全部活动",
+    "addEvent": "添加活动",
+    "eventCount": "{count} 个活动"
+  },
+  "categories": {
+    "meeting": "会议",
+    "event": "活动",
+    "deadline": "截止日期",
+    "reminder": "提醒",
+    "personal": "个人"
+  },
+  "actions": {
+    "edit": "编辑",
+    "delete": "删除",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "back": "返回"
+  }
+} 
