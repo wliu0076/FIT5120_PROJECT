@@ -116,27 +116,36 @@ const routeSteps = ref([])
 
 const userLocation = ref({
   lat: -37.818267, 
-  lng: 144.952974  // Southern Cross Station coordinates
+  lng: 144.952974  // Default to Southern Cross Station coordinates; will be updated if user grants permission
 })
 
 async function getUserLocation() {
+  console.log('Attempting to get user location...');
   if ('geolocation' in navigator) {
     try {
       const position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject)
-      })
-      
+      });
+      console.log('User location acquired:', position);
+
       userLocation.value = {
         lat: position.coords.latitude,
         lng: position.coords.longitude
-      }
-      
+      };
+      console.log('Updated userLocation:', userLocation.value);
+
+      // 如果地图已加载，则立即计算路线
       if (map.value) {
-        calculateRoute()
+        console.log('Map is loaded, calculating route...');
+        calculateRoute();
+      } else {
+        console.log('Map is not loaded yet, waiting for map initialization...');
       }
     } catch (error) {
-      console.error('Error getting user location:', error)
+      console.error('Error getting user location:', error);
     }
+  } else {
+    console.warn('Geolocation is not supported by this browser.');
   }
 }
 
@@ -158,18 +167,52 @@ async function calculateRoute() {
     const result = await directionsService.value.route(request)
     directionsRenderer.value.setDirections(result)
 
-    const route = result.routes[0].legs[0]
+    const leg = result.routes[0].legs[0]
+
     routeSummary.value = {
-      duration: route.duration.text,
-      distance: route.distance.text,
-      arrival: calculateArrivalTime(route.duration.value)
+      duration: leg.duration.text,
+      distance: leg.distance.text,
+      arrival: calculateArrivalTime(leg.duration.value)
     }
 
-    routeSteps.value = route.steps.map(step => ({
-      instructions: step.instructions,
-      distance: step.distance.text,
-      duration: step.duration.text
-    }))
+    // Build a detailed steps array
+    const detailedSteps = []
+
+    for (const step of leg.steps) {
+      if (step.travel_mode === 'WALKING') {
+        // For WALKING steps, fetch detailed route using WALKING mode
+        try {
+          const walkResult = await directionsService.value.route({
+            origin: step.start_location,
+            destination: step.end_location,
+            travelMode: google.maps.TravelMode.WALKING
+          })
+
+          const subSteps = walkResult.routes[0].legs[0].steps.map(subStep => ({
+            instructions: subStep.instructions,
+            distance: subStep.distance.text,
+            duration: subStep.duration.text
+          }))
+
+          detailedSteps.push(...subSteps)
+        } catch (walkError) {
+          console.warn('WALKING detail fetch failed, fallback to original step.')
+          detailedSteps.push({
+            instructions: step.instructions,
+            distance: step.distance?.text || '',
+            duration: step.duration?.text || ''
+          })
+        }
+      } else {
+        detailedSteps.push({
+          instructions: step.instructions,
+          distance: step.distance?.text || '',
+          duration: step.duration?.text || ''
+        })
+      }
+    }
+
+    routeSteps.value = detailedSteps
   } catch (error) {
     console.error('Direction request failed:', error)
   }
@@ -254,10 +297,16 @@ function initMap() {
     suppressMarkers: false
   })
 
-  getUserLocation()
+  // 如果用户位置已获取，则直接计算路线
+  if (userLocation.value && userLocation.value.lat) {
+    calculateRoute()
+  }
 }
 
 onMounted(() => {
+  // 先请求用户位置，这样会弹出授权提示
+  getUserLocation()
+  
   const script = document.createElement('script')
   script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&callback=initMap`
   script.async = true
@@ -289,4 +338,4 @@ onUnmounted(() => {
   width: 2px;
   background-color: #e5e7eb;
 }
-</style> 
+</style>
