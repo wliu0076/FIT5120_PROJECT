@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- 顶部导航栏 -->
     <nav class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -9,8 +8,6 @@
             <div class="flex-shrink-0 flex items-center">
               <img class="h-8 w-auto" src="/logo.png" alt="Logo" />
             </div>
-            
-            <!-- 导航链接 -->
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
               <RouterLink 
                 to="/" 
@@ -54,12 +51,8 @@
             </div>
           </div>
 
-          <!-- 右侧工具栏 -->
           <div class="flex items-center space-x-4">
-            <!-- 翻译按钮 -->
             <TranslateButton />
-            
-            <!-- 语言选择器 -->
             <select 
               v-model="currentLanguage" 
               @change="changeLanguage"
@@ -74,7 +67,6 @@
       </div>
     </nav>
 
-    <!-- 主要内容区域 -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <RouterView />
     </main>
@@ -128,7 +120,6 @@ html, body {
   flex-direction: column;
 }
 
-/* 滚动条美化 */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

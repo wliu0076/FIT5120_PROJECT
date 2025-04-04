@@ -11,14 +11,11 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- 左侧：地图和路线信息 -->
         <div class="space-y-6">
-          <!-- 地图区域 -->
           <div class="bg-white rounded-lg shadow-sm h-96 overflow-hidden">
             <div id="map" class="w-full h-full"></div>
           </div>
 
-          <!-- 交通方式选择 -->
           <div class="bg-white p-4 rounded-lg shadow-sm">
             <h3 class="font-semibold mb-3">Transportation Mode</h3>
             <div class="flex space-x-4">
@@ -50,7 +47,6 @@
           </div>
         </div>
 
-        <!-- 右侧：步骤导航 -->
         <div class="bg-white rounded-lg shadow-sm p-6">
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold">Step-by-Step Instructions</h2>
@@ -59,7 +55,6 @@
             </button>
           </div>
 
-          <!-- 路线概览 -->
           <div class="bg-gray-50 p-4 rounded-lg mb-6">
             <div class="flex items-center justify-between">
               <div>
@@ -77,7 +72,6 @@
             </div>
           </div>
 
-          <!-- 步骤列表 -->
           <div class="space-y-4 overflow-y-auto max-h-[500px]">
             <div v-for="(step, index) in routeSteps" :key="index" class="flex items-start space-x-4">
               <div class="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
@@ -101,7 +95,6 @@ import { useRoute } from 'vue-router'
 import html2canvas from 'html2canvas/dist/html2canvas.esm.js'
 import { jsPDF } from 'jspdf'
 
-// 事件数据
 const event = ref({
   title: 'Melbourne Arts Festival 2025',
   location: 'Federation Square, Melbourne',
@@ -110,7 +103,6 @@ const event = ref({
   coordinates: { lat: -37.818085, lng: 144.968124 } // Federation Square coordinates
 })
 
-// 地图相关状态
 const map = ref(null)
 const directionsService = ref(null)
 const directionsRenderer = ref(null)
@@ -122,13 +114,11 @@ const routeSummary = ref({
 })
 const routeSteps = ref([])
 
-// 用户位置（模拟数据，使用墨尔本中央车站作为起点）
 const userLocation = ref({
   lat: -37.818267, 
   lng: 144.952974  // Southern Cross Station coordinates
 })
 
-// 获取用户位置
 async function getUserLocation() {
   if ('geolocation' in navigator) {
     try {
@@ -141,24 +131,20 @@ async function getUserLocation() {
         lng: position.coords.longitude
       }
       
-      // 重新计算路线
       if (map.value) {
         calculateRoute()
       }
     } catch (error) {
       console.error('Error getting user location:', error)
-      // 保持默认位置
     }
   }
 }
 
-// 更改交通方式
 async function changeTransportMode(mode) {
   transportMode.value = mode
   await calculateRoute()
 }
 
-// 计算路线
 async function calculateRoute() {
   if (!directionsService.value || !directionsRenderer.value) return
 
@@ -172,7 +158,6 @@ async function calculateRoute() {
     const result = await directionsService.value.route(request)
     directionsRenderer.value.setDirections(result)
 
-    // 更新路线信息
     const route = result.routes[0].legs[0]
     routeSummary.value = {
       duration: route.duration.text,
@@ -180,7 +165,6 @@ async function calculateRoute() {
       arrival: calculateArrivalTime(route.duration.value)
     }
 
-    // 更新步骤说明
     routeSteps.value = route.steps.map(step => ({
       instructions: step.instructions,
       distance: step.distance.text,
@@ -191,22 +175,18 @@ async function calculateRoute() {
   }
 }
 
-// 计算预计到达时间
 function calculateArrivalTime(durationInSeconds) {
   const now = new Date()
   const arrivalTime = new Date(now.getTime() + durationInSeconds * 1000)
   return arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-// 保存为PDF
 async function savePDF() {
   try {
-    // 创建一个新的div来包含要导出的内容
     const contentDiv = document.createElement('div')
     contentDiv.style.padding = '20px'
     contentDiv.style.background = 'white'
     
-    // 添加标题和事件信息
     contentDiv.innerHTML = `
       <h1 style="font-size: 24px; margin-bottom: 10px;">${event.value.title}</h1>
       <p style="margin-bottom: 20px;">${event.value.location} • ${event.value.date} • ${event.value.time}</p>
@@ -218,7 +198,6 @@ async function savePDF() {
       <h2 style="font-size: 18px; margin-bottom: 10px;">Step-by-Step Instructions:</h2>
     `
     
-    // 添加步骤说明
     const stepsHtml = routeSteps.value.map((step, index) => `
       <div style="margin-bottom: 15px;">
         <div style="display: flex; align-items: start;">
@@ -235,10 +214,8 @@ async function savePDF() {
     
     contentDiv.innerHTML += stepsHtml
     
-    // 临时将div添加到文档中
     document.body.appendChild(contentDiv)
     
-    // 创建PDF
     const pdf = new jsPDF('p', 'mm', 'a4')
     const canvas = await html2canvas(contentDiv, {
       scale: 2,
@@ -246,17 +223,14 @@ async function savePDF() {
       logging: false
     })
     
-    // 移除临时div
     document.body.removeChild(contentDiv)
     
-    // 添加图片到PDF
     const imgData = canvas.toDataURL('image/png')
     const pdfWidth = pdf.internal.pageSize.getWidth()
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width
     
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
     
-    // 保存PDF
     pdf.save(`${event.value.title} - Navigation Guide.pdf`)
   } catch (error) {
     console.error('Error generating PDF:', error)
@@ -264,7 +238,6 @@ async function savePDF() {
   }
 }
 
-// 初始化地图
 function initMap() {
   const mapOptions = {
     zoom: 13,
@@ -281,13 +254,10 @@ function initMap() {
     suppressMarkers: false
   })
 
-  // 获取用户位置并计算路线
   getUserLocation()
 }
 
-// 生命周期钩子
 onMounted(() => {
-  // 加载 Google Maps API
   const script = document.createElement('script')
   script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&callback=initMap`
   script.async = true
@@ -297,7 +267,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // 清理 Google Maps API
   delete window.initMap
   const script = document.querySelector('script[src*="maps.googleapis.com"]')
   if (script) {

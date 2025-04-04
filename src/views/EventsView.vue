@@ -4,12 +4,10 @@
     <p class="text-gray-600 mb-8">{{ $t('events.subtitle') }}</p>
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <!-- 左侧过滤器 -->
       <div class="lg:col-span-1">
         <EventFilters @filter="handleFilter" />
       </div>
       
-      <!-- 右侧日历 -->
       <div class="lg:col-span-2">
         <Calendar />
       </div>
@@ -23,7 +21,7 @@ import EventFilters from '@/components/EventFilters.vue'
 
 const handleFilter = (filters: any) => {
   console.log('Applied filters:', filters)
-  // TODO: 实现过滤逻辑
+  // TODO: Set up the filtering part
 }
 </script>
 
