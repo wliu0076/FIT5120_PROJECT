@@ -90,5 +90,83 @@
       "getDirections": "Xem chỉ đường",
       "savePDF": "Lưu PDF"
     }
+  },
+  "help": {
+    "title": "Trung tâm trợ giúp",
+    "description": "Tìm câu trả lời cho các câu hỏi thường gặp và tìm hiểu cách tận dụng tối đa nền tảng của chúng tôi",
+    "searchPlaceholder": "Tìm kiếm bài viết trợ giúp...",
+    "sections": {
+      "events": {
+        "title": "Thông tin sự kiện",
+        "description": "Tất cả những gì bạn cần biết về việc tìm kiếm và tham dự sự kiện"
+      },
+      "navigation": {
+        "title": "Hướng dẫn di chuyển",
+        "description": "Tìm hiểu cách sử dụng các tính năng lập kế hoạch di chuyển"
+      },
+      "accessibility": {
+        "title": "Hỗ trợ tiếp cận",
+        "description": "Thông tin về các tính năng và hỗ trợ tiếp cận"
+      }
+    },
+    "contact": {
+      "title": "Vẫn cần trợ giúp?",
+      "description": "Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giúp đỡ bạn",
+      "email": "Hỗ trợ qua email",
+      "phone": "Hỗ trợ qua điện thoại"
+    }
+  },
+  "home": {
+    "search": {
+      "label": "Tìm Sự Kiện",
+      "placeholder": "Tìm kiếm sự kiện, hoạt động hoặc hội thảo..."
+    },
+    "location": {
+      "label": "Địa Điểm"
+    },
+    "hero": {
+      "title": "Khám Phá Các Sự Kiện Tốt Nhất Tại Melbourne",
+      "subtitle": "Lên kế hoạch và tìm sự kiện với hướng dẫn từng bước",
+      "browseEvents": "Xem Sự Kiện",
+      "findGuide": "Tìm Hướng Dẫn"
+    },
+    "language": {
+      "viewIn": "Xem trang web bằng ngôn ngữ của bạn"
+    },
+    "howItWorks": {
+      "title": "Cách Thức Hoạt Động",
+      "step1": {
+        "title": "Tìm Sự Kiện",
+        "description": "Duyệt sự kiện bằng ngôn ngữ của bạn"
+      },
+      "step2": {
+        "title": "Nhận Hướng Dẫn",
+        "description": "Xem hướng dẫn đường đi chi tiết"
+      },
+      "step3": {
+        "title": "Khám Phá",
+        "description": "Tham gia sự kiện cùng cộng đồng"
+      }
+    },
+    "categories": {
+      "title": "Danh Mục Phổ Biến",
+      "cultural": "Sự Kiện Văn Hóa",
+      "religious": "Sự Kiện Tôn Giáo",
+      "health": "Sức Khỏe & Thể Chất",
+      "social": "Nhóm Xã Hội",
+      "workshops": "Hội Thảo & Lớp Học",
+      "markets": "Chợ Địa Phương"
+    },
+    "events": {
+      "title": "Sự Kiện Nổi Bật",
+      "viewAll": "Xem Tất Cả",
+      "moreInfo": "Thông Tin Thêm"
+    },
+    "support": {
+      "title": "Cần Giúp Đỡ?",
+      "description": "Đội ngũ của chúng tôi sẵn sàng hỗ trợ bằng tiếng Việt",
+      "callUs": "Gọi Cho Chúng Tôi",
+      "getHelp": "Nhận Trợ Giúp"
+    }
   }
 } 

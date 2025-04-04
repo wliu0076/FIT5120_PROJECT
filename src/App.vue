@@ -55,15 +55,41 @@
 
           <div class="flex items-center space-x-4">
             <TranslateButton />
-            <select 
-              v-model="currentLanguage" 
-              @change="changeLanguage"
-              class="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-            >
-              <option value="zh">中文</option>
-              <option value="en">English</option>
-              <option value="vi">Tiếng Việt</option>
-            </select>
+            <div class="relative group">
+              <select 
+                v-model="currentLanguage" 
+                @change="changeLanguage"
+                class="appearance-none block pl-10 pr-10 py-2 text-base border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 cursor-pointer"
+                :class="[
+                  currentLanguage === 'en' ? 'border-blue-500 focus:ring-blue-500 bg-blue-50' :
+                  currentLanguage === 'zh' ? 'border-red-500 focus:ring-red-500 bg-red-50' :
+                  currentLanguage === 'vi' ? 'border-green-500 focus:ring-green-500 bg-green-50' :
+                  'border-orange-500 focus:ring-orange-500 bg-orange-50'
+                ]"
+              >
+                <option value="zh">中文 🇨🇳</option>
+                <option value="en">English 🇬🇧</option>
+                <option value="vi">Tiếng Việt 🇻🇳</option>
+                <option value="hi">हिन्दी 🇮🇳</option>
+              </select>
+              <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-xl">
+                {{ 
+                  currentLanguage === 'en' ? '🇬🇧' :
+                  currentLanguage === 'zh' ? '🇨🇳' :
+                  currentLanguage === 'vi' ? '🇻🇳' :
+                  '🇮🇳'
+                }}
+              </div>
+              <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              <!-- Tooltip -->
+              <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-3 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                Change language
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -72,6 +98,9 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <RouterView />
     </main>
+    
+    <!-- Language Selector Modal -->
+    <LanguageSelector />
   </div>
 </template>
 
@@ -80,6 +109,7 @@ import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import TranslateButton from './components/TranslateButton.vue'
+import LanguageSelector from './components/LanguageSelector.vue'
 
 const route = useRoute()
 const { locale } = useI18n()

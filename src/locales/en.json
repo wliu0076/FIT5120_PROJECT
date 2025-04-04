@@ -89,6 +89,95 @@
     "actions": {
       "getDirections": "Get Directions",
       "savePDF": "Save PDF"
+    },
+    "searchLocation": "Search Location",
+    "enterAddress": "Enter an address",
+    "addressPlaceholder": "Type to search for an address...",
+    "searchNearby": "Search Nearby",
+    "selectedLocation": "Selected Location",
+    "nearbyEvents": "Nearby Events",
+    "within2km": "Within 2km",
+    "noNearbyEvents": "No events found nearby"
+  },
+  "help": {
+    "title": "Help Center",
+    "description": "Find answers to common questions and learn how to make the most of our platform",
+    "searchPlaceholder": "Search for help articles...",
+    "popularSearches": "Popular Searches",
+    "learnMore": "Learn More",
+    "sections": {
+      "events": {
+        "title": "Event Information",
+        "description": "Everything you need to know about finding and attending events"
+      },
+      "navigation": {
+        "title": "Navigation & Travel Guide",
+        "description": "Learn how to use our travel planning features"
+      },
+      "accessibility": {
+        "title": "Accessibility Support",
+        "description": "Information about accessibility features and assistance"
+      }
+    },
+    "contact": {
+      "title": "Still Need Help?",
+      "description": "Our support team is here to assist you",
+      "email": "Email Support",
+      "phone": "Call Support",
+      "supportHours": "Support available Monday to Friday, 9am - 5pm"
+    }
+  },
+  "home": {
+    "search": {
+      "label": "Search Events",
+      "placeholder": "Search for events, activities or workshops..."
+    },
+    "location": {
+      "label": "Location"
+    },
+    "hero": {
+      "title": "Discover Melbourne's Best Events in Your Language",
+      "subtitle": "Plan your journey and find events with step-by-step help",
+      "browseEvents": "Browse Events",
+      "findGuide": "Find Travel Guide"
+    },
+    "language": {
+      "viewIn": "View this site in your language"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "step1": {
+        "title": "Find an Event",
+        "description": "Browse events in your preferred language"
+      },
+      "step2": {
+        "title": "Get Travel Help",
+        "description": "Get step-by-step directions to the event"
+      },
+      "step3": {
+        "title": "Go Explore",
+        "description": "Enjoy the event with your community"
+      }
+    },
+    "categories": {
+      "title": "Popular Categories",
+      "cultural": "Cultural Events",
+      "religious": "Religious Events",
+      "health": "Health & Wellness",
+      "social": "Social Groups",
+      "workshops": "Workshops & Classes",
+      "markets": "Local Markets"
+    },
+    "events": {
+      "title": "Featured Events",
+      "viewAll": "View All Events",
+      "moreInfo": "More Info"
+    },
+    "support": {
+      "title": "Need Help?",
+      "description": "Our friendly team is here to help you in your language",
+      "callUs": "Call Us",
+      "getHelp": "Get Help"
     }
   }
 } 

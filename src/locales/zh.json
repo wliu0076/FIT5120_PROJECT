@@ -89,6 +89,95 @@
     "actions": {
       "getDirections": "获取路线",
       "savePDF": "保存PDF"
+    },
+    "searchLocation": "搜索位置",
+    "enterAddress": "输入地址",
+    "addressPlaceholder": "输入地址进行搜索...",
+    "searchNearby": "搜索附近",
+    "selectedLocation": "已选择位置",
+    "nearbyEvents": "附近活动",
+    "within2km": "2公里范围内",
+    "noNearbyEvents": "附近没有找到活动"
+  },
+  "help": {
+    "title": "帮助中心",
+    "description": "查找常见问题的答案，了解如何充分利用我们的平台",
+    "searchPlaceholder": "搜索帮助文章...",
+    "popularSearches": "热门搜索",
+    "learnMore": "了解更多",
+    "sections": {
+      "events": {
+        "title": "活动信息",
+        "description": "关于查找和参加活动的所有信息"
+      },
+      "navigation": {
+        "title": "导航与出行指南",
+        "description": "了解如何使用我们的出行规划功能"
+      },
+      "accessibility": {
+        "title": "无障碍支持",
+        "description": "关于无障碍功能和协助的信息"
+      }
+    },
+    "contact": {
+      "title": "还需要帮助？",
+      "description": "我们的支持团队随时为您服务",
+      "email": "邮件支持",
+      "phone": "电话支持",
+      "supportHours": "支持时间：周一至周五，上午9点至下午5点"
+    }
+  },
+  "home": {
+    "search": {
+      "label": "搜索活动",
+      "placeholder": "搜索活动、课程或工作坊..."
+    },
+    "location": {
+      "label": "位置"
+    },
+    "hero": {
+      "title": "发现墨尔本精彩活动",
+      "subtitle": "获取中文活动信息和出行指南",
+      "browseEvents": "浏览活动",
+      "findGuide": "查看出行指南"
+    },
+    "language": {
+      "viewIn": "选择您的语言"
+    },
+    "howItWorks": {
+      "title": "使用指南",
+      "step1": {
+        "title": "寻找活动",
+        "description": "使用中文浏览活动信息"
+      },
+      "step2": {
+        "title": "获取路线",
+        "description": "查看详细的出行指南"
+      },
+      "step3": {
+        "title": "开始探索",
+        "description": "与社区一起参与活动"
+      }
+    },
+    "categories": {
+      "title": "热门类别",
+      "cultural": "文化活动",
+      "religious": "宗教活动",
+      "health": "健康与养生",
+      "social": "社交团体",
+      "workshops": "工作坊与课程",
+      "markets": "本地市场"
+    },
+    "events": {
+      "title": "精选活动",
+      "viewAll": "查看全部",
+      "moreInfo": "了解更多"
+    },
+    "support": {
+      "title": "需要帮助？",
+      "description": "我们的团队可以为您提供中文服务",
+      "callUs": "电话咨询",
+      "getHelp": "获取帮助"
     }
   }
 } 

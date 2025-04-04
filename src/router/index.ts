@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import EventsView from '@/views/EventsView.vue'
+import EventsView from '../views/EventsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
+      name: 'home',
       redirect: '/events'
     },
     {
@@ -16,17 +17,17 @@ const router = createRouter({
     {
       path: '/travel',
       name: 'travel',
-      component: () => import('@/views/TravelView.vue')
+      component: () => import('../views/TravelView.vue')
     },
     {
       path: '/help',
       name: 'help',
-      component: () => import('@/views/HelpView.vue')
+      component: () => import('../views/HelpView.vue')
     },
     {
       path: '/about',
       name: 'about',
-      component: () => import('@/views/AboutView.vue')
+      component: () => import('../views/AboutView.vue')
     }
   ]
 })
