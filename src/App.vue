@@ -6,7 +6,9 @@
           <div class="flex">
             <!-- Logo -->
             <div class="flex-shrink-0 flex items-center">
-              <img class="h-8 w-auto" src="/logo.png" alt="Logo" />
+              <router-link to="/" class="flex items-center">
+                <img class="h-12 w-auto" src="/logo.png" alt="Logo" />
+              </router-link>
             </div>
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
               <RouterLink 

@@ -70,21 +70,31 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8">
           <h2 class="text-2xl font-bold text-gray-900">Featured Events</h2>
-          <button class="text-purple-600 hover:text-purple-700 font-semibold flex items-center">
+          <router-link to="/events" class="text-purple-600 hover:text-purple-700 font-semibold flex items-center">
             View all <i class="mdi mdi-arrow-right ml-2"></i>
-          </button>
+          </router-link>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          <div v-for="event in featuredEvents" :key="event.id" 
+        <div v-if="isLoading" class="flex justify-center py-8">
+          <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        </div>
+        <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-600 p-4 rounded-md">
+          {{ error }}
+        </div>
+        <div v-else class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div v-for="event in upcomingEvents" :key="event.id" 
                class="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            <img :src="event.image" :alt="event.title" class="w-full h-48 object-cover">
+            <img :src="event.image" :alt="event.name" class="w-full h-48 object-cover">
             <div class="p-4">
-              <div class="text-sm text-purple-600 font-semibold mb-2">{{ event.date }}</div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ event.title }}</h3>
+              <div class="text-sm text-purple-600 font-semibold mb-2">{{ formatDate(event.datetime) }}</div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ event.name }}</h3>
               <p class="text-gray-600 text-sm mb-4">{{ event.location }}</p>
               <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-500">{{ event.price }}</span>
-                <span class="text-sm text-gray-500">{{ event.attendees }} attending</span>
+                <span :class="['text-xs px-2 py-1 rounded-full', getCategoryColor(event.category)]">
+                  {{ event.category }}
+                </span>
+                <router-link :to="`/events/${event.id}`" class="text-sm text-blue-600 hover:text-blue-800">
+                  View details
+                </router-link>
               </div>
             </div>
           </div>
@@ -108,7 +118,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { getUpcomingEvents } from '../services/eventService'
+import { formatEventDate, getEventCategoryColor } from '../utils/eventUtils'
 
 // Category data
 const categories = [
@@ -122,45 +135,37 @@ const categories = [
   { id: 'food-drink', name: 'Food & Drink', icon: 'mdi mdi-food-fork-drink' }
 ]
 
-// Featured events data
-const featuredEvents = [
-  {
-    id: 1,
-    title: 'Melbourne Food Festival',
-    date: 'Sat, Apr 15 • 10:00 AM',
-    location: 'Federation Square, Melbourne',
-    price: 'From $30',
-    attendees: '2.5K',
-    image: '/events/food-festival.jpg'
-  },
-  {
-    id: 2,
-    title: 'Live Jazz Night',
-    date: 'Fri, Apr 14 • 8:00 PM',
-    location: 'Bird\'s Basement, Melbourne',
-    price: 'From $25',
-    attendees: '450',
-    image: '/events/jazz-night.jpg'
-  },
-  {
-    id: 3,
-    title: 'Art Exhibition Opening',
-    date: 'Sun, Apr 16 • 2:00 PM',
-    location: 'NGV International',
-    price: 'Free',
-    attendees: '1.2K',
-    image: '/events/art-exhibition.jpg'
-  },
-  {
-    id: 4,
-    title: 'Yoga in the Park',
-    date: 'Every Saturday • 7:00 AM',
-    location: 'Royal Botanic Gardens',
-    price: '$15',
-    attendees: '85',
-    image: '/events/yoga.jpg'
+// Events state
+const upcomingEvents = ref([])
+const isLoading = ref(false)
+const error = ref(null)
+
+// i18n
+const { locale } = useI18n()
+
+// Fetch upcoming events
+onMounted(async () => {
+  try {
+    isLoading.value = true
+    upcomingEvents.value = await getUpcomingEvents(8)
+  } catch (err) {
+    error.value = 'Failed to load events. Please try again later.'
+    console.error(err)
+  } finally {
+    isLoading.value = false
   }
-]
+})
+
+// Format date for display
+const formatDate = (dateString) => {
+  return formatEventDate(dateString, locale.value)
+}
+
+// Get category color
+const getCategoryColor = (category) => {
+  const baseColor = getEventCategoryColor(category)
+  return `${baseColor.replace('bg-', 'bg-')} text-white`
+}
 </script>
 
 <style scoped>
