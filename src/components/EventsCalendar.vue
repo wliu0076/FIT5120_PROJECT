@@ -1,14 +1,66 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Banner Section -->
-    <div class="relative bg-gray-800 text-white py-16">
-      <div class="absolute inset-0 bg-gradient-to-r from-gray-900 to-gray-800 opacity-90"></div>
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <p class="text-sm font-semibold uppercase tracking-wider">What's On</p>
-        <h1 class="mt-2 text-4xl font-bold sm:text-5xl">Event Calendar</h1>
-        <p class="mt-3 text-gray-300">vv
-          
-        </p>
+    <div class="relative bg-gradient-to-r from-orange-100 to-red-100 py-8">
+      <!-- Carousel -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div class="carousel-container relative">
+          <!-- Navigation Arrows -->
+          <button @click="previousSlide" class="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 rounded-full p-2 shadow-lg">
+            <span class="text-2xl">←</span>
+          </button>
+          <button @click="nextSlide" class="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 rounded-full p-2 shadow-lg">
+            <span class="text-2xl">→</span>
+          </button>
+
+          <!-- Slides -->
+          <div class="overflow-hidden relative">
+            <div class="flex transition-transform duration-500 ease-in-out" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
+              <div v-for="(slide, index) in bannerSlides" :key="index" class="min-w-full">
+                <div class="flex items-center justify-between px-8 py-12">
+                  <div class="w-1/2">
+                    <div class="inline-block bg-black text-white px-4 py-1 rounded-full text-sm mb-4">{{ slide.tag }}</div>
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4">{{ slide.title }}</h2>
+                    <p class="text-gray-600 mb-6">{{ slide.description }}</p>
+                    <button class="bg-black text-white px-6 py-3 rounded-full hover:bg-gray-800 transition-colors">
+                      {{ slide.buttonText }}
+                    </button>
+                  </div>
+                  <div class="w-1/2 flex justify-end">
+                    <img :src="slide.image" :alt="slide.title" class="w-96 h-auto object-cover rounded-lg shadow-xl">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dots -->
+          <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+            <button v-for="(_, index) in bannerSlides" 
+                    :key="index"
+                    @click="currentSlide = index"
+                    :class="[
+                      'w-2 h-2 rounded-full transition-all duration-300',
+                      currentSlide === index ? 'bg-black w-4' : 'bg-gray-400'
+                    ]">
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Navigation -->
+    <div class="bg-white py-8 border-b">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-4 md:grid-cols-8 gap-6">
+          <div v-for="category in categories" :key="category.id" 
+               class="flex flex-col items-center group cursor-pointer hover:opacity-80 transition-opacity">
+            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-2 group-hover:bg-gray-200 transition-colors">
+              <i :class="category.icon" class="text-2xl text-gray-700"></i>
+            </div>
+            <span class="text-xs text-center leading-tight">{{ category.name }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -187,7 +239,7 @@
         </div>
 
         <!-- Selected Date and Events -->
-        <div v-if="selectedDate" class="pt-8">
+        <div v-if="selectedDate" class="pt-8 selected-date-events">
           <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ formatDate(selectedDate) }}</h2>
           
           <!-- Events Count Summary -->
@@ -263,7 +315,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 // 使用直接的公共路径而不是导入
@@ -371,6 +423,71 @@ const monthsList = [
   { label: 'December', value: 11 }
 ]
 
+// Banner Slides Data
+const bannerSlides = [
+  {
+    tag: 'NEW APP. NEW US.',
+    title: 'FIND MORE NEW THINGS TO DO',
+    description: 'Discover exciting events and activities happening around you.',
+    buttonText: 'Get Into It',
+    image: '/banner1.jpg'
+  },
+  {
+    tag: 'FEATURED EVENTS',
+    title: 'EXPLORE LOCAL HAPPENINGS',
+    description: 'Find the best local events and create unforgettable memories.',
+    buttonText: 'Explore Now',
+    image: '/banner2.jpg'
+  }
+]
+
+// Category Navigation Data
+const categories = [
+  { 
+    id: 'concerts', 
+    name: 'Concerts & Gig Guide', 
+    icon: 'mdi mdi-guitar-electric'
+  },
+  { 
+    id: 'performing-arts', 
+    name: 'Performing Arts', 
+    icon: 'mdi mdi-theater'
+  },
+  { 
+    id: 'sports', 
+    name: 'Sports & Outdoors', 
+    icon: 'mdi mdi-basketball'
+  },
+  { 
+    id: 'festivals', 
+    name: 'Festivals & Lifestyle', 
+    icon: 'mdi mdi-party-popper'
+  },
+  { 
+    id: 'music-festivals', 
+    name: 'Music Festivals', 
+    icon: 'mdi mdi-music-circle'
+  },
+  { 
+    id: 'exhibitions', 
+    name: 'Exhibitions', 
+    icon: 'mdi mdi-image-multiple'
+  },
+  { 
+    id: 'workshops', 
+    name: 'Workshops, Conferences & Classes', 
+    icon: 'mdi mdi-school'
+  },
+  { 
+    id: 'quiz-karaoke', 
+    name: 'Quiz, Karaoke', 
+    icon: 'mdi mdi-microphone-variant'
+  }
+]
+
+// Carousel State
+const currentSlide = ref(0)
+
 // Computed properties
 const currentMonth = computed(() => {
   return currentDate.value.toLocaleString('default', { month: 'long', year: 'numeric' })
@@ -463,6 +580,17 @@ function isSameDay(date1, date2) {
 function selectDate(dateObj) {
   selectedDate.value = dateObj.date;
   showFilters.value = false; // 选择日期时自动隐藏过滤器
+  
+  // 添加延迟以确保DOM更新后再滚动
+  setTimeout(() => {
+    const eventsSection = document.querySelector('.selected-date-events');
+    if (eventsSection) {
+      eventsSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }, 100);
 }
 
 function selectMonth(monthIndex) {
@@ -577,6 +705,22 @@ function getCategoryColor(category) {
   return colors[category] || 'bg-gray-500'
 }
 
+// Carousel Methods
+function nextSlide() {
+  currentSlide.value = (currentSlide.value + 1) % bannerSlides.length
+}
+
+function previousSlide() {
+  currentSlide.value = currentSlide.value === 0 ? bannerSlides.length - 1 : currentSlide.value - 1
+}
+
+// Auto-advance slides
+onMounted(() => {
+  setInterval(() => {
+    nextSlide()
+  }, 5000)
+})
+
 // Watch for locale changes
 watch(currentLocale, (newLocale) => {
   locale.value = newLocale
@@ -618,5 +762,23 @@ watch(currentLocale, (newLocale) => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.carousel-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.5s ease-in-out;
+}
+
+.slide-enter-from {
+  transform: translateX(100%);
+}
+
+.slide-leave-to {
+  transform: translateX(-100%);
 }
 </style> 
