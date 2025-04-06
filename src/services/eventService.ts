@@ -2,6 +2,66 @@ import { Event, EventFilters } from '../types/Event';
 import { events as mockEvents } from '../data/events';
 
 /**
+ * Get event count by month from API
+ */
+export const getEventCountByMonth = async (year: number, month: number): Promise<any> => {
+  try {
+    const response = await fetch(`/api/event-count-by-month?year=${year}&month=${month}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch event counts');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching event counts:', error);
+    // 返回模拟数据作为备用
+    return Array.from({ length: 31 }, (_, i) => ({
+      date: `${year}-${String(month).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`,
+      count: Math.floor(Math.random() * 5)
+    }));
+  }
+};
+
+/**
+ * Get events by date from API
+ */
+export const getEventsFromApi = async (date: string): Promise<Event[]> => {
+  try {
+    const response = await fetch(`/api/events-by-date?date=${date}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch events');
+    }
+    const events = await response.json();
+    return events.map((event: any) => ({
+      ...event,
+      // 确保datetime是ISO格式
+      datetime: new Date(event.datetime).toISOString(),
+      // 如果image为空，使用占位图片
+      image: event.image || getPlaceholderImage()
+    }));
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    // 返回模拟数据作为备用
+    return [
+      {
+        id: Math.floor(Math.random() * 10000),
+        name: '模拟活动 - ' + date,
+        datetime: new Date(date + 'T12:00:00').toISOString(),
+        description: '这是一个模拟活动，因为API请求失败',
+        location: 'Melbourne CBD',
+        category: 'Comedy',
+        link: '#',
+        image: getPlaceholderImage()
+      }
+    ];
+  }
+};
+
+// 工具函数：获取占位图像URL
+const getPlaceholderImage = () => {
+  return '/placeholder-event.jpg';
+};
+
+/**
  * Get all events
  */
 export const getAllEvents = async (): Promise<Event[]> => {
@@ -56,13 +116,8 @@ export const filterEvents = async (filters: EventFilters): Promise<Event[]> => {
  * Get events by date (for calendar view)
  */
 export const getEventsByDate = async (date: Date): Promise<Event[]> => {
-  const allEvents = await getAllEvents();
   const dateString = date.toISOString().split('T')[0];
-  
-  return allEvents.filter(event => {
-    const eventDate = new Date(event.datetime).toISOString().split('T')[0];
-    return eventDate === dateString;
-  });
+  return getEventsFromApi(dateString);
 };
 
 /**

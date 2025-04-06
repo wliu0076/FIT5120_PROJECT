@@ -59,6 +59,26 @@
 
       <!-- Map Section -->
       <div class="space-y-6">
+        <!-- Destination Info Card -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <i class="mdi mdi-map-marker text-2xl text-blue-600"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-gray-900">{{ $t('travel.destination') }}</h3>
+              <p class="text-gray-600 mt-1">{{ event.location }}</p>
+              <div class="flex items-center mt-2 text-sm text-gray-500">
+                <i class="mdi mdi-calendar mr-2"></i>
+                <span>{{ event.date }}</span>
+                <span class="mx-2">•</span>
+                <i class="mdi mdi-clock-outline mr-2"></i>
+                <span>{{ event.time }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="bg-white rounded-lg shadow-sm h-96 overflow-hidden">
           <div id="map" class="w-full h-full"></div>
         </div>
@@ -197,12 +217,14 @@ import { formatEventDate } from '../utils/eventUtils'
 
 const { t } = useI18n()
 
+const route = useRoute()
+
 const event = ref({
-  title: 'Melbourne Arts Festival 2025',
-  location: 'Federation Square, Melbourne',
-  date: 'April 10, 2025',
-  time: '14:00 - 22:00',
-  coordinates: { lat: -37.818085, lng: 144.968124 } // Federation Square coordinates
+  title: route.query.eventName || 'Event',
+  location: route.query.destination || '',
+  date: route.query.eventDate || '',
+  time: route.query.eventTime || '',
+  coordinates: { lat: -37.818085, lng: 144.968124 } // 默认坐标，后续会根据地址更新
 })
 
 const map = ref(null)

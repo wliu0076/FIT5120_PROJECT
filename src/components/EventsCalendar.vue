@@ -52,13 +52,17 @@
     <!-- Category Navigation -->
     <div class="bg-white py-8 border-b">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-4 md:grid-cols-8 gap-6">
+        <div class="grid grid-cols-3 md:grid-cols-6 gap-6">
           <div v-for="category in categories" :key="category.id" 
+               @click="filterByCategory(category.id)"
                class="flex flex-col items-center group cursor-pointer hover:opacity-80 transition-opacity">
-            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-2 group-hover:bg-gray-200 transition-colors">
+            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-2 group-hover:bg-gray-200 transition-colors"
+                 :class="{ 'bg-green-100': selectedEventType === category.id }">
               <i :class="category.icon" class="text-2xl text-gray-700"></i>
             </div>
-            <span class="text-xs text-center leading-tight">{{ category.name }}</span>
+            <span class="text-xs text-center leading-tight" :class="{ 'font-bold': selectedEventType === category.id }">
+              {{ category.name }}
+            </span>
           </div>
         </div>
       </div>
@@ -242,10 +246,113 @@
         <div v-if="selectedDate" class="pt-8 selected-date-events">
           <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ formatDate(selectedDate) }}</h2>
           
+          <!-- Time Range Filter -->
+          <div class="mb-8 bg-white rounded-lg shadow-sm">
+            <div class="flex items-center justify-between p-4 border-b">
+              <h3 class="text-lg font-semibold text-gray-900">Time Range</h3>
+              <div class="flex space-x-2">
+                <button 
+                  v-for="preset in timePresets" 
+                  :key="preset.label"
+                  @click="applyTimePreset(preset)"
+                  :class="[
+                    'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+                    currentPreset === preset.label 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  {{ preset.label }}
+                </button>
+              </div>
+            </div>
+
+            <div class="p-6">
+              <!-- Time Range Inputs -->
+              <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center space-x-4">
+                  <div class="relative">
+                    <input 
+                      type="text" 
+                      :value="timeRange.start"
+                      class="w-32 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 cursor-pointer bg-white"
+                      readonly
+                      @click="showTimePresets = !showTimePresets"
+                    >
+                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <i class="mdi mdi-clock-outline text-gray-500"></i>
+                    </span>
+                  </div>
+                  <span class="text-gray-500">to</span>
+                  <div class="relative">
+                    <input 
+                      type="text" 
+                      :value="timeRange.end"
+                      class="w-32 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 cursor-pointer bg-white"
+                      readonly
+                      @click="showTimePresets = !showTimePresets"
+                    >
+                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <i class="mdi mdi-clock-outline text-gray-500"></i>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Time Slider -->
+              <div class="time-slider relative h-16 select-none">
+                <!-- Time markers -->
+                <div class="absolute inset-x-0 top-0 h-6 flex">
+                  <div v-for="hour in 24" :key="hour" 
+                       class="flex-1 border-l border-gray-200 relative">
+                    <span class="absolute -top-6 left-0 text-xs text-gray-500 transform -translate-x-1/2">
+                      {{ hour === 24 ? '12 AM' : hour === 12 ? '12 PM' : hour > 12 ? `${hour-12} PM` : `${hour} AM` }}
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- Timeline bar -->
+                <div class="absolute left-0 right-0 bottom-4 h-2 bg-gray-200 rounded-full">
+                  <!-- Selected range -->
+                  <div class="absolute h-full bg-green-500 rounded-full"
+                       :style="{
+                         left: (timeToPercentage(to24Hour(timeRange.start))) + '%',
+                         right: (100 - timeToPercentage(to24Hour(timeRange.end))) + '%'
+                       }">
+                  </div>
+                  
+                  <!-- Slider handles -->
+                  <button 
+                    class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-white border-2 border-green-500 rounded-full shadow-md hover:scale-110 transition-transform"
+                    :style="{ left: timeToPercentage(to24Hour(timeRange.start)) + '%' }"
+                    @mousedown="handleSliderMouseDown('start', $event)"
+                  ></button>
+                  <button 
+                    class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-white border-2 border-green-500 rounded-full shadow-md hover:scale-110 transition-transform"
+                    :style="{ left: timeToPercentage(to24Hour(timeRange.end)) + '%' }"
+                    @mousedown="handleSliderMouseDown('end', $event)"
+                  ></button>
+                </div>
+
+                <!-- Event markers -->
+                <div class="absolute left-0 right-0 bottom-0 h-3">
+                  <div v-for="event in filteredEvents" 
+                       :key="event.id"
+                       class="absolute w-1 h-full bg-green-600 transform -translate-x-1/2"
+                       :style="{
+                         left: timeToPercentage(new Date(event.datetime).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })) + '%'
+                       }"
+                       :title="event.name">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Events Count Summary -->
           <p class="text-gray-600 mb-6">
             {{ filteredEvents.length }} {{ $t('events.eventsFound') }}
-            <span v-if="selectedEventType || selectedVenue || selectedPrice || selectedAudience" class="inline-block ml-2">
+            <span v-if="selectedEventType || timeRange.start !== '00:00' || timeRange.end !== '23:59'" class="inline-block ml-2">
               <button @click="clearFilters" class="text-blue-500 underline text-sm">{{ $t('events.clearFilters') }}</button>
             </span>
           </p>
@@ -259,53 +366,112 @@
             <p class="mt-1 text-sm text-gray-500">{{ $t('events.tryOtherDate') }}</p>
           </div>
           
-          <!-- Events Grid -->
-          <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div v-for="event in filteredEvents" :key="event.id" 
-                 class="group relative border border-gray-200 overflow-hidden rounded-lg shadow-sm hover:shadow-md transition duration-300">
-              <!-- Event Image -->
-              <div class="h-48 overflow-hidden">
-                <img :src="event.image || 'https://placehold.co/400x240'" alt="Event" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-              </div>
-              
-              <!-- Category Badge -->
-              <div class="absolute top-2 right-2">
-                <span :class="[getCategoryTagColor(event.category), 'px-2 py-1 text-xs font-bold rounded-full']">
-                  {{ event.category }}
-                </span>
-              </div>
-              
-              <!-- Event Details -->
-              <div class="p-4">
-                <div class="flex items-center space-x-1 text-xs text-gray-500 mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>{{ formatTime(event.time) }}</span>
-                </div>
-                <h3 class="text-lg font-bold leading-tight mb-1 group-hover:text-blue-600 transition-colors duration-300">{{ event.title }}</h3>
-                <div class="flex items-center space-x-1 text-xs text-gray-500 mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>{{ event.location }}</span>
+          <div v-else>
+            <!-- Events Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div v-for="event in paginatedEvents" :key="event.id" 
+                   class="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300">
+                <!-- Event Image -->
+                <div class="relative h-48 overflow-hidden rounded-t-lg">
+                  <img :src="event.image || '/placeholder-event.jpg'" 
+                       :alt="event.name"
+                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                  <!-- Category Badge -->
+                  <div class="absolute top-3 right-3">
+                    <span :class="[
+                      getCategoryTagColor(event.category),
+                      'px-3 py-1 text-xs font-semibold rounded-full shadow-sm'
+                    ]">
+                      {{ event.category }}
+                    </span>
+                  </div>
                 </div>
                 
-                <!-- Event Tags -->
-                <div class="flex flex-wrap gap-1 mb-4">
-                  <span class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded">{{ event.price }}</span>
-                  <span class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded">{{ event.audience }}</span>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="flex space-x-2">
-                  <router-link :to="`/navigation/${event.id}`" class="flex-1">
-                    <button class="w-full bg-black text-white text-xs px-3 py-2 rounded hover:bg-gray-800 transition-colors">Navigate</button>
-                  </router-link>
-                  <button class="flex-1 border border-gray-300 text-gray-700 text-xs px-3 py-2 rounded hover:bg-gray-50 transition-colors">More Info</button>
+                <!-- Event Details -->
+                <div class="p-5 flex flex-col h-[calc(100%-12rem)]">
+                  <!-- Time and Location -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2 text-gray-600">
+                      <i class="mdi mdi-clock-outline text-lg"></i>
+                      <span class="text-sm">
+                        {{ new Date(event.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                      </span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-gray-600">
+                      <i class="mdi mdi-map-marker text-lg"></i>
+                      <span class="text-sm truncate max-w-[120px]">{{ event.location }}</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Title -->
+                  <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                    {{ event.name }}
+                  </h3>
+                  
+                  <!-- Description -->
+                  <p class="text-sm text-gray-600 mb-4 line-clamp-2 flex-grow">
+                    {{ event.description }}
+                  </p>
+                  
+                  <!-- Action Buttons -->
+                  <div class="flex space-x-3 mt-auto pt-4">
+                    <button 
+                      @click="navigateToEvent(event)"
+                      class="flex-1 bg-gray-900 text-white px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2 h-[42px]"
+                    >
+                      <i class="mdi mdi-navigation text-lg"></i>
+                      <span>Navigate</span>
+                    </button>
+                    <a :href="event.link" 
+                       target="_blank" 
+                       class="flex-1">
+                      <button class="w-full border-2 border-gray-900 text-gray-900 px-4 py-2.5 rounded-lg hover:bg-gray-900 hover:text-white transition-all flex items-center justify-center space-x-2 h-[42px]">
+                        <i class="mdi mdi-information text-lg"></i>
+                        <span>Details</span>
+                      </button>
+                    </a>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="mt-8 flex justify-center items-center space-x-4">
+              <button 
+                @click="prevPage" 
+                :disabled="currentPage === 1"
+                :class="[
+                  'px-4 py-2 rounded-md text-sm',
+                  currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ]"
+              >
+                Previous
+              </button>
+              
+              <div class="flex space-x-2">
+                <button 
+                  v-for="page in totalPages" 
+                  :key="page"
+                  @click="goToPage(page)"
+                  :class="[
+                    'px-4 py-2 rounded-md text-sm',
+                    currentPage === page ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ]"
+                >
+                  {{ page }}
+                </button>
+              </div>
+              
+              <button 
+                @click="nextPage" 
+                :disabled="currentPage === totalPages"
+                :class="[
+                  'px-4 py-2 rounded-md text-sm',
+                  currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ]"
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>
@@ -315,8 +481,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { getEventCountByMonth, getEventsFromApi } from '../services/eventService'
+import { useRouter } from 'vue-router'
 
 // 使用直接的公共路径而不是导入
 const logoUrl = '/logo.png'
@@ -330,6 +498,8 @@ const showFilters = ref(false)
 // Calendar state
 const currentDate = ref(new Date('2025-04-01'))
 const selectedDate = ref(null)
+const monthEvents = ref({}) // 存储每月的事件数据
+const currentEvents = ref([]) // 存储当前选中日期的事件
 
 // Filters
 const selectedEventType = ref('')
@@ -337,12 +507,32 @@ const selectedVenue = ref('')
 const selectedPrice = ref('')
 const selectedAudience = ref('')
 
+// 时间过滤状态
+const timeRange = ref({
+  start: '12:00 AM',
+  end: '11:59 PM'
+})
+
+const timePresets = [
+  { label: 'Morning', start: '06:00 AM', end: '12:00 PM' },
+  { label: 'Afternoon', start: '12:00 PM', end: '06:00 PM' },
+  { label: 'Evening', start: '06:00 PM', end: '11:59 PM' },
+  { label: 'All Day', start: '12:00 AM', end: '11:59 PM' }
+]
+
+const showTimePresets = ref(false)
+const currentPreset = ref('All Day')
+const isDragging = ref(false)
+const activeHandle = ref(null)
+
 // Mock data
 const eventTypes = [
-  { id: 'music', name: 'Music' },
-  { id: 'market', name: 'Market' },
-  { id: 'fitness', name: 'Fitness' },
-  { id: 'social', name: 'Social' }
+  { id: 'cultural', name: 'Cultural Events' },
+  { id: 'religious', name: 'Religious Events' },
+  { id: 'health', name: 'Health & Wellness' },
+  { id: 'social', name: 'Social Groups' },
+  { id: 'workshops', name: 'Workshops & Classes' },
+  { id: 'markets', name: 'Local Markets' }
 ]
 
 const venues = [
@@ -444,49 +634,166 @@ const bannerSlides = [
 // Category Navigation Data
 const categories = [
   { 
-    id: 'concerts', 
-    name: 'Concerts & Gig Guide', 
-    icon: 'mdi mdi-guitar-electric'
-  },
-  { 
-    id: 'performing-arts', 
-    name: 'Performing Arts', 
+    id: 'cultural', 
+    name: 'Cultural Events', 
     icon: 'mdi mdi-theater'
   },
   { 
-    id: 'sports', 
-    name: 'Sports & Outdoors', 
-    icon: 'mdi mdi-basketball'
+    id: 'religious', 
+    name: 'Religious Events', 
+    icon: 'mdi mdi-church'
   },
   { 
-    id: 'festivals', 
-    name: 'Festivals & Lifestyle', 
-    icon: 'mdi mdi-party-popper'
+    id: 'health', 
+    name: 'Health & Wellness', 
+    icon: 'mdi mdi-heart-pulse'
   },
   { 
-    id: 'music-festivals', 
-    name: 'Music Festivals', 
-    icon: 'mdi mdi-music-circle'
-  },
-  { 
-    id: 'exhibitions', 
-    name: 'Exhibitions', 
-    icon: 'mdi mdi-image-multiple'
+    id: 'social', 
+    name: 'Social Groups', 
+    icon: 'mdi mdi-account-group'
   },
   { 
     id: 'workshops', 
-    name: 'Workshops, Conferences & Classes', 
+    name: 'Workshops & Classes', 
     icon: 'mdi mdi-school'
   },
   { 
-    id: 'quiz-karaoke', 
-    name: 'Quiz, Karaoke', 
-    icon: 'mdi mdi-microphone-variant'
+    id: 'markets', 
+    name: 'Local Markets', 
+    icon: 'mdi mdi-store'
   }
 ]
 
 // Carousel State
 const currentSlide = ref(0)
+
+// 分页状态
+const currentPage = ref(1)
+const eventsPerPage = 9
+
+// Router for navigation
+const router = useRouter()
+
+// Click outside handler for dropdown
+const closeTimePresets = (e) => {
+  if (!e.target.closest('.time-presets-dropdown')) {
+    showTimePresets.value = false
+  }
+}
+
+// Lifecycle hooks
+onMounted(() => {
+  document.addEventListener('click', closeTimePresets)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeTimePresets)
+})
+
+// Convert 24h time to 12h format
+function formatTime(time) {
+  const [hours, minutes] = time.split(':')
+  const hour = parseInt(hours)
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const hour12 = hour % 12 || 12
+  return `${hour12}:${minutes} ${ampm}`
+}
+
+// Convert 12h time to 24h format
+function to24Hour(time) {
+  const [timeStr, period] = time.split(' ')
+  let [hours, minutes] = timeStr.split(':')
+  hours = parseInt(hours)
+  
+  if (period === 'PM' && hours !== 12) {
+    hours += 12
+  } else if (period === 'AM' && hours === 12) {
+    hours = 0
+  }
+  
+  return `${String(hours).padStart(2, '0')}:${minutes}`
+}
+
+// Handle slider interaction
+function handleSliderMouseDown(handle, e) {
+  isDragging.value = true
+  activeHandle.value = handle
+  document.addEventListener('mousemove', handleSliderMouseMove)
+  document.addEventListener('mouseup', handleSliderMouseUp)
+}
+
+function handleSliderMouseMove(e) {
+  if (!isDragging.value) return
+  
+  const slider = document.querySelector('.time-slider')
+  const rect = slider.getBoundingClientRect()
+  let percentage = ((e.clientX - rect.left) / rect.width) * 100
+  
+  // Constrain percentage between 0 and 100
+  percentage = Math.max(0, Math.min(100, percentage))
+  
+  // Convert percentage to time
+  const minutes = Math.round((percentage / 100) * 24 * 60)
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  const time = formatTime(`${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`)
+  
+  if (activeHandle.value === 'start') {
+    if (percentage < timeToPercentage(to24Hour(timeRange.value.end))) {
+      timeRange.value.start = time
+    }
+  } else {
+    if (percentage > timeToPercentage(to24Hour(timeRange.value.start))) {
+      timeRange.value.end = time
+    }
+  }
+  
+  currentPreset.value = ''
+}
+
+function handleSliderMouseUp() {
+  isDragging.value = false
+  activeHandle.value = null
+  document.removeEventListener('mousemove', handleSliderMouseMove)
+  document.removeEventListener('mouseup', handleSliderMouseUp)
+}
+
+// Apply time preset
+function applyTimePreset(preset) {
+  currentPreset.value = preset.label
+  timeRange.value = {
+    start: preset.start,
+    end: preset.end
+  }
+  showTimePresets.value = false
+}
+
+// Convert time to percentage for slider positioning
+function timeToPercentage(time) {
+  const [hours, minutes] = time.split(':').map(Number)
+  return ((hours * 60 + minutes) / (24 * 60)) * 100
+}
+
+// Filter events based on time range
+const filteredEvents = computed(() => {
+  if (!currentEvents.value) return []
+  
+  return currentEvents.value.filter(event => {
+    const eventTime = new Date(event.datetime)
+    const eventHour = eventTime.getHours()
+    const eventMinute = eventTime.getMinutes()
+    
+    const [startHour, startMinute] = to24Hour(timeRange.value.start).split(':').map(Number)
+    const [endHour, endMinute] = to24Hour(timeRange.value.end).split(':').map(Number)
+    
+    const eventTimeValue = eventHour * 60 + eventMinute
+    const startTimeValue = startHour * 60 + startMinute
+    const endTimeValue = endHour * 60 + endMinute
+    
+    return eventTimeValue >= startTimeValue && eventTimeValue <= endTimeValue
+  })
+})
 
 // Computed properties
 const currentMonth = computed(() => {
@@ -526,39 +833,67 @@ const calendarDays = computed(() => {
   return days
 })
 
-const getEventsForDate = (date) => {
+// 获取指定日期的事件
+const getEventsForDate = async (date) => {
   if (!date) return [];
-  return events.filter(event => {
-    const eventDate = new Date(event.date);
-    return isSameDay(eventDate, date);
-  });
+  const dateString = date.toISOString().split('T')[0];
+  try {
+    const events = await getEventsFromApi(dateString);
+    return events;
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    return [];
+  }
 };
 
-const filteredEvents = computed(() => {
-  if (!selectedDate.value) return [];
-  const dateEvents = getEventsForDate(selectedDate.value);
-  
-  // 应用其他过滤条件
-  let filtered = dateEvents;
-  
-  if (selectedEventType.value) {
-    filtered = filtered.filter(event => event.category.toLowerCase() === selectedEventType.value.toLowerCase());
+// 获取当前月份的事件数量
+const fetchMonthEventCounts = async () => {
+  const year = currentDate.value.getFullYear();
+  const month = currentDate.value.getMonth() + 1;
+  try {
+    const counts = await getEventCountByMonth(year, month);
+    monthEvents.value = counts.reduce((acc, item) => {
+      acc[item.date] = item.count;
+      return acc;
+    }, {});
+  } catch (error) {
+    console.error('Error fetching month events:', error);
+    monthEvents.value = {};
   }
+};
+
+// 监听月份变化
+watch(() => currentDate.value, async () => {
+  await fetchMonthEventCounts();
+}, { immediate: true });
+
+// 创建日期对象的辅助函数
+function createDayObject(date) {
+  const dateString = date.toISOString().split('T')[0];
+  const eventsCount = monthEvents.value[dateString] || 0;
   
-  if (selectedVenue.value) {
-    filtered = filtered.filter(event => event.location.toLowerCase().includes(selectedVenue.value.toLowerCase()));
+  return {
+    day: date.getDate(),
+    date: date,
+    isCurrentMonth: date.getMonth() === currentDate.value.getMonth(),
+    hasEvents: eventsCount > 0,
+    eventsCount: eventsCount,
+    topCategories: [], // 暂时不显示类别条
+    isToday: isSameDay(date, new Date())
   }
-  
-  if (selectedPrice.value) {
-    filtered = filtered.filter(event => event.price.toLowerCase().includes(selectedPrice.value.toLowerCase()));
-  }
-  
-  if (selectedAudience.value) {
-    filtered = filtered.filter(event => event.audience.toLowerCase().includes(selectedAudience.value.toLowerCase()));
-  }
-  
-  return filtered;
-});
+}
+
+// 计算分页后的事件
+const paginatedEvents = computed(() => {
+  const startIndex = (currentPage.value - 1) * eventsPerPage
+  const endIndex = startIndex + eventsPerPage
+  return filteredEvents.value.slice(startIndex, endIndex)
+})
+
+// 计算总页数
+const totalPages = computed(() => {
+  return Math.ceil(filteredEvents.value.length / eventsPerPage)
+})
 
 // Methods
 function hasEventsOnDate(date) {
@@ -577,20 +912,22 @@ function isSameDay(date1, date2) {
          d1.getFullYear() === d2.getFullYear();
 }
 
-function selectDate(dateObj) {
-  selectedDate.value = dateObj.date;
-  showFilters.value = false; // 选择日期时自动隐藏过滤器
+// 选择日期时获取事件
+async function selectDate(dateObj) {
+  selectedDate.value = dateObj.date
+  showFilters.value = false
+  currentPage.value = 1 // 重置页码
+  currentEvents.value = await getEventsForDate(dateObj.date)
   
-  // 添加延迟以确保DOM更新后再滚动
   setTimeout(() => {
-    const eventsSection = document.querySelector('.selected-date-events');
+    const eventsSection = document.querySelector('.selected-date-events')
     if (eventsSection) {
       eventsSection.scrollIntoView({ 
         behavior: 'smooth',
         block: 'start'
-      });
+      })
     }
-  }, 100);
+  }, 100)
 }
 
 function selectMonth(monthIndex) {
@@ -618,10 +955,6 @@ function formatDate(date) {
   return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`
 }
 
-function formatTime(timeString) {
-  return timeString
-}
-
 function toggleFilters() {
   showFilters.value = !showFilters.value
 }
@@ -636,6 +969,10 @@ function clearFilters() {
   selectedVenue.value = ''
   selectedPrice.value = ''
   selectedAudience.value = ''
+  timeRange.value = {
+    start: '12:00 AM',
+    end: '11:59 PM'
+  }
 }
 
 // 获取类别标签颜色
@@ -651,32 +988,6 @@ function getCategoryTagColor(category) {
     'Social': 'bg-orange-500 text-white'
   }
   return colors[category] || 'bg-gray-500 text-white'
-}
-
-// 创建日期对象的辅助函数
-function createDayObject(date) {
-  const dateEvents = getEventsForDate(date)
-  const categories = dateEvents.map(event => event.category)
-  // 获取前3个不同类别的活动，用于显示颜色条
-  const uniqueCategories = [...new Set(categories)]
-  const topCategories = uniqueCategories.slice(0, 3)
-  
-  // 计算事件数量，如果没有实际事件且是当前月份，则生成随机数量 (1-30%)的机会生成1-5个事件)
-  let eventsCount = dateEvents.length
-  if (eventsCount === 0 && date.getMonth() === currentDate.value.getMonth() && Math.random() < 0.3) {
-    // 只在约30%的日子里随机生成事件
-    eventsCount = Math.floor(Math.random() * 5) + 1
-  }
-  
-  return {
-    day: date.getDate(),
-    date: date,
-    isCurrentMonth: date.getMonth() === currentDate.value.getMonth(),
-    hasEvents: eventsCount > 0,
-    eventsCount: eventsCount,
-    topCategories: topCategories,
-    isToday: isSameDay(date, new Date())
-  }
 }
 
 // 获取事件数量的颜色
@@ -725,6 +1036,53 @@ onMounted(() => {
 watch(currentLocale, (newLocale) => {
   locale.value = newLocale
 })
+
+// 分页方法
+function goToPage(page) {
+  currentPage.value = page
+}
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+function prevPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+
+// 快速分类过滤
+function filterByCategory(categoryId) {
+  selectedEventType.value = categoryId
+  applyFilters()
+}
+
+// Update the navigation function
+function navigateToEvent(event) {
+  if (event.location) {
+    router.push({
+      name: 'navigation',
+      query: {
+        destination: event.location,
+        eventName: event.name,
+        eventTime: new Date(event.datetime).toLocaleTimeString([], { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        eventDate: new Date(event.datetime).toLocaleDateString([], {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        address: event.location,
+        autoFill: 'true'
+      }
+    })
+  }
+}
 </script>
 
 <style scoped>
