@@ -335,7 +335,29 @@ async function calculateRoute() {
             duration: step.duration?.text || ''
           })
         }
-      } else {
+      } else if (step.travel_mode === 'TRANSIT') {
+    // bus train station
+    const transitDetails = step.transit;
+    console.log('Step mode:', step.travel_mode);
+    console.log('Transit Details:', step.transit);
+        let timingInfo = '';
+        if (transitDetails) {
+          const departure = transitDetails.departure_time ? transitDetails.departure_time.text : '';
+          const arrival = transitDetails.arrival_time ? transitDetails.arrival_time.text : '';
+          let lineName = '';
+          if (transitDetails.line) {
+            lineName = transitDetails.line.short_name || transitDetails.line.name || '';
+          }
+          timingInfo = ` (Depart: ${departure}, Arrive: ${arrival}${lineName ? ', via ' + lineName : ''})`;
+        }
+        console.log('完整的JSON数据:', JSON.stringify(result, null, 2));
+        detailedSteps.push({
+          instructions: step.instructions + timingInfo,
+          distance: step.distance?.text || '',
+          duration: step.duration?.text || ''
+        });
+      } 
+    else {
         detailedSteps.push({
           instructions: step.instructions,
           distance: step.distance?.text || '',
@@ -349,6 +371,7 @@ async function calculateRoute() {
     console.error('Direction request failed:', error)
   }
 }
+
 
 function calculateArrivalTime(durationInSeconds) {
   const now = new Date()
