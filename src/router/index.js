@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import EventsCalendar from '../components/EventsCalendar.vue'
 import NavigationView from '../views/NavigationView.vue'
 import HelpView from '../views/HelpView.vue'
+import AboutView from '../views/AboutView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,11 @@ const router = createRouter({
       path: '/help',
       name: 'help',
       component: HelpView
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: AboutView
     },
     {
       path: '/navigation/:eventId?',

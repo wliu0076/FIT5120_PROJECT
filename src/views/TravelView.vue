@@ -10,10 +10,12 @@
           v-for="culture in cultures"
           :key="culture.value"
           @click="selectCulture(culture.value)"
-          :class="[ selectedCulture === culture.value
-            ? 'bg-blue-600 text-white border-blue-600'
-            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200',
-            'px-4 py-2 rounded-full font-semibold border transition']">
+          :class="[
+            selectedCulture === culture.value
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200',
+            'px-4 py-2 rounded-full font-semibold border transition'
+          ]">
           {{ culture.label }}
         </button>
       </div>
@@ -79,13 +81,15 @@
 
       <div class="flex space-x-3 mb-4">
         <button
-          v-for="mode in ['TRANSIT', 'WALKING', 'DRIVING']"
+          v-for="mode in transportModes"
           :key="mode"
           @click="changeTransportMode(mode)"
-          :class="[ transportMode === mode
-            ? 'bg-blue-600 text-white border-blue-600'
-            : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200',
-            'px-4 py-2 rounded-full border text-sm font-medium transition']">
+          :class="[
+            transportMode === mode
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200',
+            'px-4 py-2 rounded-full border text-sm font-medium transition'
+          ]">
           {{ transportModeLabels[mode] }}
         </button>
       </div>
@@ -143,12 +147,85 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
-import { useRoute } from 'vue-router'
 
-// 获取路由参数
-const route = useRoute()
+// ===== Constants =====
+const cultures = [
+  { label: '中国文化', value: 'chinese' },
+  { label: '印度文化', value: 'indian' }
+]
 
-// State
+const TRANSPORT_MODES = ['TRANSIT', 'WALKING', 'DRIVING']
+const TRANSPORT_MODE_LABELS = {
+  TRANSIT: 'Public Transport',
+  DRIVING: 'Driving',
+  WALKING: 'Walking'
+}
+
+const landmarks = {
+  chinese: [
+    { 
+      id: 'chinatown', 
+      name: '墨尔本唐人街', 
+      location: 'Little Bourke St, Melbourne VIC 3000', 
+      lat: -37.8115, 
+      lng: 144.9711, 
+      image: '/landmarks/chinatown.jpg', 
+      description: '墨尔本唐人街是澳大利亚最古老的华人聚居区之一，以其丰富的中国美食和文化特色闻名。' 
+    },
+    { 
+      id: 'chinese-museum', 
+      name: '墨尔本中国博物馆', 
+      location: '22 Cohen Place, Melbourne VIC 3000', 
+      lat: -37.8072, 
+      lng: 144.9706, 
+      image: '/landmarks/chinese-museum.jpg', 
+      description: '博物馆展示了澳大利亚华人的历史和文化遗产。' 
+    },
+    {
+      id: 'box-hill',
+      name: 'Box Hill 中心',
+      location: 'Box Hill Central, Melbourne VIC 3128',
+      lat: -37.8190,
+      lng: 145.1220,
+      image: '/landmarks/box-hill.jpg',
+      description: '墨尔本最大的亚洲美食和购物中心之一。'
+    }
+  ],
+  indian: [
+    { 
+      id: 'temple', 
+      name: '希瓦毗湿奴神庙', 
+      location: '52 Boundary Rd, Carrum Downs VIC 3201', 
+      lat: -38.0893, 
+      lng: 145.1584, 
+      image: '/landmarks/shiva-temple.jpg', 
+      description: '维多利亚州最大的印度教寺庙。' 
+    },
+    { 
+      id: 'indian-museum', 
+      name: '印度文化中心', 
+      location: 'Federation Square, Melbourne VIC 3000', 
+      lat: -37.8183, 
+      lng: 144.9671, 
+      image: '/landmarks/indian-museum.jpg', 
+      description: '展示印度文化艺术和历史的文化中心。' 
+    },
+    {
+      id: 'dandenong',
+      name: 'Little India Dandenong',
+      location: 'Foster Street, Dandenong VIC 3175',
+      lat: -37.9814,
+      lng: 145.2119,
+      image: '/landmarks/little-india.jpg',
+      description: '墨尔本最著名的印度文化区，汇集了众多印度餐厅和商店。'
+    }
+  ]
+}
+
+const DEFAULT_USER_LOCATION = { lat: -37.818267, lng: 144.952974 }
+const EARTH_RADIUS = 6371e3 // in meters
+
+// ===== Reactive State =====
 const selectedCulture = ref('chinese')
 const landmarkSearch = ref('')
 const viewMode = ref('map')
@@ -157,55 +234,28 @@ const popupLandmark = ref(null)
 const popupAudio = '/src/info.mp3'
 const showPopup = ref(false)
 
-// 自动填充的目的地信息
-const destinationInfo = ref({
-  destination: '',
-  eventName: '',
-  eventTime: '',
-  eventDate: '',
-  address: ''
-})
-
-const userLocation = ref({ lat: -37.818267, lng: 144.952974 })
+const userLocation = ref({ ...DEFAULT_USER_LOCATION })
 const landmarkRefs = {}
 
 const transportMode = ref('TRANSIT')
-const transportModeLabels = {
-  TRANSIT: 'Public Transport',
-  DRIVING: 'Driving',
-  WALKING: 'Walking'
-}
 const routeSteps = ref([])
 const routeSummary = ref({ duration: '', distance: '', arrival: '' })
 
-// Map
+// Map related refs
 const map = ref(null)
 const mapMarkers = ref([])
 const directionsService = ref(null)
 const directionsRenderer = ref(null)
 
-const cultures = [
-  { label: 'Chinese', value: 'chinese' },
-  { label: 'Indian', value: 'indian' }
-]
-
-const landmarks = {
-  chinese: [
-    { id: 'chinatown', name: 'Chinatown Melbourne', location: 'Little Bourke St', lat: -37.8115, lng: 144.9711, image: '/landmarks/chinatown.jpg', description: 'Historic precinct full of food and culture.' },
-    { id: 'museum', name: 'Chinese Museum', location: 'Cohen Pl', lat: -37.8072, lng: 144.9706, image: '/landmarks/chinese-museum.jpg', description: 'Chinese heritage site.' }
-  ],
-  indian: [
-    { id: 'temple', name: 'Shiva Vishnu Temple', location: 'Carrum Downs', lat: -37.6593, lng: 145.0584, image: '/landmarks/shiva-temple.jpg', description: 'Large Hindu temple.' },
-    { id: 'dosa', name: 'Dosa Hut', location: 'Footscray', lat: -37.7994, lng: 144.8995, image: '/landmarks/dosa-hut.jpg', description: 'Famous South Indian food.' }
-  ]
-}
-
+// ===== Computed Properties =====
 const filteredLandmarks = computed(() => {
   const list = landmarks[selectedCulture.value] || []
   if (!landmarkSearch.value) return list
   return list.filter(l => l.name.toLowerCase().includes(landmarkSearch.value.toLowerCase()))
 })
 
+// ===== Methods =====
+// Culture and view methods
 function selectCulture(culture) {
   selectedCulture.value = culture
   landmarkSearch.value = ''
@@ -216,6 +266,7 @@ function toggleView(mode) {
   viewMode.value = mode
 }
 
+// Landmark interaction methods
 function handleLandmarkClick(landmark) {
   clearDirections()
   activeLandmark.value = landmark
@@ -234,6 +285,7 @@ function scrollToLandmark(id) {
   })
 }
 
+// Transport and routing methods
 function changeTransportMode(mode) {
   transportMode.value = mode
   if (activeLandmark.value) updateRouteToLandmark(activeLandmark.value)
@@ -269,6 +321,7 @@ function calculateArrivalTime(durationInSeconds) {
   return arrival.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
+// Map methods
 function updateMarkers() {
   mapMarkers.value.forEach(m => m.setMap(null))
   mapMarkers.value = []
@@ -296,27 +349,56 @@ function clearDirections() {
 }
 
 function initMap() {
-  map.value = new google.maps.Map(document.getElementById('map'), {
+  const mapOptions = {
     center: userLocation.value,
     zoom: 12,
     mapTypeControl: false,
-    streetViewControl: false
+    streetViewControl: false,
+    fullscreenControl: false
+  }
+  
+  map.value = new google.maps.Map(document.getElementById('map'), mapOptions)
+  directionsService.value = new google.maps.DirectionsService()
+  directionsRenderer.value = new google.maps.DirectionsRenderer({ 
+    map: map.value, 
+    suppressMarkers: false 
   })
 
-  directionsService.value = new google.maps.DirectionsService()
-  directionsRenderer.value = new google.maps.DirectionsRenderer({ map: map.value, suppressMarkers: false })
-
-  updateMarkers()
+  // 使用新的 AdvancedMarkerElement 替代 Marker
+  const { AdvancedMarkerElement } = google.maps.marker
+  updateMarkersWithAdvanced(AdvancedMarkerElement)
 }
 
+function updateMarkersWithAdvanced(AdvancedMarkerElement) {
+  mapMarkers.value.forEach(m => m.map = null)
+  mapMarkers.value = []
+  const bounds = new google.maps.LatLngBounds()
+
+  filteredLandmarks.value.forEach(landmark => {
+    const marker = new AdvancedMarkerElement({
+      map: map.value,
+      position: { lat: landmark.lat, lng: landmark.lng },
+      title: landmark.name
+    })
+    
+    marker.addListener('click', () => handleLandmarkClick(landmark))
+    mapMarkers.value.push(marker)
+    bounds.extend(marker.position)
+  })
+
+  if (filteredLandmarks.value.length) {
+    map.value.fitBounds(bounds)
+  }
+}
+
+// Location and proximity methods
 function getDistance(loc1, loc2) {
-  const R = 6371e3
   const φ1 = loc1.lat * Math.PI / 180
   const φ2 = loc2.lat * Math.PI / 180
   const Δφ = (loc2.lat - loc1.lat) * Math.PI / 180
   const Δλ = (loc2.lng - loc1.lng) * Math.PI / 180
   const a = Math.sin(Δφ/2)**2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2)**2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  return EARTH_RADIUS * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
 }
 
 function trackUserProximity() {
@@ -342,6 +424,7 @@ function startLocationWatch() {
   }
 }
 
+// PDF generation
 async function savePDF() {
   try {
     const contentDiv = document.createElement('div');
@@ -350,32 +433,7 @@ async function savePDF() {
     contentDiv.style.background = 'white';
     contentDiv.style.fontFamily = 'Arial, sans-serif';
 
-    contentDiv.innerHTML = `
-      <h1 style="font-size: 24px; margin-bottom: 10px;">${activeLandmark.value.name}</h1>
-      <p style="margin-bottom: 8px;"><strong>Location:</strong> ${activeLandmark.value.location}</p>
-      <p style="margin-bottom: 10px;"><strong>Description:</strong> ${activeLandmark.value.description}</p>
-      <img src="${activeLandmark.value.image}" style="width: 100%; border-radius: 8px; margin-bottom: 15px;" />
-      <p><strong>Total Distance:</strong> ${routeSummary.value.distance}</p>
-      <p><strong>Estimated Time:</strong> ${routeSummary.value.duration}</p>
-      <p><strong>Expected Arrival:</strong> ${routeSummary.value.arrival}</p>
-      <h2 style="font-size: 18px; margin-top: 20px; margin-bottom: 10px;">Step-by-Step Directions:</h2>
-    `;
-
-    const stepsHtml = routeSteps.value.map((step, index) => `
-      <div style="margin-bottom: 12px;">
-        <div style="display: flex; align-items: flex-start;">
-          <div style="width: 24px; height: 24px; background: #2563EB; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px;">
-            ${index + 1}
-          </div>
-          <div>
-            <p style="margin: 0 0 2px;">${step.instructions}</p>
-            <p style="margin: 0; font-size: 13px; color: #555;">${step.distance} • ${step.duration}</p>
-          </div>
-        </div>
-      </div>
-    `).join('');
-
-    contentDiv.innerHTML += stepsHtml;
+    contentDiv.innerHTML = generatePDFContent();
     document.body.appendChild(contentDiv);
 
     const canvas = await html2canvas(contentDiv, { scale: 2 });
@@ -394,100 +452,67 @@ async function savePDF() {
   }
 }
 
-// 新增：处理自动填充
-function handleAutoFill() {
-  if (route.query.autoFill === 'true') {
-    destinationInfo.value = {
-      destination: route.query.destination || '',
-      eventName: route.query.eventName || '',
-      eventTime: route.query.eventTime || '',
-      eventDate: route.query.eventDate || '',
-      address: route.query.address || ''
-    }
-    
-    // 如果有目的地，设置为搜索值并查找最近的地标
-    if (destinationInfo.value.destination) {
-      landmarkSearch.value = destinationInfo.value.destination
-      
-      // 延迟查找最匹配的地标，让界面先渲染
-      setTimeout(() => {
-        findAndNavigateToNearestLandmark(destinationInfo.value.destination)
-      }, 1000)
-    }
-  }
+function generatePDFContent() {
+  return `
+    <h1 style="font-size: 24px; margin-bottom: 10px;">${activeLandmark.value.name}</h1>
+    <p style="margin-bottom: 8px;"><strong>Location:</strong> ${activeLandmark.value.location}</p>
+    <p style="margin-bottom: 10px;"><strong>Description:</strong> ${activeLandmark.value.description}</p>
+    <img src="${activeLandmark.value.image}" style="width: 100%; border-radius: 8px; margin-bottom: 15px;" />
+    <p><strong>Total Distance:</strong> ${routeSummary.value.distance}</p>
+    <p><strong>Estimated Time:</strong> ${routeSummary.value.duration}</p>
+    <p><strong>Expected Arrival:</strong> ${routeSummary.value.arrival}</p>
+    <h2 style="font-size: 18px; margin-top: 20px; margin-bottom: 10px;">Step-by-Step Directions:</h2>
+    ${generatePDFSteps()}
+  `;
 }
 
-// 新增：查找最接近目的地名称的地标并导航
-function findAndNavigateToNearestLandmark(destination) {
-  // 搜索所有文化类别下的地标
-  let bestMatch = null
-  let highestScore = -1
-  
-  for (const culture in landmarks) {
-    for (const landmark of landmarks[culture]) {
-      // 简单的字符串匹配评分
-      const score = calculateMatchScore(landmark, destination)
-      if (score > highestScore) {
-        highestScore = score
-        bestMatch = landmark
-        selectedCulture.value = culture // 切换到匹配地标的文化类别
-      }
-    }
-  }
-  
-  // 如果找到匹配的地标，导航到它
-  if (bestMatch) {
-    console.log('找到最匹配的地标:', bestMatch.name)
-    nextTick(() => {
-      handleLandmarkClick(bestMatch)
-      viewMode.value = 'map' // 切换到地图视图
-    })
-  }
+function generatePDFSteps() {
+  return routeSteps.value.map((step, index) => `
+    <div style="margin-bottom: 12px;">
+      <div style="display: flex; align-items: flex-start;">
+        <div style="width: 24px; height: 24px; background: #2563EB; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px;">
+          ${index + 1}
+        </div>
+        <div>
+          <p style="margin: 0 0 2px;">${step.instructions}</p>
+          <p style="margin: 0; font-size: 13px; color: #555;">${step.distance} • ${step.duration}</p>
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
 
-// 新增：计算地标与目的地名称的匹配度
-function calculateMatchScore(landmark, destination) {
-  const landmarkNameLower = landmark.name.toLowerCase()
-  const destinationLower = destination.toLowerCase()
-  
-  // 完全匹配
-  if (landmarkNameLower === destinationLower) return 100
-  // 包含关系
-  if (landmarkNameLower.includes(destinationLower) || destinationLower.includes(landmarkNameLower)) return 70
-  // 部分单词匹配
-  const landmarkWords = landmarkNameLower.split(/\s+/)
-  const destinationWords = destinationLower.split(/\s+/)
-  let wordMatches = 0
-  
-  for (const word1 of landmarkWords) {
-    for (const word2 of destinationWords) {
-      if (word1 === word2 && word1.length > 2) wordMatches++
-      else if ((word1.includes(word2) || word2.includes(word1)) && word1.length > 3 && word2.length > 3) wordMatches += 0.5
-    }
-  }
-  
-  return wordMatches * 20
-}
-
+// ===== Lifecycle Hooks =====
 onMounted(() => {
   startLocationWatch()
   trackUserProximity()
+  
+  // 添加async属性到script标签
   const script = document.createElement('script')
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&callback=initMap`
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&callback=initMap&loading=async`
   script.async = true
   script.defer = true
-  window.initMap = () => {
-    initMap()
-    // 地图加载完成后处理自动填充
-    handleAutoFill()
-  }
+  window.initMap = initMap
   document.head.appendChild(script)
 })
 
 onUnmounted(() => {
+  cleanupGoogleMapsScript()
+})
+
+// ===== Helper Functions =====
+function loadGoogleMapsScript() {
+  const script = document.createElement('script')
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&callback=initMap`
+  script.async = true
+  script.defer = true
+  window.initMap = initMap
+  document.head.appendChild(script)
+}
+
+function cleanupGoogleMapsScript() {
   delete window.initMap
   const script = document.querySelector('script[src*="maps.googleapis.com"]')
   if (script) script.remove()
-})
-</script>
-
+}
+</script> 
