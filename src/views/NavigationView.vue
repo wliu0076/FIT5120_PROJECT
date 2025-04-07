@@ -223,8 +223,7 @@ const event = ref({
   title: route.query.eventName || 'Event',
   location: route.query.destination || '',
   date: route.query.eventDate || '',
-  time: route.query.eventTime || '',
-  coordinates: { lat: -37.818085, lng: 144.968124 } // 默认坐标，后续会根据地址更新
+  time: route.query.eventTime || ''
 })
 
 const map = ref(null)
@@ -291,7 +290,7 @@ async function calculateRoute() {
 
   const request = {
     origin: userLocation.value,
-    destination: event.value.coordinates,
+    destination: event.value.location,
     travelMode: google.maps.TravelMode[transportMode.value]
   }
 
@@ -306,6 +305,11 @@ async function calculateRoute() {
       distance: leg.distance.text,
       arrival: calculateArrivalTime(leg.duration.value)
     }
+
+    if (transportMode.value === 'TRANSIT') {
+    // 假设到达时间为 2025-04-10 14:00:00
+    request.arrival_time = new Date("2025-04-10T14:00:00").getTime() / 1000
+  }
 
     // Build a detailed steps array
     const detailedSteps = []
@@ -338,8 +342,6 @@ async function calculateRoute() {
       } else if (step.travel_mode === 'TRANSIT') {
     // bus train station
     const transitDetails = step.transit;
-    console.log('Step mode:', step.travel_mode);
-    console.log('Transit Details:', step.transit);
         let timingInfo = '';
         if (transitDetails) {
           const departure = transitDetails.departure_time ? transitDetails.departure_time.text : '';
@@ -350,7 +352,6 @@ async function calculateRoute() {
           }
           timingInfo = ` (Depart: ${departure}, Arrive: ${arrival}${lineName ? ', via ' + lineName : ''})`;
         }
-        console.log('完整的JSON数据:', JSON.stringify(result, null, 2));
         detailedSteps.push({
           instructions: step.instructions + timingInfo,
           distance: step.distance?.text || '',
