@@ -241,26 +241,100 @@ function changeTransportMode(mode) {
 
 function updateRouteToLandmark(landmark) {
   directionsRenderer.value.set('directions', null)
-  directionsService.value.route({
+  const request = {
     origin: userLocation.value,
     destination: { lat: landmark.lat, lng: landmark.lng },
     travelMode: google.maps.TravelMode[transportMode.value]
-  }, (res, status) => {
-    if (status === 'OK') {
-      directionsRenderer.value.setDirections(res)
-      const leg = res.routes[0].legs[0]
-      routeSteps.value = leg.steps.map(step => ({
-        instructions: step.instructions,
-        distance: step.distance.text,
-        duration: step.duration.text
-      }))
-      routeSummary.value = {
-        duration: leg.duration.text,
-        distance: leg.distance.text,
-        arrival: calculateArrivalTime(leg.duration.value)
+  }
+
+  try {
+    directionsService.value.route(request, (result, status) => {
+      if (status === 'OK') {
+        directionsRenderer.value.setDirections(result)
+
+        const leg = result.routes[0].legs[0]
+
+        routeSummary.value = {
+          duration: leg.duration.text,
+          distance: leg.distance.text,
+          arrival: calculateArrivalTime(leg.duration.value)
+        }
+
+        // Build a detailed steps array
+        const detailedSteps = []
+
+        for (const step of leg.steps) {
+          if (step.travel_mode === 'WALKING') {
+            // For WALKING steps, fetch detailed route using WALKING mode
+            try {
+              directionsService.value.route({
+                origin: step.start_location,
+                destination: step.end_location,
+                travelMode: google.maps.TravelMode.WALKING
+              }, (walkResult, walkStatus) => {
+                if (walkStatus === 'OK') {
+                  const subSteps = walkResult.routes[0].legs[0].steps.map(subStep => ({
+                    instructions: subStep.instructions,
+                    distance: subStep.distance.text,
+                    duration: subStep.duration.text
+                  }))
+                  detailedSteps.push(...subSteps)
+                } else {
+                  console.warn('WALKING detail fetch failed, fallback to original step.')
+                  detailedSteps.push({
+                    instructions: step.instructions,
+                    distance: step.distance?.text || '',
+                    duration: step.duration?.text || ''
+                  })
+                }
+              })
+            } catch (walkError) {
+              console.warn('WALKING detail fetch failed, fallback to original step.')
+              detailedSteps.push({
+                instructions: step.instructions,
+                distance: step.distance?.text || '',
+                duration: step.duration?.text || ''
+              })
+            }
+          } else if (step.travel_mode === 'TRANSIT') {
+            // bus train station
+            const transitDetails = step.transit;
+            console.log('Step mode:', step.travel_mode);
+            console.log('Transit Details:', step.transit);
+            let timingInfo = '';
+            if (transitDetails) {
+              const departure = transitDetails.departure_time ? transitDetails.departure_time.text : '';
+              const arrival = transitDetails.arrival_time ? transitDetails.arrival_time.text : '';
+              let lineName = '';
+              if (transitDetails.line) {
+                lineName = transitDetails.line.short_name || transitDetails.line.name || '';
+              }
+              timingInfo = ` (Depart: ${departure}, Arrive: ${arrival}${lineName ? ', via ' + lineName : ''})`;
+            }
+            console.log('完整的JSON数据:', JSON.stringify(result, null, 2));
+            detailedSteps.push({
+              instructions: step.instructions + timingInfo,
+              distance: step.distance?.text || '',
+              duration: step.duration?.text || ''
+            });
+          } else {
+            detailedSteps.push({
+              instructions: step.instructions,
+              distance: step.distance?.text || '',
+              duration: step.duration?.text || ''
+            })
+          }
+        }
+
+        // Update route steps when all details are collected
+        routeSteps.value = detailedSteps
+      } else {
+        console.error('Directions request failed due to ' + status)
       }
-    }
-  })
+    })
+  } catch (error) {
+    console.error('Error calculating directions:', error)
+  }
 }
 
 function calculateArrivalTime(durationInSeconds) {
