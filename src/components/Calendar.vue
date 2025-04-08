@@ -34,7 +34,7 @@ const { t } = useI18n()
 
 const currentDate = ref(new Date())
 
-const weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+const weekDays = ['mon1', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
 const currentMonthName = computed(() => {
   const monthNames = [

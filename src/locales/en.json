@@ -9,6 +9,10 @@
   "events": {
     "title": "Event Calendar",
     "subtitle": "Browse events and plan your day",
+    "featured": {
+      "title": "Featured Events",
+      "subtitle": "Explore the diverse cultural activities and exciting experiences in Melbourne"
+    },
     "filters": {
       "title": "Filters",
       "eventType": "Event Type",

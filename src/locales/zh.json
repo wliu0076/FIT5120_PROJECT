@@ -9,6 +9,10 @@
   "events": {
     "title": "活动日历",
     "subtitle": "浏览活动并规划您的行程",
+    "featured": {
+      "title": "精选活动",
+      "subtitle": "探索墨尔本多元文化活动与精彩体验"
+    },
     "filters": {
       "title": "筛选",
       "eventType": "活动类型",
