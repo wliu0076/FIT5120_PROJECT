@@ -1066,6 +1066,7 @@ const getEventsForDate = async (date) => {
   const dateString = date.toISOString().split('T')[0];
   try {
     const events = await getEventsFromApi(dateString);
+    console.log("getEventsFromApi returned:", events); // 输出返回的数据
     return events;
   } catch (error) {
     console.error('Error fetching events:', error);
