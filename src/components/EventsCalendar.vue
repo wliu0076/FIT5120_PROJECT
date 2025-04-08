@@ -1,33 +1,62 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Banner Section -->
-    <div class="relative bg-gradient-to-r from-orange-100 to-red-100 py-8">
+    <div class="relative bg-gradient-to-r from-yellow-50 via-red-50 to-pink-50 py-12">
+      <!-- Title Section -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative mb-8">
+        <h1 class="text-4xl font-extrabold text-center text-gray-900">
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 inline-block transform -rotate-1">
+            {{ $t('events.featured.title') || 'Featured Events' }}
+          </span>
+        </h1>
+        <p class="mt-3 max-w-2xl mx-auto text-center text-lg text-gray-600">
+          {{ $t('events.featured.subtitle') || 'Explore the diverse cultural activities and exciting experiences in Melbourne' }}
+        </p>
+      </div>
+      
       <!-- Carousel -->
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div class="carousel-container relative">
+        <div class="carousel-container relative rounded-2xl overflow-hidden shadow-2xl"
+             @mouseenter="stopAutoplay" 
+             @mouseleave="startAutoplay">
           <!-- Navigation Arrows -->
-          <button @click="previousSlide" class="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 rounded-full p-2 shadow-lg">
-            <span class="text-2xl">←</span>
+          <button @click="previousSlide" class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white hover:scale-110 rounded-full p-3 shadow-lg transition-all duration-300">
+            <span class="text-2xl text-gray-800">←</span>
           </button>
-          <button @click="nextSlide" class="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 rounded-full p-2 shadow-lg">
-            <span class="text-2xl">→</span>
+          <button @click="nextSlide" class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 hover:bg-white hover:scale-110 rounded-full p-3 shadow-lg transition-all duration-300">
+            <span class="text-2xl text-gray-800">→</span>
           </button>
 
           <!-- Slides -->
           <div class="overflow-hidden relative">
-            <div class="flex transition-transform duration-500 ease-in-out" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
-              <div v-for="(slide, index) in bannerSlides" :key="index" class="min-w-full">
-                <div class="flex items-center justify-between px-8 py-12">
-                  <div class="w-1/2">
-                    <div class="inline-block bg-black text-white px-4 py-1 rounded-full text-sm mb-4">{{ slide.tag }}</div>
-                    <h2 class="text-4xl font-bold text-gray-900 mb-4">{{ slide.title }}</h2>
-                    <p class="text-gray-600 mb-6">{{ slide.description }}</p>
-                    <button class="bg-black text-white px-6 py-3 rounded-full hover:bg-gray-800 transition-colors">
-                      {{ slide.buttonText }}
+            <div class="flex transition-transform duration-700 ease-in-out" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
+              <div v-for="(event, index) in featuredEvents" :key="index" class="min-w-full relative">
+                <!-- Background decoration -->
+                <div class="absolute inset-0 bg-gradient-to-r from-gray-900/70 to-transparent z-0"></div>
+                <div class="flex items-center px-8 py-16 relative z-10">
+                  <div class="w-1/2 pr-8 text-white">
+                    <div class="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-6 transform -rotate-1 shadow-lg">
+                      {{ event.category }}
+                    </div>
+                    <h2 class="text-5xl font-extrabold text-white mb-6 leading-tight drop-shadow-md">
+                      {{ event.name }}
+                    </h2>
+                    <p class="text-lg text-white/90 mb-8 max-w-lg">
+                      {{ event.description }}
+                    </p>
+                    <button @click="navigateToEvent(event)" class="group bg-white text-gray-900 px-8 py-4 rounded-xl hover:bg-yellow-400 transition-colors duration-300 font-semibold shadow-lg flex items-center space-x-2 transform hover:-translate-y-1 hover:shadow-xl">
+                      <span>{{ $t('events.actions.getTravelGuide') || 'Get Travel Guide' }}</span>
+                      <span class="group-hover:translate-x-1 transition-transform duration-300">→</span>
                     </button>
                   </div>
                   <div class="w-1/2 flex justify-end">
-                    <img :src="slide.image" :alt="slide.title" class="w-96 h-auto object-cover rounded-lg shadow-xl">
+                    <div class="relative">
+                      <!-- Main Image -->
+                      <img :src="event.image || '/placeholder-event.jpg'" :alt="event.name" class="w-[28rem] h-[20rem] object-cover rounded-2xl shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
+                      <!-- Decorative elements -->
+                      <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-yellow-400 rounded-full opacity-70 mix-blend-multiply animate-pulse"></div>
+                      <div class="absolute -top-4 -right-4 w-16 h-16 bg-red-400 rounded-full opacity-70 mix-blend-multiply animate-pulse" style="animation-delay: 1s"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -35,13 +64,15 @@
           </div>
 
           <!-- Dots -->
-          <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            <button v-for="(_, index) in bannerSlides" 
+          <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
+            <button v-for="(_, index) in featuredEvents" 
                     :key="index"
                     @click="currentSlide = index"
                     :class="[
-                      'w-2 h-2 rounded-full transition-all duration-300',
-                      currentSlide === index ? 'bg-black w-4' : 'bg-gray-400'
+                      'w-3 h-3 rounded-full transition-all duration-300 shadow',
+                      currentSlide === index 
+                        ? 'bg-white w-10' 
+                        : 'bg-white/50 hover:bg-white/80'
                     ]">
             </button>
           </div>
@@ -50,17 +81,25 @@
     </div>
 
     <!-- Category Navigation -->
-    <div class="bg-white py-8 border-b">
+    <div class="bg-white py-12 border-b">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-center text-gray-900 mb-8">{{ $t('events.categories.title') || 'Event Categories' }}</h2>
         <div class="grid grid-cols-3 md:grid-cols-6 gap-6">
           <div v-for="category in categories" :key="category.id" 
                @click="filterByCategory(category.id)"
-               class="flex flex-col items-center group cursor-pointer hover:opacity-80 transition-opacity">
-            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-2 group-hover:bg-gray-200 transition-colors"
-                 :class="{ 'bg-green-100': selectedEventType === category.id }">
-              <i :class="category.icon" class="text-2xl text-gray-700"></i>
+               class="flex flex-col items-center group cursor-pointer transition-all duration-300 transform hover:-translate-y-1">
+            <div class="w-20 h-20 rounded-2xl bg-gray-50 flex items-center justify-center mb-3 
+                        group-hover:bg-gradient-to-br group-hover:from-orange-100 group-hover:to-red-100 
+                        transition-all duration-300 shadow-md group-hover:shadow-lg"
+                 :class="{ 'bg-gradient-to-br from-orange-200 to-red-200': selectedEventType === category.id }">
+              <i :class="[
+                category.icon,
+                'text-3xl',
+                selectedEventType === category.id ? 'text-red-600' : 'text-gray-600 group-hover:text-red-500'
+              ]"></i>
             </div>
-            <span class="text-xs text-center leading-tight" :class="{ 'font-bold': selectedEventType === category.id }">
+            <span class="text-sm text-center leading-tight font-medium" 
+                  :class="{ 'text-red-600': selectedEventType === category.id }">
               {{ category.name }}
             </span>
           </div>
@@ -68,198 +107,168 @@
       </div>
     </div>
 
+    <!-- Events Count Summary -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
+      <div class="flex justify-between items-center bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl shadow-sm">
+        <p class="text-gray-700 font-medium">
+          <span class="text-orange-600 font-bold">{{ filteredEvents.length }}</span> events found
+        </p>
+        <span v-if="selectedEventType || timeRange.start !== '00:00' || timeRange.end !== '23:59'">
+          <button @click="clearFilters" class="text-orange-500 font-medium hover:text-orange-700 transition-colors flex items-center">
+            CLEAR FILTERS
+            <i class="mdi mdi-close-circle ml-1"></i>
+          </button>
+        </span>
+      </div>
+    </div>
+
     <!-- Calendar Section -->
-    <div class="py-8 bg-white">
+    <div class="py-12 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Event Count Legend -->
+        <div class="mb-8 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+          <h3 class="text-lg font-bold text-gray-800 mb-4">Event Count Legend</h3>
+          <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-2">
+              <div class="event-count-badge flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm">
+                <span class="text-xs font-bold leading-none">1</span>
+              </div>
+              <span class="text-sm text-gray-700">Few events (1-4)</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="event-count-badge flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md">
+                <span class="text-xs font-bold leading-none">5</span>
+              </div>
+              <span class="text-sm text-gray-700">Moderate events (5-9)</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="event-count-badge flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg">
+                <span class="text-xs font-bold leading-none">10+</span>
+              </div>
+              <span class="text-sm text-gray-700">Many events (10+)</span>
+            </div>
+          </div>
+        </div>
+        
         <!-- Month Navigation -->
-        <div class="flex flex-wrap items-center justify-center text-sm text-gray-600 py-4 border-b border-t border-gray-200 bg-gray-100">
-          <div class="grid grid-cols-12 gap-1 w-full max-w-4xl">
-            <div class="col-span-2 flex items-center justify-end pr-4">
-              <button @click="previousMonth" class="p-2 text-gray-500 hover:text-gray-700">
-                <span class="text-2xl font-bold">←</span>
+        <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl shadow-inner mb-8">
+          <div class="flex flex-wrap items-center justify-center py-6 px-4">
+            <div class="w-full flex justify-between items-center max-w-4xl mx-auto">
+              <button @click="previousMonth" class="p-3 text-gray-600 hover:text-gray-900 rounded-full hover:bg-white transition-colors duration-200 shadow-sm hover:shadow flex items-center justify-center w-10 h-10">
+                <span class="text-xl">←</span>
               </button>
-            </div>
-            
-            <div class="col-span-8">
-              <div class="text-center mb-2">
-                <span class="text-lg font-semibold text-gray-700">2025</span>
+              
+              <div class="flex flex-col items-center flex-grow">
+                <div class="text-center mb-4">
+                  <span class="text-2xl font-bold text-gray-800">{{ currentDate.getFullYear() }}</span>
+                </div>
+                <div class="flex justify-center space-x-2 overflow-x-auto px-4 scrollbar-hide">
+                  <template v-for="(month, index) in monthsList" :key="index">
+                    <button 
+                      @click="selectMonth(month.value)" 
+                      :class="[
+                        'px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-all duration-200', 
+                        currentDate.getMonth() === month.value 
+                          ? 'font-bold text-white bg-gradient-to-r from-red-500 to-orange-500 shadow-md transform -rotate-1 hover:rotate-0' 
+                          : 'hover:bg-white hover:shadow bg-white/70'
+                      ]">
+                      {{ month.label }}
+                    </button>
+                  </template>
+                </div>
               </div>
-              <div class="flex justify-center space-x-2 overflow-x-auto px-4">
-                <template v-for="(month, index) in monthsList" :key="index">
-                  <button 
-                    @click="selectMonth(month.value)" 
-                    :class="[
-                      'px-4 py-2 rounded-md text-sm whitespace-nowrap', 
-                      currentDate.getMonth() === month.value ? 'font-bold text-white bg-green-700' : 'hover:bg-gray-200'
-                    ]">
-                    {{ month.label }}
-                  </button>
-                </template>
-              </div>
-            </div>
-            
-            <div class="col-span-2 flex items-center justify-start pl-4">
-              <button @click="nextMonth" class="p-2 text-gray-500 hover:text-gray-700">
-                <span class="text-2xl font-bold">→</span>
+              
+              <button @click="nextMonth" class="p-3 text-gray-600 hover:text-gray-900 rounded-full hover:bg-white transition-colors duration-200 shadow-sm hover:shadow flex items-center justify-center w-10 h-10">
+                <span class="text-xl">→</span>
               </button>
             </div>
           </div>
         </div>
 
         <!-- Calendar Grid -->
-        <div class="border border-gray-200 rounded-md overflow-hidden">
+        <div class="border border-gray-100 rounded-xl overflow-hidden shadow-lg">
           <div class="grid grid-cols-7 gap-0 text-center">
-            <!-- 星期头部 -->
-            <div class="p-3 text-sm font-medium text-gray-600 bg-gray-100 border-b border-r border-gray-200">{{ $t('events.calendar.sun') }}</div>
-            <div class="p-3 text-sm font-medium text-gray-600 bg-gray-100 border-b border-r border-gray-200">{{ $t('events.calendar.mon') }}</div>
-            <div class="p-3 text-sm font-medium text-gray-600 bg-gray-100 border-b border-r border-gray-200">{{ $t('events.calendar.tue') }}</div>
-            <div class="p-3 text-sm font-medium text-gray-600 bg-gray-100 border-b border-r border-gray-200">{{ $t('events.calendar.wed') }}</div>
-            <div class="p-3 text-sm font-medium text-gray-600 bg-gray-100 border-b border-r border-gray-200">{{ $t('events.calendar.thu') }}</div>
-            <div class="p-3 text-sm font-medium text-gray-600 bg-gray-100 border-b border-r border-gray-200">{{ $t('events.calendar.fri') }}</div>
-            <div class="p-3 text-sm font-medium text-gray-600 bg-gray-100 border-b border-gray-200">{{ $t('events.calendar.sat') }}</div>
+            <!-- Weekly days header -->
+            <div class="p-3 text-sm font-medium text-gray-700 bg-gradient-to-r from-orange-50 to-red-50 border-b border-r border-gray-100">{{ $t('events.calendar.sun') || 'Sun' }}</div>
+            <div class="p-3 text-sm font-medium text-gray-700 bg-gradient-to-r from-orange-50 to-red-50 border-b border-r border-gray-100">{{ $t('events.calendar.mon') || 'Mon' }}</div>
+            <div class="p-3 text-sm font-medium text-gray-700 bg-gradient-to-r from-orange-50 to-red-50 border-b border-r border-gray-100">{{ $t('events.calendar.tue') || 'Tue' }}</div>
+            <div class="p-3 text-sm font-medium text-gray-700 bg-gradient-to-r from-orange-50 to-red-50 border-b border-r border-gray-100">{{ $t('events.calendar.wed') || 'Wed' }}</div>
+            <div class="p-3 text-sm font-medium text-gray-700 bg-gradient-to-r from-orange-50 to-red-50 border-b border-r border-gray-100">{{ $t('events.calendar.thu') || 'Thu' }}</div>
+            <div class="p-3 text-sm font-medium text-gray-700 bg-gradient-to-r from-orange-50 to-red-50 border-b border-r border-gray-100">{{ $t('events.calendar.fri') || 'Fri' }}</div>
+            <div class="p-3 text-sm font-medium text-gray-700 bg-gradient-to-r from-orange-50 to-red-50 border-b border-gray-100">{{ $t('events.calendar.sat') || 'Sat' }}</div>
             
-            <!-- 日历格子 -->
+            <!-- Calendar days -->
             <template v-for="(date, index) in calendarDays" :key="index">
-              <button 
+              <div 
                 @click="selectDate(date)" 
                 :class="[
-                  'min-h-24 py-2 px-3 text-left border-r border-b border-gray-200 relative transition duration-150 hover:bg-gray-50',
+                  'min-h-28 p-3 text-left border-r border-b border-gray-100 relative transition-all duration-300 hover:bg-gray-50 calendar-day cursor-pointer',
                   index % 7 === 6 ? 'border-r-0' : '',
                   (index >= 35) ? 'border-b-0' : '',
-                  date.isCurrentMonth ? 'bg-white' : 'bg-gray-50 text-gray-400',
-                  selectedDate && isSameDay(selectedDate, date.date) ? 'bg-green-50 border-green-500' : '',
-                  date.isToday ? 'ring-2 ring-inset ring-green-500' : ''
+                  date.isCurrentMonth ? 'bg-white' : 'bg-gray-50/50',
+                  selectedDate && isSameDay(selectedDate, date.date) ? 'bg-orange-50 selected-day' : '',
+                  date.isToday ? 'today-highlight' : ''
                 ]">
-                <div class="flex justify-between items-start">
-                  <span class="text-sm font-medium">{{ date.day }}</span>
-                  <!-- 显示事件数量的徽章 -->
-                  <span v-if="date.eventsCount > 0" class="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none rounded-full" :class="getEventCountColor(date.eventsCount)">
-                    {{ date.eventsCount }}
-                  </span>
+                <div class="flex justify-between items-start mb-2">
+                  <div :class="[
+                    'flex items-center justify-center rounded-full w-9 h-9 font-medium transition-all duration-300',
+                    !date.isCurrentMonth ? 'text-gray-400' : 'text-gray-800',
+                    selectedDate && isSameDay(selectedDate, date.date) ? 'bg-orange-500 text-white' : 
+                    date.isToday ? 'bg-orange-400 text-white' : 
+                    date.hasEvents ? 'day-with-events' : ''
+                  ]">
+                    <span class="text-lg">{{ date.day }}</span>
+                  </div>
+                  
+                  <!-- Event count badge -->
+                  <div v-if="date.eventsCount > 0" 
+                       class="event-count-badge flex items-center justify-center w-8 h-8 rounded-full transition-transform hover:scale-110"
+                       :class="getEventCountColor(date.eventsCount)">
+                    <span class="text-xs font-bold leading-none">{{ date.eventsCount }}</span>
+                  </div>
                 </div>
                 
-                <!-- 日期有活动时，显示事件指示点 -->
-                <div v-if="date.eventsCount > 0" class="mt-2 space-y-1">
-                  <div v-for="(category, i) in date.topCategories" :key="i" class="w-full h-1.5 rounded-full" :class="getCategoryColor(category)"></div>
+                <!-- Event indicators -->
+                <div v-if="date.eventsCount > 0" class="mt-2 space-y-1.5">
+                  <div v-for="(category, i) in date.topCategories.slice(0, 3)" :key="i" 
+                       class="category-indicator rounded-full shadow-sm mx-auto" 
+                       :class="getCategoryColor(category)">
+                  </div>
+                  <!-- Placeholder indicators if we don't have real categories -->
+                  <template v-if="!date.topCategories || date.topCategories.length === 0">
+                    <div v-for="i in Math.min(date.eventsCount, 3)" :key="i"
+                         class="category-indicator rounded-full shadow-sm mx-auto"
+                         :class="getRandomCategoryColor(i)">
+                    </div>
+                  </template>
                 </div>
-              </button>
+              </div>
             </template>
           </div>
         </div>
-
-        <!-- Filter Results Button -->
-        <div class="py-4 border-t border-gray-200">
-          <button 
-            @click="toggleFilters" 
-            class="flex items-center space-x-2 bg-black text-white px-4 py-2 text-sm font-medium">
-            <span>{{ $t('events.filters.title') }}</span>
-            <span v-if="showFilters">▲</span>
-            <span v-else>▼</span>
-          </button>
-          
-          <!-- Filters Panel -->
-          <div v-if="showFilters" class="mt-4 p-6 bg-gray-100 border border-gray-200">
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-4">
-              <!-- Event Type Filter -->
-              <div>
-                <p class="text-blue-500 text-sm font-bold mb-2">{{ $t('events.filters.eventType') }}</p>
-                <div class="relative">
-                  <select v-model="selectedEventType" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md appearance-none">
-                    <option value="">{{ $t('events.filters.allEvents') }}</option>
-                    <option v-for="type in eventTypes" :key="type.id" :value="type.id">
-                      {{ type.name }}
-                    </option>
-                  </select>
-                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Venue Filter -->
-              <div>
-                <p class="text-blue-500 text-sm font-bold mb-2">{{ $t('events.filters.venue') }}</p>
-                <div class="relative">
-                  <select v-model="selectedVenue" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md appearance-none">
-                    <option value="">{{ $t('events.filters.allVenues') }}</option>
-                    <option v-for="venue in venues" :key="venue.id" :value="venue.id">
-                      {{ venue.name }}
-                    </option>
-                  </select>
-                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Price Filter -->
-              <div>
-                <p class="text-blue-500 text-sm font-bold mb-2">{{ $t('events.filters.price') }}</p>
-                <div class="relative">
-                  <select v-model="selectedPrice" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md appearance-none">
-                    <option value="">{{ $t('events.filters.allPrices') }}</option>
-                    <option v-for="price in prices" :key="price.id" :value="price.id">
-                      {{ price.name }}
-                    </option>
-                  </select>
-                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Audience Filter -->
-              <div>
-                <p class="text-blue-500 text-sm font-bold mb-2">{{ $t('events.filters.audience') }}</p>
-                <div class="relative">
-                  <select v-model="selectedAudience" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md appearance-none">
-                    <option value="">{{ $t('events.filters.allAudience') }}</option>
-                    <option v-for="audience in audiences" :key="audience.id" :value="audience.id">
-                      {{ audience.name }}
-                    </option>
-                  </select>
-                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Apply Filters Button -->
-            <div class="mt-4 flex justify-end">
-              <button @click="applyFilters" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
-                {{ $t('events.filters.apply') }}
-              </button>
-            </div>
+        
+        <!-- Selected date events -->
+        <div v-if="selectedDate" class="pt-10 selected-date-events">
+          <div class="mb-8 text-center">
+            <span class="inline-block bg-gradient-to-r from-orange-100 to-red-100 px-6 py-2 rounded-full text-center">
+              <h2 class="text-3xl font-bold text-gray-900">{{ formatDate(selectedDate) }}</h2>
+            </span>
           </div>
-        </div>
-
-        <!-- Selected Date and Events -->
-        <div v-if="selectedDate" class="pt-8 selected-date-events">
-          <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ formatDate(selectedDate) }}</h2>
           
           <!-- Time Range Filter -->
-          <div class="mb-8 bg-white rounded-lg shadow-sm">
-            <div class="flex items-center justify-between p-4 border-b">
-              <h3 class="text-lg font-semibold text-gray-900">Time Range</h3>
-              <div class="flex space-x-2">
+          <div class="mb-8 bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100">
+            <div class="flex flex-wrap items-center justify-between p-5 border-b bg-gradient-to-r from-gray-50 to-gray-100">
+              <h3 class="text-xl font-bold text-gray-800 mb-2 sm:mb-0">Time Range</h3>
+              <div class="flex flex-wrap gap-2">
                 <button 
                   v-for="preset in timePresets" 
                   :key="preset.label"
                   @click="applyTimePreset(preset)"
                   :class="[
-                    'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
+                    'px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow',
                     currentPreset === preset.label 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white transform -rotate-1 hover:rotate-0' 
+                      : 'bg-white text-gray-700 hover:bg-gray-50 hover:-translate-y-0.5'
                   ]"
                 >
                   {{ preset.label }}
@@ -269,52 +278,42 @@
 
             <div class="p-6">
               <!-- Time Range Inputs -->
-              <div class="flex items-center justify-between mb-8">
+              <div class="flex flex-wrap items-center justify-center mb-8">
                 <div class="flex items-center space-x-4">
-                  <div class="relative">
+                  <div class="time-input-container relative">
                     <input 
                       type="text" 
                       :value="timeRange.start"
-                      class="w-32 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 cursor-pointer bg-white"
+                      class="w-32 px-4 py-3 border border-gray-200 rounded-lg text-gray-700 cursor-pointer bg-white hover:border-orange-300 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200 transition-all"
                       readonly
                       @click="showTimePresets = !showTimePresets"
                     >
-                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <i class="mdi mdi-clock-outline text-gray-500"></i>
+                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-orange-500">
+                      <i class="mdi mdi-clock-outline text-lg"></i>
                     </span>
                   </div>
-                  <span class="text-gray-500">to</span>
-                  <div class="relative">
+                  <span class="text-gray-500 font-medium">to</span>
+                  <div class="time-input-container relative">
                     <input 
                       type="text" 
                       :value="timeRange.end"
-                      class="w-32 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 cursor-pointer bg-white"
+                      class="w-32 px-4 py-3 border border-gray-200 rounded-lg text-gray-700 cursor-pointer bg-white hover:border-orange-300 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200 transition-all"
                       readonly
                       @click="showTimePresets = !showTimePresets"
                     >
-                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <i class="mdi mdi-clock-outline text-gray-500"></i>
+                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-orange-500">
+                      <i class="mdi mdi-clock-outline text-lg"></i>
                     </span>
                   </div>
                 </div>
               </div>
 
               <!-- Time Slider -->
-              <div class="time-slider relative h-16 select-none">
-                <!-- Time markers -->
-                <div class="absolute inset-x-0 top-0 h-6 flex">
-                  <div v-for="hour in 24" :key="hour" 
-                       class="flex-1 border-l border-gray-200 relative">
-                    <span class="absolute -top-6 left-0 text-xs text-gray-500 transform -translate-x-1/2">
-                      {{ hour === 24 ? '12 AM' : hour === 12 ? '12 PM' : hour > 12 ? `${hour-12} PM` : `${hour} AM` }}
-                    </span>
-                  </div>
-                </div>
-                
+              <div class="time-slider relative h-20 select-none">
                 <!-- Timeline bar -->
-                <div class="absolute left-0 right-0 bottom-4 h-2 bg-gray-200 rounded-full">
+                <div class="absolute left-0 right-0 bottom-6 h-3 bg-gray-200 rounded-full shadow-inner">
                   <!-- Selected range -->
-                  <div class="absolute h-full bg-green-500 rounded-full"
+                  <div class="absolute h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full shadow"
                        :style="{
                          left: (timeToPercentage(to24Hour(timeRange.start))) + '%',
                          right: (100 - timeToPercentage(to24Hour(timeRange.end))) + '%'
@@ -323,156 +322,152 @@
                   
                   <!-- Slider handles -->
                   <button 
-                    class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-white border-2 border-green-500 rounded-full shadow-md hover:scale-110 transition-transform"
+                    class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 bg-white border-2 border-orange-500 rounded-full shadow-md hover:scale-110 transition-all duration-300 hover:shadow-lg"
                     :style="{ left: timeToPercentage(to24Hour(timeRange.start)) + '%' }"
                     @mousedown="handleSliderMouseDown('start', $event)"
                   ></button>
                   <button 
-                    class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-white border-2 border-green-500 rounded-full shadow-md hover:scale-110 transition-transform"
+                    class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 bg-white border-2 border-orange-500 rounded-full shadow-md hover:scale-110 transition-all duration-300 hover:shadow-lg"
                     :style="{ left: timeToPercentage(to24Hour(timeRange.end)) + '%' }"
                     @mousedown="handleSliderMouseDown('end', $event)"
                   ></button>
                 </div>
 
                 <!-- Event markers -->
-                <div class="absolute left-0 right-0 bottom-0 h-3">
-                  <div v-for="event in filteredEvents" 
-                       :key="event.id"
-                       class="absolute w-1 h-full bg-green-600 transform -translate-x-1/2"
-                       :style="{
-                         left: timeToPercentage(new Date(event.datetime).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })) + '%'
-                       }"
-                       :title="event.name">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Events Count Summary -->
-          <p class="text-gray-600 mb-6">
-            {{ filteredEvents.length }} {{ $t('events.eventsFound') }}
-            <span v-if="selectedEventType || timeRange.start !== '00:00' || timeRange.end !== '23:59'" class="inline-block ml-2">
-              <button @click="clearFilters" class="text-blue-500 underline text-sm">{{ $t('events.clearFilters') }}</button>
-            </span>
-          </p>
-          
-          <!-- No Events Message -->
-          <div v-if="filteredEvents.length === 0" class="bg-gray-50 p-8 text-center rounded-lg border border-gray-200">
-            <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 class="mt-2 text-lg font-medium text-gray-900">{{ $t('events.noEvents') }}</h3>
-            <p class="mt-1 text-sm text-gray-500">{{ $t('events.tryOtherDate') }}</p>
-          </div>
-          
-          <div v-else>
-            <!-- Events Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div v-for="event in paginatedEvents" :key="event.id" 
-                   class="group bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300">
-                <!-- Event Image -->
-                <div class="relative h-48 overflow-hidden rounded-t-lg">
-                  <img :src="event.image || '/placeholder-event.jpg'" 
-                       :alt="event.name"
-                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                  <!-- Category Badge -->
-                  <div class="absolute top-3 right-3">
-                    <span :class="[
-                      getCategoryTagColor(event.category),
-                      'px-3 py-1 text-xs font-semibold rounded-full shadow-sm'
-                    ]">
-                      {{ event.category }}
+                <div class="absolute left-0 right-0 bottom-0 h-5 flex justify-center">
+                  <div v-for="hour in 24" :key="hour" class="flex-1 relative">
+                    <div class="absolute bottom-6 left-0 w-px h-2 bg-gray-300"></div>
+                    <span class="absolute -bottom-5 left-0 text-xs text-gray-500 transform -translate-x-1/2">
+                      {{ hour === 24 ? '12 AM' : hour === 12 ? '12 PM' : hour > 12 ? `${hour-12} PM` : `${hour} AM` }}
                     </span>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event grid -->
+          <div v-if="filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div v-for="event in paginatedEvents" :key="event.id" 
+                 class="group bg-white border border-gray-100 rounded-2xl shadow-md overflow-hidden transform transition-all duration-500 hover:-translate-y-2 hover:shadow-xl">
+              <!-- Event Image -->
+              <div class="relative h-56 overflow-hidden">
+                <img :src="event.image || '/placeholder-event.jpg'" 
+                     :alt="event.name"
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                <!-- Category Badge -->
+                <div class="absolute top-4 right-4">
+                  <span :class="[
+                    getCategoryTagColor(event.category),
+                    'px-4 py-1.5 text-xs font-bold rounded-full shadow-md'
+                  ]">
+                    {{ event.category }}
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Event Details -->
+              <div class="p-6 flex flex-col h-[calc(100%-14rem)]">
+                <!-- Time and Location -->
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center space-x-2 text-gray-600">
+                    <i class="mdi mdi-clock-outline text-lg text-orange-500"></i>
+                    <span class="text-sm font-medium">
+                      {{ new Date(event.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                    </span>
+                  </div>
+                  <div class="flex items-center space-x-2 text-gray-600">
+                    <i class="mdi mdi-map-marker text-lg text-orange-500"></i>
+                    <span class="text-sm font-medium truncate max-w-[120px]">{{ event.location }}</span>
+                  </div>
+                </div>
                 
-                <!-- Event Details -->
-                <div class="p-5 flex flex-col h-[calc(100%-12rem)]">
-                  <!-- Time and Location -->
-                  <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center space-x-2 text-gray-600">
-                      <i class="mdi mdi-clock-outline text-lg"></i>
-                      <span class="text-sm">
-                        {{ new Date(event.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-                      </span>
-                    </div>
-                    <div class="flex items-center space-x-2 text-gray-600">
-                      <i class="mdi mdi-map-marker text-lg"></i>
-                      <span class="text-sm truncate max-w-[120px]">{{ event.location }}</span>
-                    </div>
-                  </div>
-                  
-                  <!-- Title -->
-                  <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                    {{ event.name }}
-                  </h3>
-                  
-                  <!-- Description -->
-                  <p class="text-sm text-gray-600 mb-4 line-clamp-2 flex-grow">
-                    {{ event.description }}
-                  </p>
-                  
-                  <!-- Action Buttons -->
-                  <div class="flex space-x-3 mt-auto pt-4">
-                    <button 
-                      @click="navigateToEvent(event)"
-                      class="flex-1 bg-gray-900 text-white px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2 h-[42px]"
-                    >
-                      <i class="mdi mdi-navigation text-lg"></i>
-                      <span>Navigate</span>
+                <!-- Title -->
+                <h3 class="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-orange-600 transition-colors">
+                  {{ event.name }}
+                </h3>
+                
+                <!-- Description -->
+                <p class="text-sm text-gray-600 mb-6 line-clamp-3 flex-grow">
+                  {{ event.description }}
+                </p>
+                
+                <!-- Action Buttons -->
+                <div class="flex space-x-3 mt-auto">
+                  <button 
+                    @click="navigateToEvent(event)"
+                    class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all flex items-center justify-center space-x-2 h-12 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                  >
+                    <i class="mdi mdi-navigation text-lg"></i>
+                    <span>Navigate</span>
+                  </button>
+                  <a :href="event.link || '#'" 
+                     target="_blank" 
+                     class="flex-1">
+                    <button class="w-full border-2 border-gray-900 text-gray-900 px-4 py-3 rounded-xl hover:bg-gray-900 hover:text-white transition-all flex items-center justify-center space-x-2 h-12 transform hover:-translate-y-0.5">
+                      <i class="mdi mdi-information text-lg"></i>
+                      <span>Details</span>
                     </button>
-                    <a :href="event.link" 
-                       target="_blank" 
-                       class="flex-1">
-                      <button class="w-full border-2 border-gray-900 text-gray-900 px-4 py-2.5 rounded-lg hover:bg-gray-900 hover:text-white transition-all flex items-center justify-center space-x-2 h-[42px]">
-                        <i class="mdi mdi-information text-lg"></i>
-                        <span>Details</span>
-                      </button>
-                    </a>
-                  </div>
+                  </a>
                 </div>
               </div>
             </div>
+          </div>
+          
+          <!-- No events message -->
+          <div v-else class="bg-gradient-to-br from-gray-50 to-gray-100 p-12 text-center rounded-xl border border-gray-200 shadow-inner">
+            <div class="inline-block p-6 bg-white rounded-full shadow-md mb-6">
+              <svg class="h-16 w-16 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">{{ $t('events.noEvents') || 'No Events Found' }}</h3>
+            <p class="text-gray-600 max-w-md mx-auto">{{ $t('events.tryOtherDate') || 'Try selecting a different date or adjusting your filters' }}</p>
+          </div>
 
-            <!-- Pagination Controls -->
-            <div class="mt-8 flex justify-center items-center space-x-4">
+          <!-- Pagination control -->
+          <div v-if="filteredEvents.length > 0" class="mt-12 flex justify-center items-center space-x-3">
+            <button 
+              @click="prevPage" 
+              :disabled="currentPage === 1"
+              :class="[
+                'w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200',
+                currentPage === 1 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-white text-gray-700 hover:bg-gray-100 shadow hover:shadow-md'
+              ]"
+            >
+              <span class="text-xl">←</span>
+            </button>
+            
+            <div class="flex space-x-2">
               <button 
-                @click="prevPage" 
-                :disabled="currentPage === 1"
+                v-for="page in totalPages" 
+                :key="page"
+                @click="goToPage(page)"
                 :class="[
-                  'px-4 py-2 rounded-md text-sm',
-                  currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  'w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium transition-all duration-200',
+                  currentPage === page 
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md transform -rotate-1 hover:rotate-0' 
+                    : 'bg-white text-gray-700 hover:bg-gray-100 shadow hover:shadow-md'
                 ]"
               >
-                Previous
-              </button>
-              
-              <div class="flex space-x-2">
-                <button 
-                  v-for="page in totalPages" 
-                  :key="page"
-                  @click="goToPage(page)"
-                  :class="[
-                    'px-4 py-2 rounded-md text-sm',
-                    currentPage === page ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  ]"
-                >
-                  {{ page }}
-                </button>
-              </div>
-              
-              <button 
-                @click="nextPage" 
-                :disabled="currentPage === totalPages"
-                :class="[
-                  'px-4 py-2 rounded-md text-sm',
-                  currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                ]"
-              >
-                Next
+                {{ page }}
               </button>
             </div>
+            
+            <button 
+              @click="nextPage" 
+              :disabled="currentPage === totalPages"
+              :class="[
+                'w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200',
+                currentPage === totalPages 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-white text-gray-700 hover:bg-gray-100 shadow hover:shadow-md'
+              ]"
+            >
+              <span class="text-xl">→</span>
+            </button>
           </div>
         </div>
       </div>
@@ -488,8 +483,10 @@ import { useRouter } from 'vue-router'
 
 // 使用直接的公共路径而不是导入
 const logoUrl = '/logo.png'
+const router = useRouter()
 
 const { locale, t } = useI18n()
+// 不设置强制locale为zh
 const currentLocale = ref(locale.value)
 
 // UI状态
@@ -613,67 +610,339 @@ const monthsList = [
   { label: 'December', value: 11 }
 ]
 
-// Banner Slides Data
-const bannerSlides = [
-  {
-    tag: 'NEW APP. NEW US.',
-    title: 'FIND MORE NEW THINGS TO DO',
-    description: 'Discover exciting events and activities happening around you.',
-    buttonText: 'Get Into It',
-    image: '/banner1.jpg'
-  },
-  {
-    tag: 'FEATURED EVENTS',
-    title: 'EXPLORE LOCAL HAPPENINGS',
-    description: 'Find the best local events and create unforgettable memories.',
-    buttonText: 'Explore Now',
-    image: '/banner2.jpg'
+// Autoplay carousel optimization
+const autoplayInterval = ref(null);
+
+// Start autoplay
+function startAutoplay() {
+  if (autoplayInterval.value) clearInterval(autoplayInterval.value);
+  autoplayInterval.value = setInterval(() => {
+    nextSlide();
+  }, 6000);
+}
+
+// Stop autoplay
+function stopAutoplay() {
+  if (autoplayInterval.value) {
+    clearInterval(autoplayInterval.value);
+    autoplayInterval.value = null;
   }
-]
+}
 
-// Category Navigation Data
-const categories = [
-  { 
-    id: 'cultural', 
-    name: 'Cultural Events', 
-    icon: 'mdi mdi-theater'
-  },
-  { 
-    id: 'religious', 
-    name: 'Religious Events', 
-    icon: 'mdi mdi-church'
-  },
-  { 
-    id: 'health', 
-    name: 'Health & Wellness', 
-    icon: 'mdi mdi-heart-pulse'
-  },
-  { 
-    id: 'social', 
-    name: 'Social Groups', 
-    icon: 'mdi mdi-account-group'
-  },
-  { 
-    id: 'workshops', 
-    name: 'Workshops & Classes', 
-    icon: 'mdi mdi-school'
-  },
-  { 
-    id: 'markets', 
-    name: 'Local Markets', 
-    icon: 'mdi mdi-store'
+// Modified initialization logic
+onMounted(() => {
+  document.addEventListener('click', closeTimePresets);
+  initializeEvents();
+  startAutoplay();
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeTimePresets);
+  stopAutoplay();
+});
+
+// Replace Banner Slides data definition with computed property to get random events from API
+const featuredEvents = computed(() => {
+  // Randomly select 5 events from all events as featured
+  if (!currentEvents.value || currentEvents.value.length === 0) {
+    // If no events for the day, use some default event data
+    return [
+      {
+        id: 1,
+        name: "Today's Featured Event",
+        description: "Explore Melbourne's wonderful events to enrich your journey.",
+        category: "Featured",
+        image: "/banner1.jpg"
+      },
+      {
+        id: 2,
+        name: "Local Cultural Experience",
+        description: "Experience Melbourne's diverse culture and the unique charm of this city.",
+        category: "Culture",
+        image: "/banner2.jpg"
+      }
+    ];
   }
-]
+  
+  // If there are events but fewer than 5, return all
+  if (currentEvents.value.length <= 5) {
+    return currentEvents.value;
+  }
+  
+  // Randomly select 5 from all events
+  return getRandomItems(currentEvents.value, 5);
+});
 
-// Carousel State
-const currentSlide = ref(0)
+// Get random items from array
+function getRandomItems(array, n) {
+  // Create array copy
+  const shuffled = [...array];
+  
+  // Random sorting
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  // Return first n items
+  return shuffled.slice(0, n);
+}
 
-// 分页状态
-const currentPage = ref(1)
-const eventsPerPage = 9
+// Calendar days
+const calendarDays = computed(() => {
+  const year = currentDate.value.getFullYear()
+  const month = currentDate.value.getMonth()
+  const firstDay = new Date(year, month, 1)
+  const lastDay = new Date(year, month + 1, 0)
+  const days = []
 
-// Router for navigation
-const router = useRouter()
+  // Get the first day of the month (0 is Sunday, 6 is Saturday)
+  const firstDayWeekday = firstDay.getDay()
+  
+  // Add dates from previous month to fill first week
+  for (let i = 0; i < firstDayWeekday; i++) {
+    const date = new Date(year, month, -i)
+    days.unshift(createDayObject(date))
+  }
+
+  // Add dates for current month
+  for (let i = 1; i <= lastDay.getDate(); i++) {
+    const date = new Date(year, month, i)
+    days.push(createDayObject(date))
+  }
+
+  // Add dates from next month to fill last week if needed
+  const totalDaysNeeded = 42 // 6 rows x 7 days
+  const remainingDays = totalDaysNeeded - days.length
+  for (let i = 1; i <= remainingDays; i++) {
+    const date = new Date(year, month + 1, i)
+    days.push(createDayObject(date))
+  }
+
+  return days
+})
+
+// Create day object helper function
+function createDayObject(date) {
+  const dateString = date.toISOString().split('T')[0];
+  const eventsCount = monthEvents.value[dateString] || 0;
+  
+  return {
+    day: date.getDate(),
+    date: date,
+    isCurrentMonth: date.getMonth() === currentDate.value.getMonth(),
+    hasEvents: eventsCount > 0,
+    eventsCount: eventsCount,
+    topCategories: [], // Categories not shown for now
+    isToday: isSameDay(date, new Date())
+  }
+}
+
+// Get category colors
+function getCategoryColor(category) {
+  const colors = {
+    'Music': 'bg-blue-500',
+    'Workshop': 'bg-green-500',
+    'Guided Tour': 'bg-purple-500',
+    'Dance': 'bg-pink-500',
+    'Festival': 'bg-yellow-500',
+    'Film': 'bg-indigo-500',
+    'Wellness': 'bg-teal-500',
+    'Social': 'bg-orange-500',
+    'Music Event': 'bg-blue-500',
+    'Cultural Event': 'bg-purple-500',
+    'Food Event': 'bg-orange-500',
+    'Wellness Event': 'bg-teal-500'
+  }
+  return colors[category] || 'bg-gray-500'
+}
+
+// Event count colors
+function getEventCountColor(count) {
+  if (count >= 10) {
+    return 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg'
+  } else if (count >= 5) {
+    return 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md'
+  } else {
+    return 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm'
+  }
+}
+
+// 获取类别标签颜色优化
+function getCategoryTagColor(category) {
+  const colors = {
+    'Music': 'bg-gradient-to-r from-blue-500 to-blue-600 text-white',
+    'Workshop': 'bg-gradient-to-r from-green-500 to-green-600 text-white',
+    'Guided Tour': 'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
+    'Dance': 'bg-gradient-to-r from-pink-500 to-pink-600 text-white',
+    'Festival': 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black',
+    'Film': 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white',
+    'Wellness': 'bg-gradient-to-r from-teal-500 to-teal-600 text-white',
+    'Social': 'bg-gradient-to-r from-orange-500 to-orange-600 text-white',
+    'Music Event': 'bg-gradient-to-r from-blue-500 to-blue-600 text-white',
+    'Cultural Event': 'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
+    'Food Event': 'bg-gradient-to-r from-orange-500 to-orange-600 text-white',
+    'Wellness Event': 'bg-gradient-to-r from-teal-500 to-teal-600 text-white',
+    'Featured': 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black'
+  }
+  return colors[category] || 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
+}
+
+// 计算分页后的事件
+const paginatedEvents = computed(() => {
+  const startIndex = (currentPage.value - 1) * eventsPerPage
+  const endIndex = startIndex + eventsPerPage
+  return filteredEvents.value.slice(startIndex, endIndex)
+})
+
+// 计算总页数
+const totalPages = computed(() => {
+  return Math.ceil(filteredEvents.value.length / eventsPerPage)
+})
+
+// Methods
+function hasEventsOnDate(date) {
+  return events.some(event => {
+    const eventDate = new Date(event.date)
+    return isSameDay(eventDate, date)
+  })
+}
+
+function isSameDay(date1, date2) {
+  if (!date1 || !date2) return false;
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  return d1.getDate() === d2.getDate() &&
+         d1.getMonth() === d2.getMonth() &&
+         d1.getFullYear() === d2.getFullYear();
+}
+
+// 选择日期时获取事件
+async function selectDate(dateObj) {
+  selectedDate.value = dateObj.date
+  showFilters.value = false
+  currentPage.value = 1 // 重置页码
+  currentEvents.value = await getEventsForDate(dateObj.date)
+  
+  setTimeout(() => {
+    const eventsSection = document.querySelector('.selected-date-events')
+    if (eventsSection) {
+      eventsSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
+  }, 100)
+}
+
+function selectMonth(monthIndex) {
+  currentDate.value = new Date(currentDate.value.getFullYear(), monthIndex, 1)
+}
+
+function previousMonth() {
+  const newDate = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1)
+  currentDate.value = newDate
+}
+
+function nextMonth() {
+  const newDate = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1)
+  currentDate.value = newDate
+}
+
+function formatDate(date) {
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  return date.toLocaleDateString(locale.value, options);
+}
+
+function toggleFilters() {
+  showFilters.value = !showFilters.value
+}
+
+function applyFilters() {
+  // Implementation of applyFilters
+}
+
+// 清除所有筛选条件
+function clearFilters() {
+  selectedEventType.value = ''
+  selectedVenue.value = ''
+  selectedPrice.value = ''
+  selectedAudience.value = ''
+  timeRange.value = {
+    start: '12:00 AM',
+    end: '11:59 PM'
+  }
+}
+
+// Carousel Methods
+function nextSlide() {
+  currentSlide.value = (currentSlide.value + 1) % featuredEvents.value.length;
+}
+
+function previousSlide() {
+  currentSlide.value = currentSlide.value === 0 ? featuredEvents.value.length - 1 : currentSlide.value - 1;
+}
+
+// Watch for locale changes
+watch(currentLocale, (newLocale) => {
+  locale.value = newLocale
+})
+
+// 分页方法
+function goToPage(page) {
+  currentPage.value = page
+}
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+function prevPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+
+// 快速分类过滤
+function filterByCategory(categoryId) {
+  selectedEventType.value = categoryId
+  applyFilters()
+}
+
+// Update the navigation function
+function navigateToEvent(event) {
+  if (event && event.location) {
+    // 使用console.log记录导航信息，便于调试
+    console.log('Navigating to:', event.location);
+    
+    try {
+      router.push({
+        name: 'navigation',
+        query: {
+          destination: event.location,
+          eventName: event.name || 'Event',
+          eventTime: event.datetime ? new Date(event.datetime).toLocaleTimeString([], { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }) : '',
+          eventDate: event.datetime ? new Date(event.datetime).toLocaleDateString([], {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }) : '',
+          address: event.location,
+          autoFill: 'true'
+        }
+      });
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  } else {
+    console.warn('Cannot navigate: event or location is missing');
+  }
+}
 
 // Click outside handler for dropdown
 const closeTimePresets = (e) => {
@@ -681,15 +950,6 @@ const closeTimePresets = (e) => {
     showTimePresets.value = false
   }
 }
-
-// Lifecycle hooks
-onMounted(() => {
-  document.addEventListener('click', closeTimePresets)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', closeTimePresets)
-})
 
 // Convert 24h time to 12h format
 function formatTime(time) {
@@ -800,39 +1060,6 @@ const currentMonth = computed(() => {
   return currentDate.value.toLocaleString('default', { month: 'long', year: 'numeric' })
 })
 
-const calendarDays = computed(() => {
-  const year = currentDate.value.getFullYear()
-  const month = currentDate.value.getMonth()
-  const firstDay = new Date(year, month, 1)
-  const lastDay = new Date(year, month + 1, 0)
-  const days = []
-
-  // 获取该月的第一天是星期几 (0是星期日, 6是星期六)
-  const firstDayWeekday = firstDay.getDay()
-  
-  // 添加前一个月的日期填充第一周
-  for (let i = 0; i < firstDayWeekday; i++) {
-    const date = new Date(year, month, -i)
-    days.unshift(createDayObject(date))
-  }
-
-  // 添加当前月的日期
-  for (let i = 1; i <= lastDay.getDate(); i++) {
-    const date = new Date(year, month, i)
-    days.push(createDayObject(date))
-  }
-
-  // 如果需要，添加下个月的日期填充最后一周
-  const totalDaysNeeded = 42 // 6 rows x 7 days
-  const remainingDays = totalDaysNeeded - days.length
-  for (let i = 1; i <= remainingDays; i++) {
-    const date = new Date(year, month + 1, i)
-    days.push(createDayObject(date))
-  }
-
-  return days
-})
-
 // 获取指定日期的事件
 const getEventsForDate = async (date) => {
   if (!date) return [];
@@ -868,261 +1095,223 @@ watch(() => currentDate.value, async () => {
   await fetchMonthEventCounts();
 }, { immediate: true });
 
-// 创建日期对象的辅助函数
-function createDayObject(date) {
-  const dateString = date.toISOString().split('T')[0];
-  const eventsCount = monthEvents.value[dateString] || 0;
-  
-  return {
-    day: date.getDate(),
-    date: date,
-    isCurrentMonth: date.getMonth() === currentDate.value.getMonth(),
-    hasEvents: eventsCount > 0,
-    eventsCount: eventsCount,
-    topCategories: [], // 暂时不显示类别条
-    isToday: isSameDay(date, new Date())
-  }
-}
-
-// 计算分页后的事件
-const paginatedEvents = computed(() => {
-  const startIndex = (currentPage.value - 1) * eventsPerPage
-  const endIndex = startIndex + eventsPerPage
-  return filteredEvents.value.slice(startIndex, endIndex)
-})
-
-// 计算总页数
-const totalPages = computed(() => {
-  return Math.ceil(filteredEvents.value.length / eventsPerPage)
-})
-
-// Methods
-function hasEventsOnDate(date) {
-  return events.some(event => {
-    const eventDate = new Date(event.date)
-    return isSameDay(eventDate, date)
-  })
-}
-
-function isSameDay(date1, date2) {
-  if (!date1 || !date2) return false;
-  const d1 = new Date(date1);
-  const d2 = new Date(date2);
-  return d1.getDate() === d2.getDate() &&
-         d1.getMonth() === d2.getMonth() &&
-         d1.getFullYear() === d2.getFullYear();
-}
-
-// 选择日期时获取事件
-async function selectDate(dateObj) {
-  selectedDate.value = dateObj.date
-  showFilters.value = false
-  currentPage.value = 1 // 重置页码
-  currentEvents.value = await getEventsForDate(dateObj.date)
-  
-  setTimeout(() => {
-    const eventsSection = document.querySelector('.selected-date-events')
-    if (eventsSection) {
-      eventsSection.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      })
+// Initialize events function
+async function initializeEvents() {
+  try {
+    // Show loading state
+    const loadingToast = true; // A loading indicator could be added here
+    
+    // Get today's date
+    const today = new Date();
+    
+    // Update date selection
+    currentDate.value = today;
+    selectedDate.value = today;
+    
+    // Get today's events
+    let events = await getEventsForDate(today);
+    
+    // If no event data, use example data
+    if (!events || events.length === 0) {
+      const mockEvents = [
+        {
+          id: 1,
+          name: "Melbourne Weekend Music Festival",
+          description: "Large music performances in Melbourne's city center, featuring local and international artists. Experience diverse musical styles and the magic of live music.",
+          category: "Music Event",
+          image: "/events/jazz-night.jpg",
+          datetime: new Date().toISOString(),
+          location: "Federation Square"
+        },
+        {
+          id: 2,
+          name: "Chinese Cultural Festival",
+          description: "Experience traditional Chinese culture, including lion dance, calligraphy, and food. Learn about China's rich history and cultural traditions, and participate in interactive activities.",
+          category: "Cultural Event",
+          image: "/events/Chinatown'sChineseNewYearFestival.jpg",
+          datetime: new Date().toISOString(),
+          location: "Chinatown Melbourne"
+        },
+        {
+          id: 3,
+          name: "Australian Food Festival",
+          description: "Taste special foods from different regions of Australia. Explore diverse Australian cuisine and sample local ingredients and dishes.",
+          category: "Food Event",
+          image: "/events/food-festival.jpg",
+          datetime: new Date().toISOString(),
+          location: "Queen Victoria Market"
+        },
+        {
+          id: 4,
+          name: "Art Gallery Exhibition",
+          description: "Contemporary art exhibition showcasing innovative works by local artists. Appreciate various art forms, including paintings, sculptures, and installations.",
+          category: "Cultural Event",
+          image: "/events/art-gallery.jpg",
+          datetime: new Date().toISOString(),
+          location: "National Gallery of Victoria"
+        },
+        {
+          id: 5,
+          name: "Yoga and Meditation Workshop",
+          description: "Relaxation activities guided by professional yoga instructors. Learn breathing techniques and meditation methods to improve physical and mental health.",
+          category: "Wellness Event",
+          image: "/events/yoga-workshop.jpg",
+          datetime: new Date().toISOString(),
+          location: "Botanical Gardens"
+        }
+      ];
+      events = mockEvents;
     }
-  }, 100)
-}
-
-function selectMonth(monthIndex) {
-  currentDate.value = new Date(2025, monthIndex, 1)
-}
-
-function previousMonth() {
-  const newDate = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1)
-  if (newDate.getFullYear() === 2025) {
-    currentDate.value = newDate
+    
+    // Update current events
+    currentEvents.value = events;
+    
+    // Update monthly event counts
+    await fetchMonthEventCounts();
+    
+    // Reset current carousel index
+    currentSlide.value = 0;
+    
+    // Hide loading state
+    loadingToast && (loadingToast.value = false);
+  } catch (error) {
+    console.error("Failed to initialize event data:", error);
+    // Show error notification
   }
 }
 
-function nextMonth() {
-  const newDate = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1)
-  if (newDate.getFullYear() === 2025) {
-    currentDate.value = newDate
+// Category Navigation Data
+const categories = [
+  { 
+    id: 'cultural', 
+    name: 'Cultural Events', 
+    icon: 'mdi mdi-theater'
+  },
+  { 
+    id: 'religious', 
+    name: 'Religious Events', 
+    icon: 'mdi mdi-church'
+  },
+  { 
+    id: 'health', 
+    name: 'Health & Wellness', 
+    icon: 'mdi mdi-heart-pulse'
+  },
+  { 
+    id: 'social', 
+    name: 'Social Groups', 
+    icon: 'mdi mdi-account-group'
+  },
+  { 
+    id: 'workshops', 
+    name: 'Workshops & Classes', 
+    icon: 'mdi mdi-school'
+  },
+  { 
+    id: 'markets', 
+    name: 'Local Markets', 
+    icon: 'mdi mdi-store'
   }
-}
+]
 
-function formatDate(date) {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+// UI state variables
+const currentSlide = ref(0)
+const currentPage = ref(1)
+const eventsPerPage = 9
+
+// Function to get random category color
+function getRandomCategoryColor(index) {
+  const colors = [
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-orange-500',
+    'bg-purple-500',
+    'bg-pink-500',
+    'bg-yellow-500',
+    'bg-indigo-500',
+    'bg-teal-500'
+  ];
   
-  return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`
-}
-
-function toggleFilters() {
-  showFilters.value = !showFilters.value
-}
-
-function applyFilters() {
-  // Implementation of applyFilters
-}
-
-// 清除所有筛选条件
-function clearFilters() {
-  selectedEventType.value = ''
-  selectedVenue.value = ''
-  selectedPrice.value = ''
-  selectedAudience.value = ''
-  timeRange.value = {
-    start: '12:00 AM',
-    end: '11:59 PM'
-  }
-}
-
-// 获取类别标签颜色
-function getCategoryTagColor(category) {
-  const colors = {
-    'Music': 'bg-blue-500 text-white',
-    'Workshop': 'bg-green-500 text-white',
-    'Guided Tour': 'bg-purple-500 text-white',
-    'Dance': 'bg-pink-500 text-white',
-    'Festival': 'bg-yellow-500 text-black',
-    'Film': 'bg-indigo-500 text-white',
-    'Wellness': 'bg-teal-500 text-white',
-    'Social': 'bg-orange-500 text-white'
-  }
-  return colors[category] || 'bg-gray-500 text-white'
-}
-
-// 获取事件数量的颜色
-function getEventCountColor(count) {
-  if (count >= 10) {
-    return 'bg-red-500 text-white'
-  } else if (count >= 5) {
-    return 'bg-orange-500 text-white'
-  } else {
-    return 'bg-blue-500 text-white'
-  }
-}
-
-// 获取类别的颜色
-function getCategoryColor(category) {
-  const colors = {
-    'Music': 'bg-blue-500',
-    'Workshop': 'bg-green-500',
-    'Guided Tour': 'bg-purple-500',
-    'Dance': 'bg-pink-500',
-    'Festival': 'bg-yellow-500',
-    'Film': 'bg-indigo-500',
-    'Wellness': 'bg-teal-500',
-    'Social': 'bg-orange-500'
-  }
-  return colors[category] || 'bg-gray-500'
-}
-
-// Carousel Methods
-function nextSlide() {
-  currentSlide.value = (currentSlide.value + 1) % bannerSlides.length
-}
-
-function previousSlide() {
-  currentSlide.value = currentSlide.value === 0 ? bannerSlides.length - 1 : currentSlide.value - 1
-}
-
-// Auto-advance slides
-onMounted(() => {
-  setInterval(() => {
-    nextSlide()
-  }, 5000)
-})
-
-// Watch for locale changes
-watch(currentLocale, (newLocale) => {
-  locale.value = newLocale
-})
-
-// 分页方法
-function goToPage(page) {
-  currentPage.value = page
-}
-
-function nextPage() {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-  }
-}
-
-function prevPage() {
-  if (currentPage.value > 1) {
-    currentPage.value--
-  }
-}
-
-// 快速分类过滤
-function filterByCategory(categoryId) {
-  selectedEventType.value = categoryId
-  applyFilters()
-}
-
-// Update the navigation function
-function navigateToEvent(event) {
-  if (event.location) {
-    router.push({
-      name: 'navigation',
-      query: {
-        destination: event.location,
-        eventName: event.name,
-        eventTime: new Date(event.datetime).toLocaleTimeString([], { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-        eventDate: new Date(event.datetime).toLocaleDateString([], {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }),
-        address: event.location,
-        autoFill: 'true'
-      }
-    })
-  }
+  return colors[index % colors.length];
 }
 </script>
 
 <style scoped>
+/* Calendar styles */
 .calendar-day {
-  min-height: 6rem;
+  min-height: 7rem;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-.day-badge {
-  background-color: #4CAF50;
-  transform: scale(1);
-  transition: transform 0.2s ease;
+.calendar-day:hover {
+  transform: scale(1.02);
+  z-index: 10;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.day-badge:hover {
-  transform: scale(1.1);
+/* Selected day highlight */
+.selected-day {
+  box-shadow: inset 0 0 0 2px rgba(249, 115, 22, 0.4);
 }
 
+/* Today highlight */
+.today-highlight {
+  position: relative;
+}
+
+.today-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to right, #f97316, #ef4444);
+  z-index: 1;
+}
+
+/* Day with events */
+.day-with-events {
+  position: relative;
+}
+
+.day-with-events::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #f97316;
+}
+
+/* Event count badge */
+.event-count-badge {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+/* Category indicator */
 .category-indicator {
-  width: 75%;
+  width: 85%;
+  height: 0.25rem;
   opacity: 0.7;
+  transition: all 0.3s ease;
+  margin: 0 auto;
 }
 
 .calendar-day:hover .category-indicator {
-  width: 90%;
+  width: 95%;
   opacity: 1;
+  height: 0.3rem;
 }
 
-.selected-date {
-  background-color: #f0f9ff !important;
-  box-shadow: inset 0 0 0 2px #3b82f6;
-}
-
-.date-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
+/* Carousel styles */
 .carousel-container {
   overflow: hidden;
   position: relative;
@@ -1130,14 +1319,64 @@ function navigateToEvent(event) {
 
 .slide-enter-active,
 .slide-leave-active {
-  transition: all 0.5s ease-in-out;
+  transition: all 0.75s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slide-enter-from {
   transform: translateX(100%);
+  opacity: 0;
 }
 
 .slide-leave-to {
   transform: translateX(-100%);
+  opacity: 0;
+}
+
+/* Scrollbar styling */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Gradient animation */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-animate {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Hover effects */
+.hover-float {
+  transition: transform 0.3s ease;
+}
+
+.hover-float:hover {
+  transform: translateY(-5px);
+}
+
+/* Responsiveness adjustments */
+@media (max-width: 768px) {
+  .carousel-container {
+    border-radius: 0.5rem;
+  }
+  
+  .calendar-day {
+    min-height: 5rem;
+  }
 }
 </style> 

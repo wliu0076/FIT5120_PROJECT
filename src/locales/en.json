@@ -179,5 +179,52 @@
       "callUs": "Call Us",
       "getHelp": "Get Help"
     }
+  },
+  "about": {
+    "title": "About Cultural Guide",
+    "description": "Melbourne Cultural Guide is your perfect companion for exploring the diverse cultures of Melbourne. We are dedicated to providing convenient cultural landmark navigation services for tourists and local residents, helping you discover the cultural treasures in the city.",
+    "features": {
+      "title": "Features",
+      "multicultural": "Multi-cultural Landmark Exploration",
+      "navigation": "Real-time Navigation",
+      "views": "Map and List Views",
+      "language": "Multi-language Support"
+    },
+    "guide": {
+      "title": "User Guide",
+      "step1": "Select your interested culture",
+      "step2": "Browse landmarks or use search",
+      "step3": "View details and get directions",
+      "step4": "Save travel guide PDF"
+    },
+    "culture": {
+      "title": "Cultural Features",
+      "chinese": {
+        "title": "Chinese Culture",
+        "description": "Melbourne has one of Australia's largest Chinese communities, showcasing rich Chinese cultural heritage from the historic Chinatown to the modern Box Hill Central.",
+        "features": [
+          "Traditional Cuisine & Tea Culture",
+          "Festivals & Temple Fairs",
+          "Cultural Art Exhibitions",
+          "Traditional Medicine & Health"
+        ]
+      },
+      "indian": {
+        "title": "Indian Culture",
+        "description": "Melbourne's Indian community is vibrant and diverse, from magnificent Hindu temples to bustling Indian markets, presenting unique South Asian cultural charm.",
+        "features": [
+          "Traditional Festivals",
+          "Yoga & Meditation Centers",
+          "Specialty Food Markets",
+          "Classical Music & Dance"
+        ]
+      }
+    },
+    "contact": {
+      "title": "Contact Us",
+      "email": "support@culturalguide.com",
+      "phone": "+61 3 1234 5678",
+      "address": "Melbourne VIC 3000"
+    }
   }
 } 
