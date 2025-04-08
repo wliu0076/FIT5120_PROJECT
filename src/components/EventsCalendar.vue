@@ -1,5 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- Header Navigation section removed to prevent duplication -->
+    
     <!-- Banner Section -->
     <div class="relative bg-gradient-to-r from-yellow-50 via-red-50 to-pink-50 py-12">
       <!-- Title Section -->
@@ -80,33 +82,6 @@
       </div>
     </div>
 
-    <!-- Category Navigation -->
-    <div class="bg-white py-12 border-b">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-center text-gray-900 mb-8">{{ $t('events.categories.title') || 'Event Categories' }}</h2>
-        <div class="grid grid-cols-3 md:grid-cols-6 gap-6">
-          <div v-for="category in categories" :key="category.id" 
-               @click="filterByCategory(category.id)"
-               class="flex flex-col items-center group cursor-pointer transition-all duration-300 transform hover:-translate-y-1">
-            <div class="w-20 h-20 rounded-2xl bg-gray-50 flex items-center justify-center mb-3 
-                        group-hover:bg-gradient-to-br group-hover:from-orange-100 group-hover:to-red-100 
-                        transition-all duration-300 shadow-md group-hover:shadow-lg"
-                 :class="{ 'bg-gradient-to-br from-orange-200 to-red-200': selectedEventType === category.id }">
-              <i :class="[
-                category.icon,
-                'text-3xl',
-                selectedEventType === category.id ? 'text-red-600' : 'text-gray-600 group-hover:text-red-500'
-              ]"></i>
-            </div>
-            <span class="text-sm text-center leading-tight font-medium" 
-                  :class="{ 'text-red-600': selectedEventType === category.id }">
-              {{ category.name }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Events Count Summary -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
       <div class="flex justify-between items-center bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl shadow-sm">
@@ -151,35 +126,97 @@
         </div>
         
         <!-- Month Navigation -->
-        <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl shadow-inner mb-8">
-          <div class="flex flex-wrap items-center justify-center py-6 px-4">
-            <div class="w-full flex justify-between items-center max-w-4xl mx-auto">
-              <button @click="previousMonth" class="p-3 text-gray-600 hover:text-gray-900 rounded-full hover:bg-white transition-colors duration-200 shadow-sm hover:shadow flex items-center justify-center w-10 h-10">
-                <span class="text-xl">←</span>
+        <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg mb-10 border border-gray-100">
+          <!-- Glass morphism background with subtle texture -->
+          <div class="absolute inset-0 bg-gradient-to-br from-orange-50/70 via-white/90 to-red-50/70 backdrop-blur-sm"></div>
+          
+          <!-- Decorative elements -->
+          <div class="absolute top-0 left-0 w-24 h-24 bg-orange-400 rounded-full opacity-5 -translate-x-12 -translate-y-12"></div>
+          <div class="absolute bottom-0 right-0 w-32 h-32 bg-red-400 rounded-full opacity-5 translate-x-16 translate-y-16"></div>
+          
+          <!-- Content -->
+          <div class="relative flex flex-col items-center justify-center py-8 px-4">
+            <!-- Current year with subtle highlighting -->
+            <div class="relative inline-block mb-6">
+              <span class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-700">
+                {{ currentDate.getFullYear() }}
+              </span>
+              <div class="absolute -bottom-2.5 h-2 w-full bg-orange-500/20 rounded-full transform -rotate-1"></div>
+            </div>
+            
+            <!-- Navigation wrapper -->
+            <div class="w-full flex items-center justify-center max-w-5xl mx-auto px-4">
+              <!-- Previous button with improved animation -->
+              <button 
+                @click="previousMonth" 
+                class="flex items-center justify-center w-12 h-12 mr-4 relative group"
+                aria-label="Previous month"
+              >
+                <div class="absolute inset-0 rounded-full opacity-0 bg-orange-100 transform scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"></div>
+                <span class="relative text-xl text-gray-700 group-hover:text-orange-600 transition-colors duration-200 group-active:translate-x-0.5">
+                  <i class="mdi mdi-chevron-left"></i>
+                </span>
               </button>
               
-              <div class="flex flex-col items-center flex-grow">
-                <div class="text-center mb-4">
-                  <span class="text-2xl font-bold text-gray-800">{{ currentDate.getFullYear() }}</span>
+              <!-- Month selection with smooth scrolling -->
+              <div class="flex-1 relative">
+                <div class="overflow-x-auto hide-scrollbar py-2 relative">
+                  <div class="inline-flex items-center justify-center space-x-1 sm:space-x-2 min-w-full px-2">
+                    <template v-for="(month, index) in monthsList" :key="index">
+                      <button 
+                        @click="selectMonth(month.value)" 
+                        :class="[
+                          'px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 relative',
+                          currentDate.getMonth() === month.value 
+                            ? 'text-white shadow-md z-20' 
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-orange-50/80'
+                        ]"
+                      >
+                        <!-- Active state with gradient background -->
+                        <div 
+                          v-if="currentDate.getMonth() === month.value"
+                          class="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl z-10 animate-pulse-subtle"
+                        ></div>
+                        
+                        <!-- Light reflection effect on active button -->
+                        <div 
+                          v-if="currentDate.getMonth() === month.value"
+                          class="absolute inset-0 rounded-xl overflow-hidden z-15"
+                        >
+                          <div class="absolute top-0 left-0 right-0 h-px bg-white/40"></div>
+                          <div class="absolute bottom-0 left-0 right-0 h-px bg-black/10"></div>
+                        </div>
+                        
+                        <!-- Month label -->
+                        <span :class="{ 'drop-shadow-sm relative z-30': currentDate.getMonth() === month.value }">
+                          {{ month.label }}
+                        </span>
+                        
+                        <!-- Active indicator dot -->
+                        <div 
+                          v-if="currentDate.getMonth() === month.value"
+                          class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full z-20"
+                        ></div>
+                      </button>
+                    </template>
+                  </div>
                 </div>
-                <div class="flex justify-center space-x-2 overflow-x-auto px-4 scrollbar-hide">
-                  <template v-for="(month, index) in monthsList" :key="index">
-                    <button 
-                      @click="selectMonth(month.value)" 
-                      :class="[
-                        'px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-all duration-200', 
-                        currentDate.getMonth() === month.value 
-                          ? 'font-bold text-white bg-gradient-to-r from-red-500 to-orange-500 shadow-md transform -rotate-1 hover:rotate-0' 
-                          : 'hover:bg-white hover:shadow bg-white/70'
-                      ]">
-                      {{ month.label }}
-                    </button>
-                  </template>
-                </div>
+                
+                <!-- Subtle fade effect on edges -->
+                <div class="absolute top-0 left-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none z-5"></div>
+                <div class="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-5"></div>
               </div>
               
-              <button @click="nextMonth" class="p-3 text-gray-600 hover:text-gray-900 rounded-full hover:bg-white transition-colors duration-200 shadow-sm hover:shadow flex items-center justify-center w-10 h-10">
-                <span class="text-xl">→</span>
+              <!-- Next button with improved animation -->
+              <button 
+                @click="nextMonth" 
+                class="flex items-center justify-center w-12 h-12 ml-4 relative group"
+                aria-label="Next month"
+              >
+                <div class="absolute inset-0 rounded-full opacity-0 bg-orange-100 transform scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300"></div>
+                <span class="relative text-xl text-gray-700 group-hover:text-orange-600 transition-colors duration-200 group-active:-translate-x-0.5">
+                  <i class="mdi mdi-chevron-right"></i>
+                </span>
               </button>
             </div>
           </div>
@@ -309,7 +346,7 @@
               </div>
 
               <!-- Time Slider -->
-              <div class="time-slider relative h-20 select-none">
+              <div class="time-slider relative h-20 select-none mx-auto max-w-4xl">
                 <!-- Timeline bar -->
                 <div class="absolute left-0 right-0 bottom-6 h-3 bg-gray-200 rounded-full shadow-inner">
                   <!-- Selected range -->
@@ -341,6 +378,136 @@
                       {{ hour === 24 ? '12 AM' : hour === 12 ? '12 PM' : hour > 12 ? `${hour-12} PM` : `${hour} AM` }}
                     </span>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Categories -->
+          <div class="mb-8 bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100">
+            <div class="flex flex-wrap items-center justify-between p-5 border-b bg-gradient-to-r from-gray-50 to-gray-100">
+              <h3 class="text-xl font-bold text-gray-800 mb-2 sm:mb-0">Event Categories</h3>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                <div 
+                  @click="selectedEventType = ''; applyFilters()"
+                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
+                        shadow-md hover:shadow-lg transition-all duration-300"
+                       :class="selectedEventType === '' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-view-grid text-2xl" :class="selectedEventType === '' ? 'text-orange-600' : 'text-gray-600'"></i>
+                  </div>
+                  <span class="text-xs text-center leading-tight font-medium" 
+                      :class="{ 'text-orange-600': selectedEventType === '' }">
+                    All Events
+                  </span>
+                </div>
+                
+                <div 
+                  @click="selectedEventType = 'Cultural Event'; applyFilters()"
+                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
+                        shadow-md hover:shadow-lg transition-all duration-300"
+                       :class="selectedEventType === 'Cultural Event' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-theater text-2xl" :class="selectedEventType === 'Cultural Event' ? 'text-orange-600' : 'text-gray-600'"></i>
+                  </div>
+                  <span class="text-xs text-center leading-tight font-medium" 
+                      :class="{ 'text-orange-600': selectedEventType === 'Cultural Event' }">
+                    Cultural Events
+                  </span>
+                </div>
+                
+                <div 
+                  @click="selectedEventType = 'Music Event'; applyFilters()"
+                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
+                        shadow-md hover:shadow-lg transition-all duration-300"
+                       :class="selectedEventType === 'Music Event' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-music text-2xl" :class="selectedEventType === 'Music Event' ? 'text-orange-600' : 'text-gray-600'"></i>
+                  </div>
+                  <span class="text-xs text-center leading-tight font-medium" 
+                      :class="{ 'text-orange-600': selectedEventType === 'Music Event' }">
+                    Music Events
+                  </span>
+                </div>
+                
+                <div 
+                  @click="selectedEventType = 'Food Event'; applyFilters()"
+                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
+                        shadow-md hover:shadow-lg transition-all duration-300"
+                       :class="selectedEventType === 'Food Event' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-food text-2xl" :class="selectedEventType === 'Food Event' ? 'text-orange-600' : 'text-gray-600'"></i>
+                  </div>
+                  <span class="text-xs text-center leading-tight font-medium" 
+                      :class="{ 'text-orange-600': selectedEventType === 'Food Event' }">
+                    Food Events
+                  </span>
+                </div>
+                
+                <div 
+                  @click="selectedEventType = 'Workshop'; applyFilters()"
+                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
+                        shadow-md hover:shadow-lg transition-all duration-300"
+                       :class="selectedEventType === 'Workshop' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-school text-2xl" :class="selectedEventType === 'Workshop' ? 'text-orange-600' : 'text-gray-600'"></i>
+                  </div>
+                  <span class="text-xs text-center leading-tight font-medium" 
+                      :class="{ 'text-orange-600': selectedEventType === 'Workshop' }">
+                    Workshops & Classes
+                  </span>
+                </div>
+                
+                <div 
+                  @click="selectedEventType = 'Wellness Event'; applyFilters()"
+                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
+                        shadow-md hover:shadow-lg transition-all duration-300"
+                       :class="selectedEventType === 'Wellness Event' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-heart-pulse text-2xl" :class="selectedEventType === 'Wellness Event' ? 'text-orange-600' : 'text-gray-600'"></i>
+                  </div>
+                  <span class="text-xs text-center leading-tight font-medium" 
+                      :class="{ 'text-orange-600': selectedEventType === 'Wellness Event' }">
+                    Health & Wellness
+                  </span>
+                </div>
+                
+                <div 
+                  @click="selectedEventType = 'Social Event'; applyFilters()"
+                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
+                        shadow-md hover:shadow-lg transition-all duration-300"
+                       :class="selectedEventType === 'Social Event' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-account-group text-2xl" :class="selectedEventType === 'Social Event' ? 'text-orange-600' : 'text-gray-600'"></i>
+                  </div>
+                  <span class="text-xs text-center leading-tight font-medium" 
+                      :class="{ 'text-orange-600': selectedEventType === 'Social Event' }">
+                    Social Groups
+                  </span>
+                </div>
+                
+                <div 
+                  @click="selectedEventType = 'Market'; applyFilters()"
+                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
+                        shadow-md hover:shadow-lg transition-all duration-300"
+                       :class="selectedEventType === 'Market' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-store text-2xl" :class="selectedEventType === 'Market' ? 'text-orange-600' : 'text-gray-600'"></i>
+                  </div>
+                  <span class="text-xs text-center leading-tight font-medium" 
+                      :class="{ 'text-orange-600': selectedEventType === 'Market' }">
+                    Local Markets
+                  </span>
                 </div>
               </div>
             </div>
@@ -421,8 +588,12 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-3">{{ $t('events.noEvents') || 'No Events Found' }}</h3>
-            <p class="text-gray-600 max-w-md mx-auto">{{ $t('events.tryOtherDate') || 'Try selecting a different date or adjusting your filters' }}</p>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">Looks Like It's Quiet Today</h3>
+            <p class="text-gray-600 max-w-md mx-auto mb-2">There aren't any events matching your current selection.</p>
+            <p class="text-gray-600 max-w-md mx-auto">
+              <span class="text-orange-500 font-medium">Suggestions:</span> 
+              Try selecting another date, adjusting your time range, or exploring different event categories. Melbourne always has something happening!
+            </p>
           </div>
 
           <!-- Pagination control -->
@@ -491,6 +662,8 @@ const currentLocale = ref(locale.value)
 
 // UI状态
 const showFilters = ref(false)
+const isMenuOpen = ref(false)
+const isLanguageOpen = ref(false)
 
 // Calendar state
 const currentDate = ref(new Date('2025-04-01'))
@@ -859,7 +1032,9 @@ function toggleFilters() {
 }
 
 function applyFilters() {
-  // Implementation of applyFilters
+  // Filters are now applied automatically through the computed property
+  // This function is kept for future functionality extensions
+  currentPage.value = 1 // Reset to first page when filters change
 }
 
 // 清除所有筛选条件
@@ -872,6 +1047,7 @@ function clearFilters() {
     start: '12:00 AM',
     end: '11:59 PM'
   }
+  currentPreset.value = 'All Day'
 }
 
 // Carousel Methods
@@ -1035,11 +1211,12 @@ function timeToPercentage(time) {
   return ((hours * 60 + minutes) / (24 * 60)) * 100
 }
 
-// Filter events based on time range
+// Filter events based on time range and category
 const filteredEvents = computed(() => {
   if (!currentEvents.value) return []
   
   return currentEvents.value.filter(event => {
+    // Time filter
     const eventTime = new Date(event.datetime)
     const eventHour = eventTime.getHours()
     const eventMinute = eventTime.getMinutes()
@@ -1051,8 +1228,97 @@ const filteredEvents = computed(() => {
     const startTimeValue = startHour * 60 + startMinute
     const endTimeValue = endHour * 60 + endMinute
     
-    return eventTimeValue >= startTimeValue && eventTimeValue <= endTimeValue
+    const timeMatch = eventTimeValue >= startTimeValue && eventTimeValue <= endTimeValue
+    
+    // Category filter with category alias mapping
+    const categoryMatch = selectedEventType.value === '' || 
+                         event.category === selectedEventType.value || 
+                         matchCategoryAlias(event.category, selectedEventType.value)
+    
+    return timeMatch && categoryMatch
   })
+})
+
+// Function to match category with possible aliases
+function matchCategoryAlias(eventCategory, selectedCategory) {
+  if (!eventCategory) return false;
+  
+  // 将事件类别转为小写
+  const lowerEventCategory = eventCategory.toLowerCase();
+  
+  // Cultural Events (最常见分类之一)
+  if (selectedCategory === 'Cultural Event' && 
+      ['art', 'exhibition', 'festival', 'cultural', 'culture', 'heritage', 'museum', 
+       'gallery', 'tradition', 'ethnic', 'history', 'performance', 'chinese'].some(term => 
+        lowerEventCategory.includes(term))) {
+    return true;
+  }
+  
+  // Religious Events
+  if (selectedCategory === 'Religious Event' && 
+      ['religious', 'spiritual', 'church', 'temple', 'mosque', 'prayer', 'worship', 
+       'faith', 'religion', 'ceremony', 'buddhist', 'hindu', 'christian', 'islamic'].some(term => 
+        lowerEventCategory.includes(term))) {
+    return true;
+  }
+  
+  // Health & Wellness (很受欢迎的分类)
+  if (selectedCategory === 'Wellness Event' && 
+      ['health', 'wellness', 'yoga', 'meditation', 'fitness', 'exercise', 'wellbeing', 
+       'mindfulness', 'mental health', 'physical', 'therapy', 'healing', 'spa'].some(term => 
+        lowerEventCategory.includes(term))) {
+    return true;
+  }
+  
+  // Social Groups
+  if (selectedCategory === 'Social Event' && 
+      ['social', 'community', 'meetup', 'networking', 'club', 'gathering', 'party', 
+       'group', 'society', 'association', 'connect', 'meeting'].some(term => 
+        lowerEventCategory.includes(term))) {
+    return true;
+  }
+  
+  // Workshops & Classes (常见分类)
+  if (selectedCategory === 'Workshop' && 
+      ['workshop', 'class', 'course', 'training', 'seminar', 'education', 'learn', 
+       'skill', 'teach', 'tutorial', 'session', 'lecture', 'lesson'].some(term => 
+        lowerEventCategory.includes(term))) {
+    return true;
+  }
+  
+  // Local Markets
+  if (selectedCategory === 'Market' && 
+      ['market', 'fair', 'bazaar', 'shopping', 'trade', 'stall', 'vendor', 
+       'goods', 'craft', 'farmers', 'flea', 'sale'].some(term => 
+        lowerEventCategory.includes(term))) {
+    return true;
+  }
+
+  // Music Events (新增常见分类)
+  if (selectedCategory === 'Music Event' && 
+      ['music', 'concert', 'gig', 'band', 'performance', 'live music', 'dj', 
+       'orchestra', 'choir', 'song', 'jazz', 'rock', 'classical'].some(term => 
+        lowerEventCategory.includes(term))) {
+    return true;
+  }
+  
+  // Food Events (新增常见分类)
+  if (selectedCategory === 'Food Event' && 
+      ['food', 'cuisine', 'culinary', 'dining', 'tasting', 'gastronomy', 'restaurant', 
+       'cook', 'chef', 'wine', 'beer', 'feast', 'dinner'].some(term => 
+        lowerEventCategory.includes(term))) {
+    return true;
+  }
+  
+  return false;
+}
+
+// Add computed property to extract unique categories from current events
+const eventCategories = computed(() => {
+  if (!currentEvents.value || currentEvents.value.length === 0) return []
+  
+  const categories = currentEvents.value.map(event => event.category)
+  return [...new Set(categories)].filter(category => category)
 })
 
 // Computed properties
@@ -1232,6 +1498,13 @@ function getRandomCategoryColor(index) {
   ];
   
   return colors[index % colors.length];
+}
+
+// 设置语言函数
+function setLocale(lang) {
+  locale.value = lang
+  currentLocale.value = lang
+  isLanguageOpen.value = false
 }
 </script>
 
