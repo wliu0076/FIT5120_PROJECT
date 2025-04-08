@@ -4,7 +4,8 @@
     "events": "活动",
     "travel": "出行",
     "help": "帮助",
-    "about": "关于"
+    "about": "关于",
+    "landmarks": "文化地标"
   },
   "events": {
     "title": "活动日历",
@@ -77,6 +78,34 @@
       "bookTickets": "预订门票",
       "moreInfo": "更多信息",
       "getTravelGuide": "获取出行指南"
+    }
+  },
+  "landmarks": {
+    "title": "文化地标",
+    "subtitle": "探索墨尔本的文化地标和遗产景点",
+    "searchPlaceholder": "搜索地标...",
+    "filters": {
+      "chinese": "中国",
+      "indian": "印度"
+    },
+    "viewMode": {
+      "title": "视图",
+      "map": "地图",
+      "list": "列表"
+    },
+    "directions": {
+      "title": "前往",
+      "audioGuide": "播放语音导览",
+      "savePdf": "保存PDF",
+      "distance": "距离",
+      "time": "时间",
+      "arrival": "到达时间",
+      "transit": "公共交通",
+      "driving": "驾车",
+      "walking": "步行",
+      "location": "位置",
+      "description": "描述",
+      "steps": "逐步导航"
     }
   },
   "travel": {

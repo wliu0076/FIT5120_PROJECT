@@ -4,7 +4,8 @@
     "events": "Events",
     "travel": "Travel",
     "help": "Help",
-    "about": "About"
+    "about": "About",
+    "landmarks": "Cultural Landmarks"
   },
   "events": {
     "title": "Event Calendar",
@@ -77,6 +78,34 @@
       "bookTickets": "Book Tickets",
       "moreInfo": "More Info",
       "getTravelGuide": "Get Travel Guide"
+    }
+  },
+  "landmarks": {
+    "title": "Cultural Landmarks",
+    "subtitle": "Explore cultural landmarks and heritage sites in Melbourne",
+    "searchPlaceholder": "Search landmark...",
+    "filters": {
+      "chinese": "Chinese",
+      "indian": "Indian"
+    },
+    "viewMode": {
+      "title": "View",
+      "map": "Map",
+      "list": "List"
+    },
+    "directions": {
+      "title": "Directions to",
+      "audioGuide": "Play Audio Guide",
+      "savePdf": "Save PDF",
+      "distance": "Distance",
+      "time": "Time",
+      "arrival": "Arrival",
+      "transit": "Public Transport",
+      "driving": "Driving",
+      "walking": "Walking",
+      "location": "Location",
+      "description": "Description",
+      "steps": "Step-by-step Directions"
     }
   },
   "travel": {

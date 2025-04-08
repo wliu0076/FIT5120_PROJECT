@@ -82,45 +82,64 @@
       </div>
     </div>
 
-    <!-- Events Count Summary -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
-      <div class="flex justify-between items-center bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl shadow-sm">
-        <p class="text-gray-700 font-medium">
-          <span class="text-orange-600 font-bold">{{ filteredEvents.length }}</span> events found
-        </p>
-        <span v-if="selectedEventType || timeRange.start !== '00:00' || timeRange.end !== '23:59'">
-          <button @click="clearFilters" class="text-orange-500 font-medium hover:text-orange-700 transition-colors flex items-center">
-            CLEAR FILTERS
-            <i class="mdi mdi-close-circle ml-1"></i>
-          </button>
-        </span>
-      </div>
-    </div>
-
     <!-- Calendar Section -->
     <div class="py-12 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Event Count Legend -->
         <div class="mb-8 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
           <h3 class="text-lg font-bold text-gray-800 mb-4">Event Count Legend</h3>
-          <div class="flex items-center space-x-6">
-            <div class="flex items-center space-x-2">
-              <div class="event-count-badge flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm">
-                <span class="text-xs font-bold leading-none">1</span>
+          <div class="flex flex-col space-y-4">
+            <!-- 事件数量指示器 -->
+            <div class="flex items-center space-x-6">
+              <div class="flex items-center space-x-2">
+                <div class="event-count-badge flex items-center justify-center w-8 h-8 rounded-md bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm">
+                  <span class="text-xs font-bold leading-none">1</span>
+                </div>
+                <span class="text-sm text-gray-700">Few events (1-4)</span>
               </div>
-              <span class="text-sm text-gray-700">Few events (1-4)</span>
+              <div class="flex items-center space-x-2">
+                <div class="event-count-badge flex items-center justify-center w-8 h-8 rounded-md bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md">
+                  <span class="text-xs font-bold leading-none">5</span>
+                </div>
+                <span class="text-sm text-gray-700">Moderate events (5-9)</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="event-count-badge flex items-center justify-center w-8 h-8 rounded-md bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg">
+                  <span class="text-xs font-bold leading-none">10+</span>
+                </div>
+                <span class="text-sm text-gray-700">Many events (10+)</span>
+              </div>
             </div>
-            <div class="flex items-center space-x-2">
-              <div class="event-count-badge flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md">
-                <span class="text-xs font-bold leading-none">5</span>
+            
+            <!-- 彩色线条指示器说明 -->
+            <div class="pt-2 border-t border-gray-100">
+              <h4 class="text-sm font-medium text-gray-800 mb-2">Event Categories</h4>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="flex items-center space-x-2">
+                  <div class="w-12 h-2 bg-blue-500 rounded-full"></div>
+                  <span class="text-sm text-gray-700">Gig Guide</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div class="w-12 h-2 bg-purple-500 rounded-full"></div>
+                  <span class="text-sm text-gray-700">Exhibitions</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div class="w-12 h-2 bg-yellow-500 rounded-full"></div>
+                  <span class="text-sm text-gray-700">Lifestyle</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div class="w-12 h-2 bg-pink-500 rounded-full"></div>
+                  <span class="text-sm text-gray-700">Arts</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div class="w-12 h-2 bg-green-500 rounded-full"></div>
+                  <span class="text-sm text-gray-700">Outdoors</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div class="w-12 h-2 bg-orange-500 rounded-full"></div>
+                  <span class="text-sm text-gray-700">Classes</span>
+                </div>
               </div>
-              <span class="text-sm text-gray-700">Moderate events (5-9)</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <div class="event-count-badge flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg">
-                <span class="text-xs font-bold leading-none">10+</span>
-              </div>
-              <span class="text-sm text-gray-700">Many events (10+)</span>
             </div>
           </div>
         </div>
@@ -259,7 +278,7 @@
                   
                   <!-- Event count badge -->
                   <div v-if="date.eventsCount > 0" 
-                       class="event-count-badge flex items-center justify-center w-8 h-8 rounded-full transition-transform hover:scale-110"
+                       class="event-count-badge flex items-center justify-center w-8 h-8 rounded-md transition-transform hover:scale-110"
                        :class="getEventCountColor(date.eventsCount)">
                     <span class="text-xs font-bold leading-none">{{ date.eventsCount }}</span>
                   </div>
@@ -383,13 +402,29 @@
             </div>
           </div>
 
+          <!-- Events Count Summary -->
+          <div class="mb-8">
+            <div class="flex justify-between items-center bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl shadow-sm">
+              <p class="text-gray-700 font-medium">
+                <span class="text-orange-600 font-bold">{{ filteredEvents.length }}</span> events found
+              </p>
+              <span v-if="selectedEventType || timeRange.start !== '00:00' || timeRange.end !== '23:59'">
+                <button @click="clearFilters" class="text-orange-500 font-medium hover:text-orange-700 transition-colors flex items-center">
+                  CLEAR FILTERS
+                  <i class="mdi mdi-close-circle ml-1"></i>
+                </button>
+              </span>
+            </div>
+          </div>
+
           <!-- Event Categories -->
           <div class="mb-8 bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100">
             <div class="flex flex-wrap items-center justify-between p-5 border-b bg-gradient-to-r from-gray-50 to-gray-100">
               <h3 class="text-xl font-bold text-gray-800 mb-2 sm:mb-0">Event Categories</h3>
             </div>
             <div class="p-6">
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              <div class="grid grid-cols-7 gap-4">
+                <!-- All Events -->
                 <div 
                   @click="selectedEventType = ''; applyFilters()"
                   class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
@@ -405,108 +440,99 @@
                   </span>
                 </div>
                 
+                <!-- Gig Guide -->
                 <div 
-                  @click="selectedEventType = 'Cultural Event'; applyFilters()"
+                  @click="selectedEventType = 'gig-guide'; applyFilters()"
                   class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
                         shadow-md hover:shadow-lg transition-all duration-300"
-                       :class="selectedEventType === 'Cultural Event' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
-                    <i class="mdi mdi-theater text-2xl" :class="selectedEventType === 'Cultural Event' ? 'text-orange-600' : 'text-gray-600'"></i>
+                       :class="selectedEventType === 'gig-guide' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-music-note text-2xl" :class="selectedEventType === 'gig-guide' ? 'text-orange-600' : 'text-gray-600'"></i>
                   </div>
                   <span class="text-xs text-center leading-tight font-medium" 
-                      :class="{ 'text-orange-600': selectedEventType === 'Cultural Event' }">
-                    Cultural Events
+                      :class="{ 'text-orange-600': selectedEventType === 'gig-guide' }">
+                    Gig Guide
                   </span>
                 </div>
                 
+                <!-- Exhibitions -->
                 <div 
-                  @click="selectedEventType = 'Music Event'; applyFilters()"
+                  @click="selectedEventType = 'exhibitions'; applyFilters()"
                   class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
                         shadow-md hover:shadow-lg transition-all duration-300"
-                       :class="selectedEventType === 'Music Event' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
-                    <i class="mdi mdi-music text-2xl" :class="selectedEventType === 'Music Event' ? 'text-orange-600' : 'text-gray-600'"></i>
+                       :class="selectedEventType === 'exhibitions' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-image-multiple text-2xl" :class="selectedEventType === 'exhibitions' ? 'text-orange-600' : 'text-gray-600'"></i>
                   </div>
                   <span class="text-xs text-center leading-tight font-medium" 
-                      :class="{ 'text-orange-600': selectedEventType === 'Music Event' }">
-                    Music Events
+                      :class="{ 'text-orange-600': selectedEventType === 'exhibitions' }">
+                    Exhibitions
                   </span>
                 </div>
                 
+                <!-- Lifestyle -->
                 <div 
-                  @click="selectedEventType = 'Food Event'; applyFilters()"
+                  @click="selectedEventType = 'lifestyle'; applyFilters()"
                   class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
                         shadow-md hover:shadow-lg transition-all duration-300"
-                       :class="selectedEventType === 'Food Event' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
-                    <i class="mdi mdi-food text-2xl" :class="selectedEventType === 'Food Event' ? 'text-orange-600' : 'text-gray-600'"></i>
+                       :class="selectedEventType === 'lifestyle' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-party-popper text-2xl" :class="selectedEventType === 'lifestyle' ? 'text-orange-600' : 'text-gray-600'"></i>
                   </div>
                   <span class="text-xs text-center leading-tight font-medium" 
-                      :class="{ 'text-orange-600': selectedEventType === 'Food Event' }">
-                    Food Events
+                      :class="{ 'text-orange-600': selectedEventType === 'lifestyle' }">
+                    Lifestyle
                   </span>
                 </div>
                 
+                <!-- Arts -->
                 <div 
-                  @click="selectedEventType = 'Workshop'; applyFilters()"
+                  @click="selectedEventType = 'arts'; applyFilters()"
                   class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
                         shadow-md hover:shadow-lg transition-all duration-300"
-                       :class="selectedEventType === 'Workshop' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
-                    <i class="mdi mdi-school text-2xl" :class="selectedEventType === 'Workshop' ? 'text-orange-600' : 'text-gray-600'"></i>
+                       :class="selectedEventType === 'arts' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-theater text-2xl" :class="selectedEventType === 'arts' ? 'text-orange-600' : 'text-gray-600'"></i>
                   </div>
                   <span class="text-xs text-center leading-tight font-medium" 
-                      :class="{ 'text-orange-600': selectedEventType === 'Workshop' }">
+                      :class="{ 'text-orange-600': selectedEventType === 'arts' }">
+                    Arts
+                  </span>
+                </div>
+                
+                <!-- Outdoors -->
+                <div 
+                  @click="selectedEventType = 'outdoors'; applyFilters()"
+                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
+                        shadow-md hover:shadow-lg transition-all duration-300"
+                       :class="selectedEventType === 'sports' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-hiking text-2xl" :class="selectedEventType === 'sports' ? 'text-orange-600' : 'text-gray-600'"></i>
+                  </div>
+                  <span class="text-xs text-center leading-tight font-medium" 
+                      :class="{ 'text-orange-600': selectedEventType === 'sports' }">
+                    Sports & Outdoors
+                  </span>
+                </div>
+                
+                <!-- Workshops & Classes -->
+                <div 
+                  @click="selectedEventType = 'workshops-conferences-classes'; applyFilters()"
+                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
+                        shadow-md hover:shadow-lg transition-all duration-300"
+                       :class="selectedEventType === 'workshops-conferences-classes' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
+                    <i class="mdi mdi-school text-2xl" :class="selectedEventType === 'workshops-conferences-classes' ? 'text-orange-600' : 'text-gray-600'"></i>
+                  </div>
+                  <span class="text-xs text-center leading-tight font-medium" 
+                      :class="{ 'text-orange-600': selectedEventType === 'workshops-conferences-classes' }">
                     Workshops & Classes
-                  </span>
-                </div>
-                
-                <div 
-                  @click="selectedEventType = 'Wellness Event'; applyFilters()"
-                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
-                        shadow-md hover:shadow-lg transition-all duration-300"
-                       :class="selectedEventType === 'Wellness Event' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
-                    <i class="mdi mdi-heart-pulse text-2xl" :class="selectedEventType === 'Wellness Event' ? 'text-orange-600' : 'text-gray-600'"></i>
-                  </div>
-                  <span class="text-xs text-center leading-tight font-medium" 
-                      :class="{ 'text-orange-600': selectedEventType === 'Wellness Event' }">
-                    Health & Wellness
-                  </span>
-                </div>
-                
-                <div 
-                  @click="selectedEventType = 'Social Event'; applyFilters()"
-                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
-                        shadow-md hover:shadow-lg transition-all duration-300"
-                       :class="selectedEventType === 'Social Event' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
-                    <i class="mdi mdi-account-group text-2xl" :class="selectedEventType === 'Social Event' ? 'text-orange-600' : 'text-gray-600'"></i>
-                  </div>
-                  <span class="text-xs text-center leading-tight font-medium" 
-                      :class="{ 'text-orange-600': selectedEventType === 'Social Event' }">
-                    Social Groups
-                  </span>
-                </div>
-                
-                <div 
-                  @click="selectedEventType = 'Market'; applyFilters()"
-                  class="flex flex-col items-center cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  <div class="w-16 h-16 rounded-xl flex items-center justify-center mb-2 
-                        shadow-md hover:shadow-lg transition-all duration-300"
-                       :class="selectedEventType === 'Market' ? 'bg-orange-100' : 'bg-gray-50 hover:bg-orange-50'">
-                    <i class="mdi mdi-store text-2xl" :class="selectedEventType === 'Market' ? 'text-orange-600' : 'text-gray-600'"></i>
-                  </div>
-                  <span class="text-xs text-center leading-tight font-medium" 
-                      :class="{ 'text-orange-600': selectedEventType === 'Market' }">
-                    Local Markets
                   </span>
                 </div>
               </div>

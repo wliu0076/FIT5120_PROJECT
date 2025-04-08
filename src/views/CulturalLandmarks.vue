@@ -1,16 +1,17 @@
 <template>
   <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
     <div class="bg-white shadow-lg rounded-xl p-6 mb-8">
-      <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Explore Cultural Landmarks</h2>
+      <h2 class="text-3xl font-extrabold text-gray-800 mb-4">{{ $t('landmarks.title') }}</h2>
+      <p class="text-lg text-gray-600 mb-6">{{ $t('landmarks.subtitle') }}</p>
 
       <div class="flex flex-wrap gap-3 mb-4">
         <button v-for="culture in cultures" :key="culture.value" @click="selectCulture(culture.value)"
           :class="[ selectedCulture === culture.value ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200', 'px-4 py-2 rounded-full font-semibold border transition']">
-          {{ culture.label }}
+          {{ $t(`landmarks.filters.${culture.value}`) }}
         </button>
       </div>
 
-      <input v-model="landmarkSearch" type="text" placeholder="Search landmark..."
+      <input v-model="landmarkSearch" type="text" :placeholder="$t('landmarks.searchPlaceholder')"
         class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
 
       <ul v-if="placeSuggestions.length"
@@ -24,10 +25,10 @@
 
     <div class="bg-white shadow-md rounded-xl p-4 mb-6">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-700">View</h3>
+        <h3 class="text-lg font-semibold text-gray-700">{{ $t('landmarks.viewMode.title') }}</h3>
         <div class="flex space-x-2">
-          <button @click="toggleView('map')" :class="[viewMode === 'map' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800', 'px-4 py-1 rounded-lg']">Map</button>
-          <button @click="toggleView('list')" :class="[viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800', 'px-4 py-1 rounded-lg']">List</button>
+          <button @click="toggleView('map')" :class="[viewMode === 'map' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800', 'px-4 py-1 rounded-lg']">{{ $t('landmarks.viewMode.map') }}</button>
+          <button @click="toggleView('list')" :class="[viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800', 'px-4 py-1 rounded-lg']">{{ $t('landmarks.viewMode.list') }}</button>
         </div>
       </div>
       <div v-show="viewMode === 'map'" class="rounded-lg shadow h-96 overflow-hidden">
@@ -36,7 +37,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10" v-show="viewMode === 'list'">
-      <div v-for="landmark in filteredLandmarks" :key="landmark.id" :ref="el => landmarkRefs[landmark.id] = el"
+      <div v-for="landmark in filteredLandmarks" :key="landmark.id" 
         class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition cursor-pointer"
         @click="handleLandmarkClick(landmark)">
         <img :src="landmark.image" @error="e => e.target.src = defaultImage"
@@ -50,15 +51,15 @@
 
     <div v-if="routeSteps.length" class="bg-white shadow-md rounded-xl p-6 mb-10" ref="directionsSection">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-gray-800">Directions to {{ activeLandmark?.name }}</h3>
+        <h3 class="text-xl font-bold text-gray-800">{{ $t('landmarks.directions.title') }} {{ activeLandmark?.name }}</h3>
         <div class="flex justify-end gap-3">
           <button @click="playAudioGuide"
             class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2">
-            <i class="mdi mdi-volume-high"></i><span>Play Audio Guide</span>
+            <i class="mdi mdi-volume-high"></i><span>{{ $t('landmarks.directions.audioGuide') }}</span>
           </button>
           <button @click="savePDF"
             class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
-            <i class="mdi mdi-download"></i><span>Save PDF</span>
+            <i class="mdi mdi-download"></i><span>{{ $t('landmarks.directions.savePdf') }}</span>
           </button>
         </div>
         <audio ref="audioRef" :src="popupAudio" class="hidden" />
@@ -68,14 +69,14 @@
         <button v-for="mode in ['TRANSIT', 'WALKING', 'DRIVING']" :key="mode"
           @click="changeTransportMode(mode)"
           :class="[ transportMode === mode ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200', 'px-4 py-2 rounded-full border text-sm font-medium transition']">
-          {{ transportModeLabels[mode] }}
+          {{ $t(`landmarks.directions.${mode.toLowerCase()}`) }}
         </button>
       </div>
 
       <div class="text-sm text-gray-600 mb-6">
-        <p><strong>Distance:</strong> {{ routeSummary.distance }}</p>
-        <p><strong>Time:</strong> {{ routeSummary.duration }}</p>
-        <p><strong>Arrival:</strong> {{ routeSummary.arrival }}</p>
+        <p><strong>{{ $t('landmarks.directions.distance') }}:</strong> {{ routeSummary.distance }}</p>
+        <p><strong>{{ $t('landmarks.directions.time') }}:</strong> {{ routeSummary.duration }}</p>
+        <p><strong>{{ $t('landmarks.directions.arrival') }}:</strong> {{ routeSummary.arrival }}</p>
       </div>
 
       <div class="space-y-4">
@@ -103,11 +104,13 @@
 }
 </style>
 
-
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const map = ref(null)
 const placesService = ref(null)
@@ -131,16 +134,17 @@ const popupAudio = '/src/info.mp3'
 const landmarkRefs = {}
 const directionsSection = ref(null)
 const defaultImage = '/placeholder.jpg'
+const audioRef = ref(null)
 
 const transportModeLabels = {
-  TRANSIT: 'Public Transport',
-  DRIVING: 'Driving',
-  WALKING: 'Walking'
+  TRANSIT: t('landmarks.directions.transit'),
+  DRIVING: t('landmarks.directions.driving'),
+  WALKING: t('landmarks.directions.walking')
 }
 
 const cultures = [
-  { label: 'Chinese', value: 'chinese' },
-  { label: 'Indian', value: 'indian' }
+  { label: t('landmarks.filters.chinese'), value: 'chinese' },
+  { label: t('landmarks.filters.indian'), value: 'indian' }
 ]
 
 // Culture category queries
@@ -149,39 +153,49 @@ const fetchLandmarks = async () => {
     ? ['chinese museum', 'place_of_worship', 'restaurant', 'tourist_attraction', 'store']
     : ['hindu_temple', 'restaurant', 'tourist_attraction Melbourne', 'store']
 
-  const promises = queries.map(q => searchPlaces(q))
-  const results = await Promise.all(promises)
-  const flat = results.flat()
-  const unique = []
-  const seen = new Set()
+  try {
+    const promises = queries.map(q => searchPlaces(q))
+    const results = await Promise.all(promises)
+    const flat = results.flat()
+    const unique = []
+    const seen = new Set()
 
-  flat.forEach(p => {
-    if (!seen.has(p.id)) {
-      seen.add(p.id)
-      unique.push(p)
-    }
-  })
+    flat.forEach(p => {
+      if (!seen.has(p.id)) {
+        seen.add(p.id)
+        unique.push(p)
+      }
+    })
 
-  landmarks.value = unique
-  updateMarkers()
+    landmarks.value = unique
+    updateMarkers()
+  } catch (error) {
+    console.error("Error fetching landmarks:", error)
+  }
 }
 
 function searchPlaces(query) {
   return new Promise((resolve) => {
+    if (!placesService.value || !google?.maps?.places) {
+      console.error("Places service not available")
+      resolve([])
+      return
+    }
+
     const victoriaBounds = new google.maps.LatLngBounds(
       new google.maps.LatLng(-39.2, 140.8), // Southwest corner (near Portland)
       new google.maps.LatLng(-33.9, 149.0)  // Northeast corner (near Wodonga)
-    );
+    )
 
     const request = {
       query,
       bounds: victoriaBounds,
       location: userLocation.value,
       radius: 20000  // You can increase this if you're not seeing enough results
-    };
+    }
 
     placesService.value.textSearch(request, (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
+      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
         const formatted = results.map(place => ({
           id: place.place_id,
           name: place.name,
@@ -190,26 +204,24 @@ function searchPlaces(query) {
           lng: place.geometry.location.lng(),
           image: place.photos?.[0]?.getUrl({ maxWidth: 400 }) || defaultImage,
           description: place.types?.join(', ') || 'No description available'
-        }));
+        }))
 
         // Keep only results that are in Victoria, Australia
         const victoriaOnly = formatted.filter(p =>
           /vic|victoria/i.test(p.location)
-        );
+        )
 
-        resolve(victoriaOnly);
+        resolve(victoriaOnly)
       } else {
-        resolve([]);
+        resolve([])
       }
-    });
-  });
+    })
+  })
 }
-
-
 
 // Autocomplete
 watch(landmarkSearch, async (val) => {
-  if (!val || !autocompleteService.value) {
+  if (!val || !autocompleteService.value || !google?.maps?.places) {
     placeSuggestions.value = []
     return
   }
@@ -219,7 +231,7 @@ watch(landmarkSearch, async (val) => {
     location: new google.maps.LatLng(userLocation.value.lat, userLocation.value.lng),
     radius: 10000
   }, (predictions, status) => {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
+    if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
       placeSuggestions.value = predictions
     } else {
       placeSuggestions.value = []
@@ -228,13 +240,18 @@ watch(landmarkSearch, async (val) => {
 })
 
 function selectPlacePrediction(prediction) {
+  if (!placesService.value || !google?.maps?.places) {
+    console.error("Places service not available")
+    return
+  }
+
   const request = {
     placeId: prediction.place_id,
     fields: ['name', 'geometry', 'formatted_address', 'photos', 'types']
   }
 
   placesService.value.getDetails(request, (place, status) => {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
+    if (status === google.maps.places.PlacesServiceStatus.OK && place) {
       const landmark = {
         id: place.place_id,
         name: place.name,
@@ -259,6 +276,10 @@ const filteredLandmarks = computed(() => {
 
 function toggleView(mode) {
   viewMode.value = mode
+  if (mode === 'map' && map.value) {
+    // Trigger map resize if needed
+    google.maps.event.trigger(map.value, 'resize')
+  }
 }
 
 function selectCulture(culture) {
@@ -276,20 +297,14 @@ function handleLandmarkClick(landmark, scroll = false) {
     nextTick(() => {
       directionsSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
-  } else {
-    scrollToLandmark(landmark.id)
   }
 
   clearMapMarkers()
-}
-
-function scrollToLandmark(id) {
-  nextTick(() => {
-    const el = landmarkRefs[id]
-    if (el?.scrollIntoView) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-  })
+  // Center map on clicked landmark
+  if (map.value && landmark) {
+    map.value.setCenter({ lat: landmark.lat, lng: landmark.lng })
+    map.value.setZoom(15)
+  }
 }
 
 function changeTransportMode(mode) {
@@ -298,7 +313,10 @@ function changeTransportMode(mode) {
 }
 
 function updateRouteToLandmark(landmark) {
-  if (!directionsService.value || !directionsRenderer.value) return
+  if (!directionsService.value || !directionsRenderer.value || !google?.maps?.DirectionsService) {
+    console.error("Directions service not available")
+    return
+  }
 
   directionsRenderer.value.set('directions', null)
   directionsService.value.route({
@@ -306,7 +324,7 @@ function updateRouteToLandmark(landmark) {
     destination: { lat: landmark.lat, lng: landmark.lng },
     travelMode: google.maps.TravelMode[transportMode.value]
   }, (res, status) => {
-    if (status === 'OK') {
+    if (status === 'OK' && res) {
       directionsRenderer.value.setDirections(res)
       const leg = res.routes[0].legs[0]
       routeSteps.value = leg.steps.map(step => ({
@@ -319,6 +337,10 @@ function updateRouteToLandmark(landmark) {
         distance: leg.distance.text,
         arrival: calculateArrivalTime(leg.duration.value)
       }
+    } else {
+      console.error("Directions request failed:", status)
+      routeSteps.value = []
+      routeSummary.value = { duration: '', distance: '', arrival: '' }
     }
   })
 }
@@ -329,6 +351,11 @@ function calculateArrivalTime(seconds) {
 }
 
 function updateMarkers() {
+  if (!map.value || !google?.maps?.Marker) {
+    console.error("Map not initialized")
+    return
+  }
+
   clearMapMarkers()
   const bounds = new google.maps.LatLngBounds()
 
@@ -357,10 +384,13 @@ function clearDirections() {
   if (directionsRenderer.value) {
     directionsRenderer.value.set('directions', null)
     routeSteps.value = []
+    routeSummary.value = { duration: '', distance: '', arrival: '' }
   }
 }
 
 function savePDF() {
+  if (!activeLandmark.value) return
+
   const contentDiv = document.createElement('div')
   contentDiv.style.width = '600px'
   contentDiv.style.padding = '20px'
@@ -369,13 +399,13 @@ function savePDF() {
 
   contentDiv.innerHTML = `
     <h1>${activeLandmark.value.name}</h1>
-    <p><strong>Location:</strong> ${activeLandmark.value.location}</p>
+    <p><strong>${t('landmarks.directions.location')}:</strong> ${activeLandmark.value.location}</p>
     <img src="${activeLandmark.value.image}" style="width:100%;border-radius:8px;" />
-    <p><strong>Description:</strong> ${activeLandmark.value.description}</p>
-    <p><strong>Distance:</strong> ${routeSummary.value.distance}</p>
-    <p><strong>Duration:</strong> ${routeSummary.value.duration}</p>
-    <p><strong>Arrival:</strong> ${routeSummary.value.arrival}</p>
-    <h2>Step-by-step Directions:</h2>
+    <p><strong>${t('landmarks.directions.description')}:</strong> ${activeLandmark.value.description}</p>
+    <p><strong>${t('landmarks.directions.distance')}:</strong> ${routeSummary.value.distance}</p>
+    <p><strong>${t('landmarks.directions.time')}:</strong> ${routeSummary.value.duration}</p>
+    <p><strong>${t('landmarks.directions.arrival')}:</strong> ${routeSummary.value.arrival}</p>
+    <h2>${t('landmarks.directions.steps')}:</h2>
     ${routeSteps.value.map((s, i) => `
       <p><strong>${i + 1}.</strong> ${s.instructions} (${s.distance}, ${s.duration})</p>
     `).join('')}
@@ -392,9 +422,8 @@ function savePDF() {
 }
 
 function playAudioGuide() {
-  const audio = document.querySelector('audio')
-  if (audio) {
-    audio.play()
+  if (audioRef.value) {
+    audioRef.value.play()
   }
 }
 
@@ -405,18 +434,14 @@ function startLocationWatch() {
         lat: pos.coords.latitude,
         lng: pos.coords.longitude
       }
+    }, (err) => {
+      console.error("Geolocation error:", err)
     })
   }
 }
 
-onMounted(() => {
-  startLocationWatch()
-
-  const script = document.createElement('script')
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMap`
-  script.async = true
-  script.defer = true
-  window.initMap = () => {
+function initMap() {
+  try {
     map.value = new google.maps.Map(document.getElementById('map'), {
       center: userLocation.value,
       zoom: 12
@@ -428,14 +453,41 @@ onMounted(() => {
     directionsRenderer.value = new google.maps.DirectionsRenderer({ map: map.value })
 
     fetchLandmarks()
+  } catch (error) {
+    console.error("Error initializing map:", error)
   }
+}
 
-  document.head.appendChild(script)
+onMounted(() => {
+  startLocationWatch()
+
+  // 检查Google Maps API是否已加载
+  if (window.google && window.google.maps) {
+    initMap()
+  } else {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+    if (!apiKey) {
+      console.error("Google Maps API Key not found. Please set VITE_GOOGLE_MAPS_API_KEY in .env file")
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMaps`
+    script.async = true
+    script.defer = true
+    
+    window.initGoogleMaps = function() {
+      initMap()
+    }
+    
+    document.head.appendChild(script)
+  }
 })
 
 onUnmounted(() => {
-  delete window.initMap
-  const script = document.querySelector('script[src*="maps.googleapis.com"]')
-  if (script) script.remove()
+  // 清理全局回调函数
+  if (window.initGoogleMaps) {
+    delete window.initGoogleMaps
+  }
 })
-</script>
+</script> 
