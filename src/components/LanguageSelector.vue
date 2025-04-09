@@ -1,62 +1,37 @@
 <template>
-  <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center">
-    <!-- Backdrop with blur effect -->
-    <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
-    
-    <!-- Modal content -->
-    <div class="relative bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6 z-10">
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome! Please choose your preferred language 🌐</h2>
-        <p class="text-gray-600">Select your language to continue</p>
-      </div>
-      
-      <div class="space-y-4">
-        <button 
-          v-for="lang in languages" 
-          :key="lang.code"
-          @click="selectLanguage(lang.code)"
-          class="group w-full flex items-center justify-center p-4 rounded-lg border-2 transition-all duration-300 relative overflow-hidden"
-          :class="[
-            'hover:scale-105',
-            'animate-pulse-border',
-            lang.code === 'en' ? 'border-blue-500 hover:bg-blue-50' :
-            lang.code === 'zh' ? 'border-red-500 hover:bg-red-50' :
-            lang.code === 'vi' ? 'border-green-500 hover:bg-green-50' :
-            'border-orange-500 hover:bg-orange-50'
-          ]"
-        >
-          <!-- Gradient background -->
-          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-               :class="[
-                 lang.code === 'en' ? 'bg-gradient-to-r from-blue-100 to-blue-200' :
-                 lang.code === 'zh' ? 'bg-gradient-to-r from-red-100 to-red-200' :
-                 lang.code === 'vi' ? 'bg-gradient-to-r from-green-100 to-green-200' :
-                 'bg-gradient-to-r from-orange-100 to-orange-200'
-               ]">
+  <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <!-- Background overlay -->
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+      <!-- Modal panel -->
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <h3 class="text-2xl font-bold text-center mb-8">{{ $t('home.language.viewIn') }}</h3>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <button v-for="lang in languages" :key="lang.code"
+              @click="selectLanguage(lang.code)"
+              class="relative p-4 rounded-lg border-2 transition-all duration-300 group hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <!-- Content -->
+              <div class="relative flex items-center space-x-3">
+                <span class="text-3xl transform group-hover:scale-110 transition-transform duration-300">{{ lang.flag }}</span>
+                <span class="text-lg font-medium group-hover:font-bold transition-all duration-300">{{ lang.name }}</span>
+              </div>
+            </button>
           </div>
           
-          <!-- Content -->
-          <div class="relative flex items-center space-x-3">
-            <span class="text-3xl transform group-hover:scale-110 transition-transform duration-300">{{ lang.flag }}</span>
-            <span class="text-lg font-medium group-hover:font-bold transition-all duration-300">{{ lang.name }}</span>
+          <div class="mt-6 flex items-center justify-center">
+            <label class="flex items-center cursor-pointer group">
+              <input 
+                type="checkbox" 
+                v-model="dontShowAgain" 
+                class="form-checkbox h-5 w-5 text-blue-600 rounded transition-colors duration-200"
+              >
+              <span class="ml-2 text-gray-700 group-hover:text-gray-900 transition-colors duration-200">Don't show this again</span>
+            </label>
           </div>
-          
-          <!-- Tooltip -->
-          <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-3 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-            Click to read in {{ lang.name }}
-          </div>
-        </button>
-      </div>
-      
-      <div class="mt-6 flex items-center justify-center">
-        <label class="flex items-center cursor-pointer group">
-          <input 
-            type="checkbox" 
-            v-model="dontShowAgain" 
-            class="form-checkbox h-5 w-5 text-blue-600 rounded transition-colors duration-200"
-          >
-          <span class="ml-2 text-gray-700 group-hover:text-gray-900 transition-colors duration-200">Don't show this again</span>
-        </label>
+        </div>
       </div>
     </div>
   </div>
@@ -72,34 +47,26 @@ const dontShowAgain = ref(false)
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'zh', name: '简体中文', flag: '🇨🇳' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
   { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
   { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' }
 ]
 
+const selectLanguage = (lang) => {
+  locale.value = lang
+  localStorage.setItem('language', lang)
+  if (dontShowAgain.value) {
+    localStorage.setItem('hideLanguageModal', 'true')
+  }
+  showModal.value = false
+}
+
 onMounted(() => {
-  // Check if user has already selected a language
-  const savedLanguage = localStorage.getItem('language')
-  const dontShowAgain = localStorage.getItem('dontShowLanguageSelector')
-  
-  if (savedLanguage) {
-    locale.value = savedLanguage
-  } else if (!dontShowAgain) {
-    // Show the language selector if no language is saved and user hasn't chosen to hide it
+  const hideModal = localStorage.getItem('hideLanguageModal')
+  if (!hideModal) {
     showModal.value = true
   }
 })
-
-const selectLanguage = (langCode) => {
-  locale.value = langCode
-  localStorage.setItem('language', langCode)
-  
-  if (dontShowAgain.value) {
-    localStorage.setItem('dontShowLanguageSelector', 'true')
-  }
-  
-  showModal.value = false
-}
 </script>
 
 <style scoped>

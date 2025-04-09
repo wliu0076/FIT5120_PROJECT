@@ -8,21 +8,15 @@ import en from './locales/en.json'
 import zh from './locales/zh.json'
 import vi from './locales/vi.json'
 
-// 获取 cookie 中的语言设置
-const getLanguageFromCookie = () => {
-  const cookies = document.cookie.split(';')
-  for (let cookie of cookies) {
-    const [name, value] = cookie.trim().split('=')
-    if (name === 'language') {
-      return value
-    }
-  }
-  return 'zh' // 默认语言
+// 从 localStorage 获取语言设置
+const getLanguage = () => {
+  const savedLanguage = localStorage.getItem('language')
+  return savedLanguage || navigator.language.split('-')[0] || 'zh'
 }
 
 const i18n = createI18n({
   legacy: false, 
-  locale: getLanguageFromCookie(), 
+  locale: getLanguage(), 
   fallbackLocale: 'en', 
   messages: {
     en,

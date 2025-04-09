@@ -53,8 +53,11 @@
           <!-- 右侧操作区 -->
           <div class="flex items-center space-x-3">
             <!-- 语言切换 -->
-            <div class="relative" @click.away="isLanguageOpen = false">
-              <button @click="isLanguageOpen = !isLanguageOpen" class="flex items-center space-x-1 px-3 py-2 border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 transition-all duration-200">
+            <div class="relative" v-click-outside="closeLanguageDropdown">
+              <button 
+                @click="toggleLanguageDropdown" 
+                class="flex items-center space-x-1 px-3 py-2 border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 transition-all duration-200"
+              >
                 <span class="text-sm font-medium">
                   <span class="hidden sm:inline-block">
                     {{ currentLanguage === 'zh' ? '中文' : 
@@ -67,42 +70,43 @@
                        currentLanguage === 'vi' ? 'VI' : 'HI' }}
                   </span>
                 </span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  class="h-4 w-4 text-gray-500 transition-transform duration-200"
+                  :class="{ 'transform rotate-180': isLanguageOpen }"
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               
               <!-- 语言下拉菜单 -->
-              <div v-if="isLanguageOpen" class="absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50 transform origin-top-right transition-all duration-200">
-                <a href="#" @click.prevent="setLanguage('en')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
-                  <div class="flex items-center">
-                    <span class="mr-2 flag-icon">🇬🇧</span>
-                    <span>English</span>
-                    <span v-if="currentLanguage === 'en'" class="ml-auto text-orange-500">✓</span>
-                  </div>
-                </a>
-                <a href="#" @click.prevent="setLanguage('zh')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
-                  <div class="flex items-center">
-                    <span class="mr-2 flag-icon">🇨🇳</span>
-                    <span>中文</span>
-                    <span v-if="currentLanguage === 'zh'" class="ml-auto text-orange-500">✓</span>
-                  </div>
-                </a>
-                <a href="#" @click.prevent="setLanguage('vi')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
-                  <div class="flex items-center">
-                    <span class="mr-2 flag-icon">🇻🇳</span>
-                    <span>Tiếng Việt</span>
-                    <span v-if="currentLanguage === 'vi'" class="ml-auto text-orange-500">✓</span>
-                  </div>
-                </a>
-                <a href="#" @click.prevent="setLanguage('hi')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600">
-                  <div class="flex items-center">
-                    <span class="mr-2 flag-icon">🇮🇳</span>
-                    <span>हिन्दी</span>
-                    <span v-if="currentLanguage === 'hi'" class="ml-auto text-orange-500">✓</span>
-                  </div>
-                </a>
-              </div>
+              <transition
+                enter-active-class="transition ease-out duration-100"
+                enter-from-class="transform opacity-0 scale-95"
+                enter-to-class="transform opacity-100 scale-100"
+                leave-active-class="transition ease-in duration-75"
+                leave-from-class="transform opacity-100 scale-100"
+                leave-to-class="transform opacity-0 scale-95"
+              >
+                <div v-show="isLanguageOpen" class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                  <a 
+                    v-for="lang in languages" 
+                    :key="lang.code"
+                    href="#" 
+                    @click.prevent="setLanguage(lang.code)" 
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600"
+                  >
+                    <div class="flex items-center">
+                      <span class="mr-2 flag-icon">{{ lang.flag }}</span>
+                      <span>{{ lang.name }}</span>
+                      <span v-if="currentLanguage === lang.code" class="ml-auto text-orange-500">✓</span>
+                    </div>
+                  </a>
+                </div>
+              </transition>
             </div>
             
             <!-- 移动菜单按钮 -->
@@ -162,11 +166,41 @@ const currentLanguage = ref(locale.value)
 const isLanguageOpen = ref(false)
 const isMenuOpen = ref(false)
 
+const languages = [
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' }
+]
+
+const toggleLanguageDropdown = () => {
+  isLanguageOpen.value = !isLanguageOpen.value
+}
+
+const closeLanguageDropdown = () => {
+  isLanguageOpen.value = false
+}
+
 const setLanguage = (lang) => {
   currentLanguage.value = lang
   locale.value = lang
   localStorage.setItem('language', lang)
-  isLanguageOpen.value = false
+  closeLanguageDropdown()
+}
+
+// 点击外部关闭下拉菜单的指令
+const vClickOutside = {
+  mounted(el, binding) {
+    el.clickOutsideEvent = (event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value()
+      }
+    }
+    document.addEventListener('click', el.clickOutsideEvent)
+  },
+  unmounted(el) {
+    document.removeEventListener('click', el.clickOutsideEvent)
+  }
 }
 
 onMounted(() => {

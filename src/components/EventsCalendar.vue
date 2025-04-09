@@ -1116,31 +1116,12 @@ function filterByCategory(categoryId) {
 // Update the navigation function
 function navigateToEvent(event) {
   if (event && event.location) {
-    // 使用console.log记录导航信息，便于调试
-    console.log('Navigating to:', event.location);
-    
-    try {
-      router.push({
-        name: 'navigation',
-        query: {
-          destination: event.location,
-          eventName: event.name || 'Event',
-          eventTime: event.datetime ? new Date(event.datetime).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          }) : '',
-          eventDate: event.datetime ? new Date(event.datetime).toLocaleDateString([], {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }) : '',
-          address: event.location,
-          autoFill: 'true'
-        }
-      });
-    } catch (error) {
-      console.error('Navigation error:', error);
-    }
+    router.push({
+      name: 'navigation',
+      query: {
+        destination: event.location
+      }
+    });
   } else {
     console.warn('Cannot navigate: event or location is missing');
   }
@@ -1390,8 +1371,8 @@ watch(() => currentDate.value, async () => {
 // Initialize events function
 async function initializeEvents() {
   try {
-    // Show loading state
-    const loadingToast = true; // A loading indicator could be added here
+    // 使用ref而不是布尔值
+    const loadingToast = ref(true);
     
     // Get today's date
     const today = new Date();
@@ -1465,7 +1446,7 @@ async function initializeEvents() {
     currentSlide.value = 0;
     
     // Hide loading state
-    loadingToast && (loadingToast.value = false);
+    loadingToast.value = false;
   } catch (error) {
     console.error("Failed to initialize event data:", error);
     // Show error notification

@@ -27,8 +27,8 @@
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-700">{{ $t('landmarks.viewMode.title') }}</h3>
         <div class="flex space-x-2">
-          <button @click="toggleView('map')" :class="[viewMode === 'map' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800', 'px-4 py-1 rounded-lg']">{{ $t('landmarks.viewMode.map') }}</button>
           <button @click="toggleView('list')" :class="[viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800', 'px-4 py-1 rounded-lg']">{{ $t('landmarks.viewMode.list') }}</button>
+          <button @click="toggleView('map')" :class="[viewMode === 'map' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800', 'px-4 py-1 rounded-lg']">{{ $t('landmarks.viewMode.map') }}</button>
         </div>
       </div>
       <div v-show="viewMode === 'map'" class="rounded-lg shadow h-96 overflow-hidden">
@@ -37,7 +37,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10" v-show="viewMode === 'list'">
-      <div v-for="landmark in filteredLandmarks" :key="landmark.id" 
+      <div v-for="landmark in filteredLandmarks" :key="landmark.id" :ref="el => landmarkRefs[landmark.id] = el"
         class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition cursor-pointer"
         @click="handleLandmarkClick(landmark)">
         <img :src="landmark.image" @error="e => e.target.src = defaultImage"
@@ -45,6 +45,15 @@
         <div class="p-4">
           <h2 class="text-lg font-bold text-gray-800">{{ landmark.name }}</h2>
           <p class="text-sm text-gray-500 mt-1">{{ landmark.location }}</p>
+          <div class="mt-4 flex justify-end">
+            <button 
+              @click.stop="navigateToLandmark(landmark)"
+              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <i class="mdi mdi-navigation mr-2"></i>
+              {{ $t('landmarks.actions.navigate') }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -109,6 +118,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
 
@@ -121,7 +131,7 @@ const mapMarkers = ref([])
 
 const selectedCulture = ref('chinese')
 const landmarkSearch = ref('')
-const viewMode = ref('map')
+const viewMode = ref('list')
 const landmarks = ref([])
 const placeSuggestions = ref([])
 const routeSteps = ref([])
@@ -135,6 +145,8 @@ const landmarkRefs = {}
 const directionsSection = ref(null)
 const defaultImage = '/placeholder.jpg'
 const audioRef = ref(null)
+
+const router = useRouter()
 
 const transportModeLabels = {
   TRANSIT: t('landmarks.directions.transit'),
@@ -168,9 +180,13 @@ const fetchLandmarks = async () => {
     })
 
     landmarks.value = unique
+    console.log('获取到的地标:', landmarks.value)
     updateMarkers()
   } catch (error) {
     console.error("Error fetching landmarks:", error)
+    // 如果API调用失败，使用本地数据作为备份
+    landmarks.value = getFallbackLandmarks()
+    updateMarkers()
   }
 }
 
@@ -271,7 +287,9 @@ function selectPlacePrediction(prediction) {
 
 const filteredLandmarks = computed(() => {
   if (!landmarkSearch.value) return landmarks.value
-  return landmarks.value.filter(l => l.name.toLowerCase().includes(landmarkSearch.value.toLowerCase()))
+  return landmarks.value.filter(l => 
+    l.name.toLowerCase().includes(landmarkSearch.value.toLowerCase())
+  )
 })
 
 function toggleView(mode) {
@@ -285,26 +303,75 @@ function toggleView(mode) {
 function selectCulture(culture) {
   selectedCulture.value = culture
   landmarkSearch.value = ''
+  
+  // 清除当前地图标记
+  clearMapMarkers()
+  
+  // 重置当前活动地标和路由步骤
+  activeLandmark.value = null
+  routeSteps.value = []
+  
+  // 获取新的地标列表
   fetchLandmarks()
+  
+  // 如果当前视图是列表，滚动到顶部
+  if (viewMode.value === 'list') {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+function navigateToLandmark(landmark) {
+  // 阻止事件冒泡，避免触发父元素的点击事件
+  event.stopPropagation();
+  
+  // 添加日志以跟踪传递的数据
+  console.log('导航到地标，传递的数据:', landmark);
+  
+  // 检查地标数据完整性
+  if (!landmark || !landmark.id || !landmark.name || !landmark.location) {
+    console.error('地标数据不完整:', landmark);
+    return;
+  }
+  
+  router.push({
+    name: 'landmark-navigation',
+    query: {
+      landmark: encodeURIComponent(JSON.stringify({
+        id: landmark.id,
+        name: landmark.name,
+        location: landmark.location,
+        description: landmark.description,
+        image: landmark.image,
+        lat: landmark.lat,
+        lng: landmark.lng
+      }))
+    }
+  });
 }
 
 function handleLandmarkClick(landmark, scroll = false) {
   clearDirections()
   activeLandmark.value = landmark
   updateRouteToLandmark(landmark)
-
-  if (scroll) {
+  
+  if (scroll && directionsSection.value) {
     nextTick(() => {
-      directionsSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      directionsSection.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
+  } else {
+    scrollToLandmark(landmark.id)
   }
+}
 
-  clearMapMarkers()
-  // Center map on clicked landmark
-  if (map.value && landmark) {
-    map.value.setCenter({ lat: landmark.lat, lng: landmark.lng })
-    map.value.setZoom(15)
-  }
+function scrollToLandmark(id) {
+  nextTick(() => {
+    const el = landmarkRefs[id]
+    if (el && el.scrollIntoView) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.classList.add('ring-2', 'ring-blue-500')
+      setTimeout(() => el.classList.remove('ring-2', 'ring-blue-500'), 1500)
+    }
+  })
 }
 
 function changeTransportMode(mode) {
@@ -365,7 +432,7 @@ function updateMarkers() {
       map: map.value,
       title: landmark.name
     })
-    marker.addListener('click', () => handleLandmarkClick(landmark, true))
+    marker.addListener('click', () => navigateToLandmark(landmark))
     mapMarkers.value.push(marker)
     bounds.extend(marker.getPosition())
   })
@@ -490,4 +557,76 @@ onUnmounted(() => {
     delete window.initGoogleMaps
   }
 })
+
+// 添加备用数据函数
+function getFallbackLandmarks() {
+  const fallbackData = {
+    chinese: [
+      { 
+        id: '1',
+        placeId: 'chinatown', 
+        name: '墨尔本唐人街', 
+        location: 'Little Bourke St, Melbourne VIC 3000', 
+        lat: -37.8115, 
+        lng: 144.9711, 
+        image: '/landmarks/chinatown.jpg', 
+        description: '墨尔本唐人街是澳大利亚最古老的华人聚居区之一，以其丰富的中国美食和文化特色闻名。' 
+      },
+      { 
+        id: '2',
+        placeId: 'chinese-museum', 
+        name: '墨尔本中国博物馆', 
+        location: '22 Cohen Place, Melbourne VIC 3000', 
+        lat: -37.8072, 
+        lng: 144.9706, 
+        image: '/landmarks/chinese-museum.jpg', 
+        description: '博物馆展示了澳大利亚华人的历史和文化遗产。' 
+      },
+      {
+        id: '3',
+        placeId: 'box-hill',
+        name: 'Box Hill 中心',
+        location: 'Box Hill Central, Melbourne VIC 3128',
+        lat: -37.8190,
+        lng: 145.1220,
+        image: '/landmarks/box-hill.jpg',
+        description: '墨尔本最大的亚洲美食和购物中心之一。'
+      }
+    ],
+    indian: [
+      { 
+        id: '4',
+        placeId: 'temple', 
+        name: '希瓦毗湿奴神庙', 
+        location: '52 Boundary Rd, Carrum Downs VIC 3201', 
+        lat: -38.0893, 
+        lng: 145.1584, 
+        image: '/landmarks/shiva-temple.jpg', 
+        description: '维多利亚州最大的印度教寺庙。' 
+      },
+      { 
+        id: '5',
+        placeId: 'indian-museum', 
+        name: '印度文化中心', 
+        location: 'Federation Square, Melbourne VIC 3000', 
+        lat: -37.8183, 
+        lng: 144.9671, 
+        image: '/landmarks/indian-museum.jpg', 
+        description: '展示印度文化艺术和历史的文化中心。' 
+      },
+      {
+        id: '6',
+        placeId: 'dandenong',
+        name: 'Little India Dandenong',
+        location: 'Foster Street, Dandenong VIC 3175',
+        lat: -37.9814,
+        lng: 145.2119,
+        image: '/landmarks/little-india.jpg',
+        description: '墨尔本最著名的印度文化区，汇集了众多印度餐厅和商店。'
+      }
+    ]
+  }
+  
+  return fallbackData[selectedCulture.value] || []
+}
 </script> 

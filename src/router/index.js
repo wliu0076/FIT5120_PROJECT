@@ -3,6 +3,8 @@ import HomeView from '../views/HomeView.vue'
 import EventsCalendar from '../components/EventsCalendar.vue'
 import NavigationView from '../views/NavigationView.vue'
 import HelpView from '../views/HelpView.vue'
+import CulturalLandmarks from '../views/CulturalLandmarks.vue'
+import LandmarkNavigation from '../views/LandmarkNavigation.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,7 +42,12 @@ const router = createRouter({
     {
       path: '/landmarks',
       name: 'landmarks',
-      component: () => import('../views/CulturalLandmarks.vue')
+      component: CulturalLandmarks
+    },
+    {
+      path: '/landmark-navigation',
+      name: 'landmark-navigation',
+      component: LandmarkNavigation
     }
   ],
   scrollBehavior(to, from, savedPosition) {

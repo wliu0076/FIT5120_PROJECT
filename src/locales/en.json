@@ -84,6 +84,7 @@
     "title": "Cultural Landmarks",
     "subtitle": "Explore cultural landmarks and heritage sites in Melbourne",
     "searchPlaceholder": "Search landmark...",
+    "description": "Description",
     "filters": {
       "chinese": "Chinese",
       "indian": "Indian"
@@ -106,6 +107,17 @@
       "location": "Location",
       "description": "Description",
       "steps": "Step-by-step Directions"
+    },
+    "actions": {
+      "navigate": "Navigate"
+    },
+    "loading": {
+      "pleaseWait": "Please wait while we prepare your information",
+      "loadingMap": "Loading map",
+      "calculatingRoute": "Calculating best route",
+      "gettingLocation": "Getting your location",
+      "generatingPdf": "Generating PDF",
+      "loadingDescription": "Loading description..."
     }
   },
   "travel": {
@@ -130,7 +142,10 @@
     "selectedLocation": "Selected Location",
     "nearbyEvents": "Nearby Events",
     "within2km": "Within 2km",
-    "noNearbyEvents": "No events found nearby"
+    "noNearbyEvents": "No events found nearby",
+    "displayAddress": "Display Address",
+    "currentAddress": "Current Address",
+    "noAddressSelected": "No address selected"
   },
   "help": {
     "title": "Help Center",
