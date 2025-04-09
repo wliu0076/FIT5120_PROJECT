@@ -15,3 +15,12 @@ applications:
       cache:
         paths:
           - node_modules/**/*  
+      customHeaders:
+        - pattern: '**/*'
+          headers:
+            - key: 'Cache-Control'
+              value: 'max-age=0, no-cache, no-store, must-revalidate'
+      redirects:
+        - source: '/api/<*>'
+          destination: 'http://3.107.74.118:5000/<*>'
+          status: 200
