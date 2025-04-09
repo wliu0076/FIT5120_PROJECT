@@ -9,7 +9,7 @@ applications:
           commands:
             - npm run build
       artifacts:
-        baseDirectory: dist
+        baseDirectory: FIT5120_PROJECT/dist
         files:
           - '**/*'
       cache:
