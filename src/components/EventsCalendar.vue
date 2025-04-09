@@ -669,6 +669,13 @@
         </div>
       </div>
     </div>
+
+    <!-- Attribution Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-12">
+      <div class="flex justify-center">
+        <img src="/attribution.png" alt="Data Attribution" class="max-w-full h-auto shadow-md rounded-lg" />
+      </div>
+    </div>
   </div>
 </template>
 

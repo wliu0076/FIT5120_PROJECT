@@ -6,7 +6,7 @@
 
       <div class="flex flex-wrap gap-3 mb-4">
         <button v-for="culture in cultures" :key="culture.value" @click="selectCulture(culture.value)"
-          :class="[ selectedCulture === culture.value ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200', 'px-4 py-2 rounded-full font-semibold border transition']">
+          :class="[selectedCulture === culture.value ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200', 'px-4 py-2 rounded-full font-semibold border transition']">
           {{ $t(`landmarks.filters.${culture.value}`) }}
         </button>
       </div>
@@ -77,7 +77,7 @@
       <div class="flex space-x-3 mb-4">
         <button v-for="mode in ['TRANSIT', 'WALKING', 'DRIVING']" :key="mode"
           @click="changeTransportMode(mode)"
-          :class="[ transportMode === mode ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200', 'px-4 py-2 rounded-full border text-sm font-medium transition']">
+          :class="[transportMode === mode ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200', 'px-4 py-2 rounded-full border text-sm font-medium transition']">
           {{ $t(`landmarks.directions.${mode.toLowerCase()}`) }}
         </button>
       </div>
@@ -143,7 +143,7 @@ const popupAudio = '/src/info.mp3'
 
 const landmarkRefs = {}
 const directionsSection = ref(null)
-const defaultImage = '/placeholder.jpg'
+const defaultImage = '/imageerror.png'
 const audioRef = ref(null)
 
 const router = useRouter()
@@ -485,6 +485,8 @@ function savePDF() {
     pdf.addImage(imgData, 'PNG', 0, 0, 210, 0)
     pdf.save(`${activeLandmark.value.name}-guide.pdf`)
     document.body.removeChild(contentDiv)
+  }).catch(error => {
+    console.error('PDF 生成错误:', error)
   })
 }
 
@@ -494,139 +496,104 @@ function playAudioGuide() {
   }
 }
 
-function startLocationWatch() {
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(pos => {
-      userLocation.value = {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude
-      }
-    }, (err) => {
-      console.error("Geolocation error:", err)
-    })
-  }
-}
-
-function initMap() {
-  try {
-    map.value = new google.maps.Map(document.getElementById('map'), {
-      center: userLocation.value,
-      zoom: 12
-    })
-
-    placesService.value = new google.maps.places.PlacesService(map.value)
-    autocompleteService.value = new google.maps.places.AutocompleteService()
-    directionsService.value = new google.maps.DirectionsService()
-    directionsRenderer.value = new google.maps.DirectionsRenderer({ map: map.value })
-
-    fetchLandmarks()
-  } catch (error) {
-    console.error("Error initializing map:", error)
-  }
-}
-
 onMounted(() => {
-  startLocationWatch()
-
-  // 检查Google Maps API是否已加载
   if (window.google && window.google.maps) {
     initMap()
   } else {
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
     if (!apiKey) {
-      console.error("Google Maps API Key not found. Please set VITE_GOOGLE_MAPS_API_KEY in .env file")
+      console.error("Google Maps API Key not found")
       return
     }
 
     const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMaps`
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`
     script.async = true
     script.defer = true
     
-    window.initGoogleMaps = function() {
+    window.initMap = function() {
       initMap()
     }
     
     document.head.appendChild(script)
   }
-})
 
-onUnmounted(() => {
-  // 清理全局回调函数
-  if (window.initGoogleMaps) {
-    delete window.initGoogleMaps
+  // 获取用户位置
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        userLocation.value = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        }
+      },
+      error => {
+        console.warn('获取用户位置失败:', error)
+      }
+    )
+  }
+
+  // 初始化地图
+  function initMap() {
+    map.value = new google.maps.Map(document.getElementById('map'), {
+      center: userLocation.value,
+      zoom: 12,
+      mapTypeControl: false
+    })
+
+    directionsService.value = new google.maps.DirectionsService()
+    directionsRenderer.value = new google.maps.DirectionsRenderer({
+      map: map.value
+    })
+    
+    placesService.value = new google.maps.places.PlacesService(map.value)
+    autocompleteService.value = new google.maps.places.AutocompleteService()
+
+    fetchLandmarks()
   }
 })
 
-// 添加备用数据函数
 function getFallbackLandmarks() {
-  const fallbackData = {
-    chinese: [
-      { 
-        id: '1',
-        placeId: 'chinatown', 
-        name: '墨尔本唐人街', 
-        location: 'Little Bourke St, Melbourne VIC 3000', 
-        lat: -37.8115, 
-        lng: 144.9711, 
-        image: '/landmarks/chinatown.jpg', 
-        description: '墨尔本唐人街是澳大利亚最古老的华人聚居区之一，以其丰富的中国美食和文化特色闻名。' 
-      },
-      { 
-        id: '2',
-        placeId: 'chinese-museum', 
-        name: '墨尔本中国博物馆', 
-        location: '22 Cohen Place, Melbourne VIC 3000', 
-        lat: -37.8072, 
-        lng: 144.9706, 
-        image: '/landmarks/chinese-museum.jpg', 
-        description: '博物馆展示了澳大利亚华人的历史和文化遗产。' 
-      },
-      {
-        id: '3',
-        placeId: 'box-hill',
-        name: 'Box Hill 中心',
-        location: 'Box Hill Central, Melbourne VIC 3128',
-        lat: -37.8190,
-        lng: 145.1220,
-        image: '/landmarks/box-hill.jpg',
-        description: '墨尔本最大的亚洲美食和购物中心之一。'
-      }
-    ],
-    indian: [
-      { 
-        id: '4',
-        placeId: 'temple', 
-        name: '希瓦毗湿奴神庙', 
-        location: '52 Boundary Rd, Carrum Downs VIC 3201', 
-        lat: -38.0893, 
-        lng: 145.1584, 
-        image: '/landmarks/shiva-temple.jpg', 
-        description: '维多利亚州最大的印度教寺庙。' 
-      },
-      { 
-        id: '5',
-        placeId: 'indian-museum', 
-        name: '印度文化中心', 
-        location: 'Federation Square, Melbourne VIC 3000', 
-        lat: -37.8183, 
-        lng: 144.9671, 
-        image: '/landmarks/indian-museum.jpg', 
-        description: '展示印度文化艺术和历史的文化中心。' 
-      },
-      {
-        id: '6',
-        placeId: 'dandenong',
-        name: 'Little India Dandenong',
-        location: 'Foster Street, Dandenong VIC 3175',
-        lat: -37.9814,
-        lng: 145.2119,
-        image: '/landmarks/little-india.jpg',
-        description: '墨尔本最著名的印度文化区，汇集了众多印度餐厅和商店。'
-      }
-    ]
-  }
-  
-  return fallbackData[selectedCulture.value] || []
+  return selectedCulture.value === 'chinese' 
+    ? [
+        { 
+          id: 'chinatown', 
+          name: '墨尔本唐人街', 
+          location: 'Little Bourke St, Melbourne VIC 3000', 
+          lat: -37.8115, 
+          lng: 144.9711, 
+          image: '/landmarks/chinatown.jpg', 
+          description: '墨尔本唐人街是澳大利亚最古老的华人聚居区之一，以其丰富的中国美食和文化特色闻名。' 
+        },
+        { 
+          id: 'chinese-museum', 
+          name: '墨尔本中国博物馆', 
+          location: '22 Cohen Place, Melbourne VIC 3000', 
+          lat: -37.8116, 
+          lng: 144.9689, 
+          image: '/landmarks/chinese-museum.jpg', 
+          description: '博物馆展示了澳大利亚华人的历史和文化遗产。' 
+        }
+      ]
+    : [
+        { 
+          id: 'temple', 
+          name: '希瓦毗湿奴神庙', 
+          location: '52 Boundary Rd, Carrum Downs VIC 3201', 
+          lat: -38.0893, 
+          lng: 145.1584, 
+          image: '/landmarks/temple.jpg', 
+          description: '维多利亚州最大的印度教寺庙。' 
+        },
+        { 
+          id: 'indian-museum', 
+          name: '印度文化中心', 
+          location: 'Federation Square, Melbourne VIC 3000', 
+          lat: -37.8183, 
+          lng: 144.9671, 
+          image: '/landmarks/indian-museum.jpg', 
+          description: '展示印度文化艺术和历史的文化中心。' 
+        }
+      ]
 }
-</script> 
+</script>

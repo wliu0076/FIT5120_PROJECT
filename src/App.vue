@@ -33,14 +33,6 @@
               </router-link>
             </div>
             <div class="relative group">
-              <router-link to="/travel" class="hover:text-orange-600 px-4 py-2 rounded-lg text-gray-700 font-medium transition-colors duration-200 hover:bg-orange-50/60 relative"
-                :class="$route.path === '/travel' ? 'text-orange-600 bg-orange-50/80' : ''">
-                {{ $t('navigation.travel') }}
-                <span class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-10 h-0.5 rounded-full bg-orange-500"
-                      :class="$route.path === '/travel' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-all duration-300'"></span>
-              </router-link>
-            </div>
-            <div class="relative group">
               <router-link to="/landmarks" class="hover:text-orange-600 px-4 py-2 rounded-lg text-gray-700 font-medium transition-colors duration-200 hover:bg-orange-50/60 relative"
                 :class="$route.path === '/landmarks' ? 'text-orange-600 bg-orange-50/80' : ''">
                 {{ $t('navigation.landmarks') }}
@@ -131,10 +123,6 @@
             <router-link to="/events" class="block px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50/70 transition-colors duration-200"
               :class="$route.path === '/events' ? 'text-orange-600 bg-orange-50/70' : ''">
               {{ $t('navigation.events') }}
-            </router-link>
-            <router-link to="/travel" class="block px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50/70 transition-colors duration-200"
-              :class="$route.path === '/travel' ? 'text-orange-600 bg-orange-50/70' : ''">
-              {{ $t('navigation.travel') }}
             </router-link>
             <router-link to="/landmarks" class="block px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50/70 transition-colors duration-200"
               :class="$route.path === '/landmarks' ? 'text-orange-600 bg-orange-50/70' : ''">

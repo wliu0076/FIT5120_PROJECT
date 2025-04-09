@@ -59,7 +59,7 @@
         :ref="el => landmarkRefs[landmark.id] = el"
         class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition cursor-pointer"
         @click="handleLandmarkClick(landmark)">
-        <img :src="landmark.image" class="w-full h-48 object-cover" />
+        <img :src="landmark.image" @error="e => e.target.src = defaultImage" class="w-full h-48 object-cover" />
         <div class="p-4">
           <h2 class="text-lg font-bold text-gray-800">{{ landmark.name }}</h2>
           <p class="text-sm text-gray-500 mt-1">{{ landmark.location }}</p>
@@ -121,13 +121,49 @@
       <div
         v-if="popupLandmark"
         class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white rounded-xl shadow-xl border border-blue-300 p-4 w-full max-w-md z-50">
-        <img :src="popupLandmark.image" class="w-full h-40 object-cover rounded-lg mb-3" />
+        <img :src="popupLandmark.image" @error="e => e.target.src = defaultImage" class="w-full h-40 object-cover rounded-lg mb-3" />
         <h4 class="font-bold text-lg text-gray-800 mb-1">{{ popupLandmark.name }}</h4>
         <p class="text-sm text-gray-600 mb-2">{{ popupLandmark.description }}</p>
         <audio controls :src="popupAudio" class="w-full" />
         <button @click="popupLandmark = null" class="text-blue-600 hover:underline text-sm mt-2 block text-right">Close</button>
       </div>
     </transition>
+
+    <!-- Nearby Events -->
+    <div v-if="nearbyEvents.length" class="bg-white shadow-md rounded-xl p-6 mb-10">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Nearby Events</h3>
+      <div v-else class="grid grid-cols-1 gap-6">
+        <div v-for="event in nearbyEvents" 
+             :key="event.id" 
+             class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+          <img :src="event.image" @error="e => e.target.src = defaultImage" :alt="event.name" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">{{ event.name }}</h3>
+                <p class="text-sm text-gray-500 mt-1">{{ event.distance }}km away</p>
+              </div>
+              <span :class="['px-2 py-1 text-xs font-medium rounded-full', getCategoryColor(event.category)]">
+                {{ event.category }}
+              </span>
+            </div>
+            <p class="text-gray-600 text-sm mt-2">{{ event.address }}</p>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-sm text-gray-500">
+                <i class="mdi mdi-calendar mr-1"></i>
+                {{ formatDate(event.datetime) }}
+              </span>
+              <button 
+                @click="showDirections(event)"
+                class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                {{ $t('travel.getDirections') }}
+                <i class="mdi mdi-arrow-right ml-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -160,6 +196,9 @@ const TRANSPORT_MODE_LABELS = {
   DRIVING: 'Driving',
   WALKING: 'Walking'
 }
+
+// 添加默认图片常量
+const defaultImage = '/imageerror.png'
 
 const landmarks = {
   chinese: [

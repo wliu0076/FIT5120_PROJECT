@@ -129,7 +129,7 @@
           <div v-for="event in nearbyEvents" 
                :key="event.id" 
                class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-            <img :src="event.image" :alt="event.name" class="w-full h-48 object-cover">
+            <img :src="event.image" @error="e => e.target.src = defaultImage" :alt="event.name" class="w-full h-48 object-cover">
             <div class="p-4">
               <div class="flex items-start justify-between">
                 <div>
@@ -188,6 +188,7 @@ const routeSummary = ref({
   arrival: ''
 })
 const userLocation = ref({ lat: -37.8136, lng: 144.9631 }) // Melbourne CBD
+const defaultImage = '/imageerror.png' // 添加默认图片常量
 
 // 搜索相关状态
 const searchQuery = ref('')

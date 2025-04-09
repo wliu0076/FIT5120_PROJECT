@@ -110,7 +110,7 @@ const userLocation = ref({ lat: -37.818267, lng: 144.952974 })
 const transportMode = ref('TRANSIT')
 const routeSteps = ref([])
 const routeSummary = ref({ duration: '', distance: '', arrival: '' })
-const defaultImage = '/placeholder.jpg'
+const defaultImage = '/imageerror.png'
 const audioRef = ref(null)
 const popupAudio = '/src/info.mp3'
 
