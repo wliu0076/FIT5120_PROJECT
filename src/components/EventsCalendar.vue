@@ -1347,6 +1347,12 @@ const getEventsForDate = async (date) => {
   try {
     const events = await getEventsFromApi(dateString);
     console.log("getEventsFromApi returned:", events); // 输出返回的数据
+    
+    // 如果返回空数组，直接展示没有事件的信息
+    if (events.length === 0) {
+      console.log(`没有找到${dateString}的事件数据`);
+    }
+    
     return events;
   } catch (error) {
     console.error('Error fetching events:', error);

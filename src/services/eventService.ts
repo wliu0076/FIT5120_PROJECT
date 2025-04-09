@@ -10,7 +10,16 @@ export const getEventCountByMonth = async (year: number, month: number): Promise
     if (!response.ok) {
       throw new Error('Failed to fetch event counts');
     }
-    return await response.json();
+    
+    const data = await response.json();
+    
+    // 检查返回的数据格式是否正确
+    if (!Array.isArray(data)) {
+      console.error('API返回的数据不是数组格式:', data);
+      throw new Error('API返回的数据格式不正确');
+    }
+    
+    return data;
   } catch (error) {
     console.error('Error fetching event counts:', error);
     // 返回模拟数据作为备用
@@ -31,10 +40,22 @@ export const getEventsFromApi = async (date: string): Promise<Event[]> => {
       throw new Error('Failed to fetch events');
     }
     const events = await response.json();
+    
+    // 检查events是否是数组
+    if (!Array.isArray(events)) {
+      console.error('API返回的数据不是数组格式:', events);
+      return [];
+    }
+    
+    // 如果是空数组，直接返回
+    if (events.length === 0) {
+      return [];
+    }
+    
     return events.map((event: any) => ({
       ...event,
       // 确保datetime是ISO格式
-      datetime: new Date(event.datetime).toISOString(),
+      datetime: new Date(event.datetime || date + 'T12:00:00').toISOString(),
       // 如果image为空，使用占位图片
       image: event.image || getPlaceholderImage()
     }));
