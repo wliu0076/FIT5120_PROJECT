@@ -15,8 +15,14 @@ import { useI18n } from 'vue-i18n'
 const { locale } = useI18n()
 const currentLocale = ref(locale.value)
 
+// 设置 cookie
+const setLanguageCookie = (lang: string) => {
+  document.cookie = `language=${lang};path=/;max-age=31536000` // 有效期一年
+}
+
 const changeLanguage = () => {
   locale.value = currentLocale.value
+  setLanguageCookie(currentLocale.value)
 }
 
 watch(() => locale.value, (newLocale) => {
