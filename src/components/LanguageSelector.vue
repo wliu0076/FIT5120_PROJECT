@@ -38,12 +38,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { locale } = useI18n()
 const showModal = ref(false)
 const dontShowAgain = ref(false)
+
+const props = defineProps({
+  isOpen: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['close'])
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -58,14 +67,11 @@ const selectLanguage = (lang) => {
   if (dontShowAgain.value) {
     localStorage.setItem('hideLanguageModal', 'true')
   }
-  showModal.value = false
+  emit('close')
 }
 
-onMounted(() => {
-  const hideModal = localStorage.getItem('hideLanguageModal')
-  if (!hideModal) {
-    showModal.value = true
-  }
+watch(() => props.isOpen, (newVal) => {
+  showModal.value = newVal
 })
 </script>
 

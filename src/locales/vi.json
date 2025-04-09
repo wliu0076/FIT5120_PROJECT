@@ -168,5 +168,11 @@
       "callUs": "Gọi Cho Chúng Tôi",
       "getHelp": "Nhận Trợ Giúp"
     }
+  },
+  "pagination": {
+    "previous": "Trước",
+    "next": "Tiếp",
+    "page": "Trang",
+    "of": "trên"
   }
 } 

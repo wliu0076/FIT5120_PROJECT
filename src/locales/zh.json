@@ -188,20 +188,9 @@
     "language": {
       "viewIn": "选择您的语言"
     },
-    "howItWorks": {
-      "title": "使用指南",
-      "step1": {
-        "title": "寻找活动",
-        "description": "使用中文浏览活动信息"
-      },
-      "step2": {
-        "title": "获取路线",
-        "description": "查看详细的出行指南"
-      },
-      "step3": {
-        "title": "开始探索",
-        "description": "与社区一起参与活动"
-      }
+    "makingMelbourneSimple": {
+      "title": "让墨尔本探索变得简单",
+      "description": "我们致力于为您提供便捷的文化地标导航服务，帮助您发现城市中的文化瑰宝"
     },
     "categories": {
       "title": "热门类别",
@@ -223,5 +212,11 @@
       "callUs": "电话咨询",
       "getHelp": "获取帮助"
     }
+  },
+  "pagination": {
+    "previous": "上一页",
+    "next": "下一页",
+    "page": "第",
+    "of": "共"
   }
 } 

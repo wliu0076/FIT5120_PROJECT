@@ -138,7 +138,7 @@
     </main>
     
     <!-- Language Selector Modal -->
-    <LanguageSelector />
+    <LanguageSelector :is-open="isLanguageModalOpen" @close="closeLanguageModal" />
   </div>
 </template>
 
@@ -153,6 +153,7 @@ const { locale } = useI18n()
 const currentLanguage = ref(locale.value)
 const isLanguageOpen = ref(false)
 const isMenuOpen = ref(false)
+const isLanguageModalOpen = ref(false)
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -174,6 +175,14 @@ const setLanguage = (lang) => {
   locale.value = lang
   localStorage.setItem('language', lang)
   closeLanguageDropdown()
+  // 当用户选择语言时，显示语言选择器
+  if (route.path === '/landmarks' || route.path === '/events') {
+    isLanguageModalOpen.value = true
+  }
+}
+
+const closeLanguageModal = () => {
+  isLanguageModalOpen.value = false
 }
 
 // 点击外部关闭下拉菜单的指令

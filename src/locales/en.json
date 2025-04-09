@@ -192,20 +192,9 @@
     "language": {
       "viewIn": "View this site in your language"
     },
-    "howItWorks": {
-      "title": "How It Works",
-      "step1": {
-        "title": "Find an Event",
-        "description": "Browse events in your preferred language"
-      },
-      "step2": {
-        "title": "Get Travel Help",
-        "description": "Get step-by-step directions to the event"
-      },
-      "step3": {
-        "title": "Go Explore",
-        "description": "Enjoy the event with your community"
-      }
+    "makingMelbourneSimple": {
+      "title": "Making Melbourne Simple to Explore",
+      "description": "We are dedicated to providing convenient cultural landmark navigation services to help you discover the cultural treasures in the city"
     },
     "categories": {
       "title": "Popular Categories",
@@ -274,5 +263,11 @@
       "phone": "+61 3 1234 5678",
       "address": "Melbourne VIC 3000"
     }
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of"
   }
 } 

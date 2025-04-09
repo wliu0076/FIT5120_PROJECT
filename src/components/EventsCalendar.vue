@@ -614,7 +614,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-3">Looks Like It's Quiet Today</h3>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">Looks Like It's Quiet this day</h3>
             <p class="text-gray-600 max-w-md mx-auto mb-2">There aren't any events matching your current selection.</p>
             <p class="text-gray-600 max-w-md mx-auto">
               <span class="text-orange-500 font-medium">Suggestions:</span> 

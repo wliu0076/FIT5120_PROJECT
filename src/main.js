@@ -8,16 +8,15 @@ import en from './locales/en.json'
 import zh from './locales/zh.json'
 import vi from './locales/vi.json'
 
-// 从 localStorage 获取语言设置
 const getLanguage = () => {
   const savedLanguage = localStorage.getItem('language')
-  return savedLanguage || navigator.language.split('-')[0] || 'zh'
+  return savedLanguage || 'en' // 默认使用英语
 }
 
 const i18n = createI18n({
-  legacy: false, 
-  locale: getLanguage(), 
-  fallbackLocale: 'en', 
+  legacy: false,
+  locale: getLanguage(),
+  fallbackLocale: 'en',
   messages: {
     en,
     zh,

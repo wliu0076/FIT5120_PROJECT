@@ -11,16 +11,24 @@
         </button>
       </div>
 
-      <input v-model="landmarkSearch" type="text" :placeholder="$t('landmarks.searchPlaceholder')"
-        class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
-
-      <ul v-if="placeSuggestions.length"
-        class="absolute z-50 bg-white border border-gray-200 rounded-md mt-2 w-full max-h-60 overflow-auto shadow-lg">
-        <li v-for="prediction in placeSuggestions" :key="prediction.place_id" @click="selectPlacePrediction(prediction)"
-          class="px-4 py-2 cursor-pointer hover:bg-gray-100 text-gray-800">
-          {{ prediction.description }}
-        </li>
-      </ul>
+      <div class="relative mb-6">
+        <input 
+          v-model="landmarkSearch" 
+          type="text" 
+          :placeholder="$t('landmarks.searchPlaceholder')"
+          class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          @input="handleSearchInput"
+        />
+        <div v-if="placeSuggestions.length > 0" 
+          class="absolute z-50 bg-white border border-gray-200 rounded-md mt-1 w-full max-h-60 overflow-auto shadow-lg">
+          <div v-for="prediction in placeSuggestions" 
+            :key="prediction.place_id" 
+            @click="selectPlacePrediction(prediction)"
+            class="px-4 py-2 cursor-pointer hover:bg-gray-100 text-gray-800">
+            {{ prediction.description }}
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="bg-white shadow-md rounded-xl p-4 mb-6">
@@ -37,7 +45,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10" v-show="viewMode === 'list'">
-      <div v-for="landmark in filteredLandmarks" :key="landmark.id" :ref="el => landmarkRefs[landmark.id] = el"
+      <div v-for="landmark in paginatedLandmarks" :key="landmark.id" :ref="el => landmarkRefs[landmark.id] = el"
         class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition cursor-pointer"
         @click="handleLandmarkClick(landmark)">
         <img :src="landmark.image" @error="e => e.target.src = defaultImage"
@@ -56,6 +64,26 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div v-if="totalPages > 1" class="flex justify-center items-center space-x-2 mb-10">
+      <button 
+        @click="currentPage--" 
+        :disabled="currentPage === 1"
+        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {{ $t('pagination.previous') }}
+      </button>
+      <span class="px-4 py-2 text-gray-700">
+        {{ $t('pagination.page') }} {{ currentPage }} {{ $t('pagination.of') }} {{ totalPages }}
+      </span>
+      <button 
+        @click="currentPage++" 
+        :disabled="currentPage === totalPages"
+        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {{ $t('pagination.next') }}
+      </button>
     </div>
 
     <div v-if="routeSteps.length" class="bg-white shadow-md rounded-xl p-6 mb-10" ref="directionsSection">
@@ -495,6 +523,64 @@ function playAudioGuide() {
     audioRef.value.play()
   }
 }
+
+// 分页相关
+const currentPage = ref(1)
+const itemsPerPage = 9
+
+// 计算总页数
+const totalPages = computed(() => {
+  return Math.ceil(filteredLandmarks.value.length / itemsPerPage)
+})
+
+// 获取当前页的地标
+const paginatedLandmarks = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredLandmarks.value.slice(start, end)
+})
+
+// 监听搜索输入
+const handleSearchInput = debounce(async (event) => {
+  const value = event.target.value
+  if (!value || !autocompleteService.value || !google?.maps?.places) {
+    placeSuggestions.value = []
+    return
+  }
+
+  try {
+    const request = {
+      input: value,
+      location: new google.maps.LatLng(userLocation.value.lat, userLocation.value.lng),
+      radius: 10000
+    }
+
+    autocompleteService.value.getPlacePredictions(request, (predictions, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+        placeSuggestions.value = predictions.slice(0, 5) // 限制显示5个建议
+      } else {
+        placeSuggestions.value = []
+      }
+    })
+  } catch (error) {
+    console.error('搜索建议获取失败:', error)
+    placeSuggestions.value = []
+  }
+}, 300)
+
+// 防抖函数
+function debounce(fn, delay) {
+  let timeoutId
+  return function (...args) {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => fn.apply(this, args), delay)
+  }
+}
+
+// 监听筛选条件变化，重置页码
+watch([selectedCulture, landmarkSearch], () => {
+  currentPage.value = 1
+})
 
 onMounted(() => {
   if (window.google && window.google.maps) {
