@@ -699,7 +699,7 @@ const isMenuOpen = ref(false)
 const isLanguageOpen = ref(false)
 
 // Calendar state
-const currentDate = ref(new Date('2025-04-01'))
+const currentDate = ref(new Date('2024-09-01'))
 const selectedDate = ref(null)
 const monthEvents = ref({}) // 存储每月的事件数据
 const currentEvents = ref([]) // 存储当前选中日期的事件
@@ -1346,11 +1346,11 @@ const getEventsForDate = async (date) => {
   const dateString = date.toISOString().split('T')[0];
   try {
     const events = await getEventsFromApi(dateString);
-    console.log("getEventsFromApi returned:", events); // 输出返回的数据
+    console.log("getEventsFromApi returned:", events); // Log returned data
     
-    // 如果返回空数组，直接展示没有事件的信息
+    // If an empty array is returned, display no events information
     if (events.length === 0) {
-      console.log(`没有找到${dateString}的事件数据`);
+      console.log(`No events found for ${dateString}`);
     }
     
     return events;
@@ -1387,15 +1387,13 @@ async function initializeEvents() {
     // 使用ref而不是布尔值
     const loadingToast = ref(true);
     
-    // Get today's date
-    const today = new Date();
-    
-    // Update date selection
-    currentDate.value = today;
-    selectedDate.value = today;
+    // 保持当前设置的日期，仅当selectedDate为空时才设置新日期
+    if (!selectedDate.value) {
+      selectedDate.value = currentDate.value;
+    }
     
     // Get today's events
-    let events = await getEventsForDate(today);
+    let events = await getEventsForDate(selectedDate.value);
     
     // If no event data, use example data
     if (!events || events.length === 0) {
