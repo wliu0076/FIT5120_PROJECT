@@ -141,7 +141,9 @@
     "selectedLocation": "已选择位置",
     "nearbyEvents": "附近活动",
     "within2km": "2公里范围内",
-    "noNearbyEvents": "附近没有找到活动"
+    "noNearbyEvents": "附近没有找到活动",
+    "yourLocation": "您的位置",
+    "locationError": "无法获取您的位置，将使用默认位置。请确保您已允许位置访问权限。"
   },
   "help": {
     "title": "帮助中心",

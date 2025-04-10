@@ -209,6 +209,53 @@ onMounted(() => {
     }
   }
   
+  // 先获取用户位置，然后再初始化地图
+  getUserLocation()
+})
+
+// 获取用户位置
+function getUserLocation() {
+  if (navigator.geolocation) {
+    isLoading.value = true
+    
+    const options = {
+      enableHighAccuracy: true,  // 请求高精度位置
+      timeout: 10000,            // 10秒超时
+      maximumAge: 0              // 不使用缓存位置
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+      // 成功回调
+      (position) => {
+        console.log('Got user location:', position.coords)
+        userLocation.value = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        }
+        
+        // 获取位置后初始化地图
+        initializeMap()
+      },
+      // 错误回调
+      (error) => {
+        console.warn('Failed to get user location:', error.message)
+        alert(t('travel.locationError'))
+        
+        // 如果获取位置失败，使用默认位置并初始化地图
+        initializeMap()
+      },
+      // 配置选项
+      options
+    )
+  } else {
+    console.error('Geolocation is not supported by this browser')
+    // 如果浏览器不支持地理定位，直接使用默认位置初始化地图
+    initializeMap()
+  }
+}
+
+// 初始化地图的函数封装
+function initializeMap() {
   // 初始化地图和服务
   if (window.google && window.google.maps) {
     initMap()
@@ -216,6 +263,7 @@ onMounted(() => {
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
     if (!apiKey) {
       console.error("Google Maps API Key not found. Please set VITE_GOOGLE_MAPS_API_KEY in .env file")
+      isLoading.value = false
       return
     }
 
@@ -230,7 +278,74 @@ onMounted(() => {
     
     document.head.appendChild(script)
   }
-})
+}
+
+// 初始化地图
+function initMap() {
+  try {
+    map.value = new google.maps.Map(document.getElementById('map'), {
+      center: userLocation.value,
+      zoom: 14,
+      mapTypeControl: true,
+      fullscreenControl: true,
+      streetViewControl: true,
+      zoomControl: true
+    })
+
+    placesService.value = new google.maps.places.PlacesService(map.value)
+    autocompleteService.value = new google.maps.places.AutocompleteService()
+    directionsService.value = new google.maps.DirectionsService()
+    directionsRenderer.value = new google.maps.DirectionsRenderer({
+      map: map.value,
+      suppressMarkers: false,
+      polylineOptions: {
+        strokeColor: '#4285F4',
+        strokeWeight: 5,
+        strokeOpacity: 0.8
+      }
+    })
+
+    // 添加用户当前位置标记
+    const userMarker = new google.maps.Marker({
+      position: userLocation.value,
+      map: map.value,
+      title: t('travel.yourLocation'),
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor: '#4285F4',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 2
+      },
+      animation: google.maps.Animation.DROP,
+      zIndex: 2
+    })
+
+    // 为用户位置添加信息窗口
+    const infoWindow = new google.maps.InfoWindow({
+      content: `<div style="padding:5px;"><strong>${t('travel.yourLocation')}</strong></div>`
+    })
+
+    userMarker.addListener('click', () => {
+      infoWindow.open(map.value, userMarker)
+    })
+    
+    // 初始时短暂显示用户位置信息窗口
+    infoWindow.open(map.value, userMarker)
+    setTimeout(() => infoWindow.close(), 3000)
+
+    // 如果有初始目的地，计算路线
+    if (event.value && event.value.address) {
+      geocodeAddress(event.value.address)
+    }
+    
+    isLoading.value = false
+  } catch (error) {
+    console.error("Error initializing map:", error)
+    isLoading.value = false
+  }
+}
 
 // 监听语言变化，重新计算路线
 watch(locale, () => {
@@ -246,29 +361,6 @@ function updateURLParams(destination) {
       destination: encodeURIComponent(destination)
     }
   })
-}
-
-// 初始化地图
-function initMap() {
-  try {
-    map.value = new google.maps.Map(document.getElementById('map'), {
-      center: userLocation.value,
-      zoom: 14,
-      styles: [/* your map styles */]
-    })
-
-    placesService.value = new google.maps.places.PlacesService(map.value)
-    autocompleteService.value = new google.maps.places.AutocompleteService()
-    directionsService.value = new google.maps.DirectionsService()
-    directionsRenderer.value = new google.maps.DirectionsRenderer({ map: map.value })
-
-    // 如果有初始目的地，计算路线
-    if (event.value && event.value.address) {
-      geocodeAddress(event.value.address)
-    }
-  } catch (error) {
-    console.error("Error initializing map:", error)
-  }
 }
 
 // 修改交通方式

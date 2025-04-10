@@ -145,7 +145,9 @@
     "noNearbyEvents": "No events found nearby",
     "displayAddress": "Display Address",
     "currentAddress": "Current Address",
-    "noAddressSelected": "No address selected"
+    "noAddressSelected": "No address selected",
+    "yourLocation": "Your Location",
+    "locationError": "Could not access your location. Using default location. Please make sure you've allowed location access."
   },
   "help": {
     "title": "Help Center",
