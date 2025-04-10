@@ -132,7 +132,6 @@ const selectLanguage = async (langCode: string) => {
   background-color: #f5f5f5;
 }
 
-/* 美化滚动条 */
 .language-dropdown::-webkit-scrollbar {
   width: 6px;
 }

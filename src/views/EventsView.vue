@@ -1,10 +1,8 @@
 <template>
   <div class="events-view">
-    <!-- 轮播部分 -->
     <div class="relative bg-gradient-to-r from-orange-100 to-red-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="carousel-container relative">
-          <!-- 导航箭头 -->
           <button @click="previousSlide" 
                   class="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white">
             <span class="text-xl">←X</span>
@@ -13,8 +11,6 @@
                   class="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 rounded-full p-2 shadow-lg hover:bg-white">
             <span class="text-xl">X→</span>
           </button>
-
-          <!-- 轮播内容 -->
           <div class="overflow-hidden relative">
             <div class="flex transition-transform duration-500 ease-in-out" 
                 :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
@@ -22,13 +18,11 @@
                   :key="index" 
                   class="min-w-full">
                 <div class="flex items-start space-x-6 px-8 py-6">
-                  <!-- 左侧图片 -->
                   <div class="w-1/3">
                     <img :src="event.image" 
                          :alt="event.title" 
                          class="w-full h-64 object-cover rounded-lg shadow-lg">
                   </div>
-                  <!-- 右侧内容 -->
                   <div class="w-2/3 flex flex-col">
                     <div class="mb-2">
                       <span class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
@@ -64,7 +58,6 @@
             </div>
           </div>
 
-          <!-- 轮播指示点 -->
           <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
             <button v-for="(_, index) in events" 
                     :key="index"
@@ -79,7 +72,6 @@
       </div>
     </div>
 
-    <!-- 主要内容区域 -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-1">
@@ -99,7 +91,6 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import Calendar from '@/components/Calendar.vue'
 import EventFilters from '@/components/EventFilters.vue'
 
-// 所有事件数据
 const allEvents = [
   {
     id: 1,
@@ -169,28 +160,22 @@ const allEvents = [
   }
 ]
 
-// 获取当前日期
 const getCurrentDate = () => {
   const today = new Date()
   return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 }
 
-// 从数组中随机选择n个元素
 const getRandomItems = (arr: any[], n: number) => {
   const shuffled = [...arr].sort(() => 0.5 - Math.random())
   return shuffled.slice(0, n)
 }
 
-// 获取当日事件或随机事件
 const events = computed(() => {
   const todayEvents = allEvents.filter(event => event.date === getCurrentDate())
-  
-  // 如果当日事件大于等于5个，随机选择5个当日事件
   if (todayEvents.length >= 5) {
     return getRandomItems(todayEvents, 5)
   }
-  
-  // 如果当日事件不足5个，随机补充其他日期的事件
+
   const otherEvents = allEvents.filter(event => event.date !== getCurrentDate())
   const additionalEvents = getRandomItems(otherEvents, 5 - todayEvents.length)
   
@@ -207,12 +192,10 @@ const previousSlide = () => {
   currentSlide.value = (currentSlide.value - 1 + events.value.length) % events.value.length
 }
 
-// 处理筛选
 const handleFilter = (filters: any) => {
   console.log('Applied filters:', filters)
 }
 
-// 自动轮播
 let autoplayInterval: any = null
 
 onMounted(() => {
@@ -247,7 +230,6 @@ onUnmounted(() => {
   min-width: 100%;
 }
 
-/* 轮播过渡效果 */
 .transition-transform {
   transition: transform 0.5s ease-in-out;
 }

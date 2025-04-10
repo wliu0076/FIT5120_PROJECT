@@ -96,7 +96,6 @@
         <div class="mb-8 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
           <h3 class="text-lg font-bold text-gray-800 mb-4">Event Count Legend</h3>
           <div class="flex flex-col space-y-4">
-            <!-- 事件数量指示器 -->
             <div class="flex items-center space-x-6">
               <div class="flex items-center space-x-2">
                 <div class="event-count-badge flex items-center justify-center w-8 h-8 rounded-md bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm">
@@ -118,7 +117,6 @@
               </div>
             </div>
             
-            <!-- 彩色线条指示器说明 -->
             <div class="pt-2 border-t border-gray-100">
               <h4 class="text-sm font-medium text-gray-800 mb-2">Event Categories</h4>
               <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -694,20 +692,13 @@ import { useI18n } from 'vue-i18n'
 import { getEventCountByMonth, getEventsFromApi } from '../services/eventService'
 import { useRouter } from 'vue-router'
 
-// 使用直接的公共路径而不是导入
 const logoUrl = '/logo.png'
 const router = useRouter()
-
 const { locale, t } = useI18n()
-// 不设置强制locale为zh
 const currentLocale = ref(locale.value)
-
-// UI状态
 const showFilters = ref(false)
 const isMenuOpen = ref(false)
 const isLanguageOpen = ref(false)
-
-// Calendar state
 const currentDate = ref(new Date())
 const selectedDate = ref(null)
 const monthEvents = ref({})
@@ -719,7 +710,6 @@ const selectedVenue = ref('')
 const selectedPrice = ref('')
 const selectedAudience = ref('')
 
-// 时间过滤状态
 const timeRange = ref({
   start: '12:00 AM',
   end: '11:59 PM'
@@ -767,7 +757,6 @@ const audiences = [
   { id: 'families', name: 'Families' }
 ]
 
-// Mock events data - 这将来自API
 const events = [
   {
     id: 1,
@@ -825,7 +814,6 @@ const monthsList = [
   { label: 'December', value: 11 }
 ]
 
-// Autoplay carousel optimization
 const autoplayInterval = ref(null);
 
 // Start autoplay
@@ -1079,7 +1067,6 @@ function applyFilters() {
   currentPage.value = 1 // Reset to first page when filters change
 }
 
-// 清除所有筛选条件
 function clearFilters() {
   selectedEventType.value = ''
   selectedVenue.value = ''
@@ -1106,7 +1093,6 @@ watch(currentLocale, (newLocale) => {
   locale.value = newLocale
 })
 
-// 分页方法
 function goToPage(page) {
   currentPage.value = page
 }
@@ -1123,7 +1109,6 @@ function prevPage() {
   }
 }
 
-// 快速分类过滤
 function filterByCategory(categoryId) {
   selectedEventType.value = categoryId
   applyFilters()
@@ -1266,10 +1251,8 @@ const filteredEvents = computed(() => {
 function matchCategoryAlias(eventCategory, selectedCategory) {
   if (!eventCategory) return false;
   
-  // 将事件类别转为小写
   const lowerEventCategory = eventCategory.toLowerCase();
   
-  // Cultural Events (最常见分类之一)
   if (selectedCategory === 'Cultural Event' && 
       ['art', 'exhibition', 'festival', 'cultural', 'culture', 'heritage', 'museum', 
        'gallery', 'tradition', 'ethnic', 'history', 'performance', 'chinese'].some(term => 
@@ -1285,7 +1268,6 @@ function matchCategoryAlias(eventCategory, selectedCategory) {
     return true;
   }
   
-  // Health & Wellness (很受欢迎的分类)
   if (selectedCategory === 'Wellness Event' && 
       ['health', 'wellness', 'yoga', 'meditation', 'fitness', 'exercise', 'wellbeing', 
        'mindfulness', 'mental health', 'physical', 'therapy', 'healing', 'spa'].some(term => 
@@ -1317,7 +1299,6 @@ function matchCategoryAlias(eventCategory, selectedCategory) {
     return true;
   }
 
-  // Music Events (新增常见分类)
   if (selectedCategory === 'Music Event' && 
       ['music', 'concert', 'gig', 'band', 'performance', 'live music', 'dj', 
        'orchestra', 'choir', 'song', 'jazz', 'rock', 'classical'].some(term => 
@@ -1325,7 +1306,6 @@ function matchCategoryAlias(eventCategory, selectedCategory) {
     return true;
   }
   
-  // Food Events (新增常见分类)
   if (selectedCategory === 'Food Event' && 
       ['food', 'cuisine', 'culinary', 'dining', 'tasting', 'gastronomy', 'restaurant', 
        'cook', 'chef', 'wine', 'beer', 'feast', 'dinner'].some(term => 
@@ -1349,7 +1329,6 @@ const currentMonth = computed(() => {
   return currentDate.value.toLocaleString('default', { month: 'long', year: 'numeric' })
 })
 
-// 获取指定日期的事件
 const getEventsForDate = async (date) => {
   if (!date) return [];
   const dateString = date.toISOString().split('T')[0];
@@ -1369,7 +1348,6 @@ const getEventsForDate = async (date) => {
   }
 };
 
-// 获取当前月份的事件数量
 const fetchMonthEventCounts = async () => {
   const year = currentDate.value.getFullYear();
   const month = currentDate.value.getMonth() + 1;
@@ -1385,7 +1363,6 @@ const fetchMonthEventCounts = async () => {
   }
 };
 
-// 监听月份变化
 watch(() => currentDate.value, async () => {
   await fetchMonthEventCounts();
 }, { immediate: true });
@@ -1393,10 +1370,7 @@ watch(() => currentDate.value, async () => {
 // Initialize events function
 async function initializeEvents() {
   try {
-    // 使用ref而不是布尔值
     const loadingToast = ref(true);
-    
-    // 保持当前设置的日期，仅当selectedDate为空时才设置新日期
     if (!selectedDate.value) {
       selectedDate.value = currentDate.value;
     }
@@ -1528,7 +1502,6 @@ function getRandomCategoryColor(index) {
   return colors[index % colors.length];
 }
 
-// 设置语言函数
 function setLocale(lang) {
   locale.value = lang
   currentLocale.value = lang
@@ -1543,26 +1516,18 @@ function showTooltip(event, message) {
   tooltip.value.style.opacity = '1'
   tooltip.value.style.pointerEvents = 'auto'
   
-  // 计算tooltip位置，保持在视口内
-  const tooltipWidth = 200 // 估计的宽度
+  const tooltipWidth = 200 
   const viewportWidth = window.innerWidth
   
-  // 默认显示在鼠标上方
   let leftPos = event.clientX - tooltipWidth / 2
   let topPos = event.clientY - 40
-  
-  // 防止tooltip超出视口左边界
   if (leftPos < 10) leftPos = 10
-  
-  // 防止tooltip超出视口右边界
   if (leftPos + tooltipWidth > viewportWidth - 10) {
     leftPos = viewportWidth - tooltipWidth - 10
   }
   
   tooltip.value.style.left = `${leftPos}px`
   tooltip.value.style.top = `${topPos}px`
-  
-  // 添加动画效果
   tooltip.value.style.transform = 'translateY(0)'
 }
 

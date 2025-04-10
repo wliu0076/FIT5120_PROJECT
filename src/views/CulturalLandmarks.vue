@@ -212,7 +212,6 @@ const fetchLandmarks = async () => {
     updateMarkers()
   } catch (error) {
     console.error("Error fetching landmarks:", error)
-    // 如果API调用失败，使用本地数据作为备份
     landmarks.value = getFallbackLandmarks()
     updateMarkers()
   }
@@ -332,30 +331,22 @@ function selectCulture(culture) {
   selectedCulture.value = culture
   landmarkSearch.value = ''
   
-  // 清除当前地图标记
   clearMapMarkers()
   
-  // 重置当前活动地标和路由步骤
   activeLandmark.value = null
   routeSteps.value = []
   
-  // 获取新的地标列表
   fetchLandmarks()
   
-  // 如果当前视图是列表，滚动到顶部
   if (viewMode.value === 'list') {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
 function navigateToLandmark(landmark) {
-  // 阻止事件冒泡，避免触发父元素的点击事件
   event.stopPropagation();
-  
-  // 添加日志以跟踪传递的数据
   console.log('导航到地标，传递的数据:', landmark);
-  
-  // 检查地标数据完整性
+
   if (!landmark || !landmark.id || !landmark.name || !landmark.location) {
     console.error('地标数据不完整:', landmark);
     return;
@@ -524,23 +515,19 @@ function playAudioGuide() {
   }
 }
 
-// 分页相关
 const currentPage = ref(1)
 const itemsPerPage = 9
 
-// 计算总页数
 const totalPages = computed(() => {
   return Math.ceil(filteredLandmarks.value.length / itemsPerPage)
 })
 
-// 获取当前页的地标
 const paginatedLandmarks = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
   return filteredLandmarks.value.slice(start, end)
 })
 
-// 监听搜索输入
 const handleSearchInput = debounce(async (event) => {
   const value = event.target.value
   if (!value || !autocompleteService.value || !google?.maps?.places) {
@@ -557,7 +544,7 @@ const handleSearchInput = debounce(async (event) => {
 
     autocompleteService.value.getPlacePredictions(request, (predictions, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-        placeSuggestions.value = predictions.slice(0, 5) // 限制显示5个建议
+        placeSuggestions.value = predictions.slice(0, 5) 
       } else {
         placeSuggestions.value = []
       }
@@ -568,7 +555,6 @@ const handleSearchInput = debounce(async (event) => {
   }
 }, 300)
 
-// 防抖函数
 function debounce(fn, delay) {
   let timeoutId
   return function (...args) {
@@ -577,7 +563,6 @@ function debounce(fn, delay) {
   }
 }
 
-// 监听筛选条件变化，重置页码
 watch([selectedCulture, landmarkSearch], () => {
   currentPage.value = 1
 })
@@ -604,7 +589,6 @@ onMounted(() => {
     document.head.appendChild(script)
   }
 
-  // 获取用户位置
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       pos => {
@@ -619,7 +603,6 @@ onMounted(() => {
     )
   }
 
-  // 初始化地图
   function initMap() {
     map.value = new google.maps.Map(document.getElementById('map'), {
       center: userLocation.value,
