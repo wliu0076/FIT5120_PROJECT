@@ -37,8 +37,12 @@
                 <div class="absolute inset-0 bg-gradient-to-r from-gray-900/70 to-transparent z-0"></div>
                 <div class="flex items-center px-8 py-16 relative z-10">
                   <div class="w-1/2 pr-8 text-white">
-                    <div class="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-6 transform -rotate-1 shadow-lg">
-                      {{ event.category }}
+                    <div 
+                      :class="[
+                      getCategoryTagColor(event.category),
+                      'inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6 transform -rotate-1 shadow-lg'
+                    ]">
+                      {{ getCategoryName(event.category) }}
                     </div>
                     <h2 class="text-5xl font-extrabold text-white mb-6 leading-tight drop-shadow-md">
                       {{ event.name }}
@@ -554,7 +558,7 @@
                     getCategoryTagColor(event.category),
                     'px-4 py-1.5 text-xs font-bold rounded-full shadow-md'
                   ]">
-                    {{ event.category }}
+                    {{ getCategoryName(event.category) }}
                   </span>
                 </div>
               </div>
@@ -974,39 +978,40 @@ function getEventCountColor(count) {
   }
 }
 
-// 获取类别标签颜色优化
 function getCategoryTagColor(category) {
   const colors = {
-    'Music': 'bg-gradient-to-r from-blue-500 to-blue-600 text-white',
-    'Workshop': 'bg-gradient-to-r from-green-500 to-green-600 text-white',
-    'Guided Tour': 'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
-    'Dance': 'bg-gradient-to-r from-pink-500 to-pink-600 text-white',
-    'Festival': 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black',
-    'Film': 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white',
-    'Wellness': 'bg-gradient-to-r from-teal-500 to-teal-600 text-white',
-    'Social': 'bg-gradient-to-r from-orange-500 to-orange-600 text-white',
-    'Music Event': 'bg-gradient-to-r from-blue-500 to-blue-600 text-white',
-    'Cultural Event': 'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
-    'Food Event': 'bg-gradient-to-r from-orange-500 to-orange-600 text-white',
-    'Wellness Event': 'bg-gradient-to-r from-teal-500 to-teal-600 text-white',
-    'Featured': 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black'
+    'concerts-gig-guide': 'bg-gradient-to-r from-blue-500 to-blue-600 text-white',
+    'exhibitions': 'bg-gradient-to-r from-green-500 to-green-600 text-white',
+    'lifestyle': 'bg-gradient-to-r from-purple-500 to-purple-600 text-white',
+    'arts': 'bg-gradient-to-r from-pink-500 to-pink-600 text-white',
+    'sports': 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black',
+    'workshops-conferences-classes': 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white',
   }
   return colors[category] || 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
 }
 
-// 计算分页后的事件
+function getCategoryName(category) {
+  const colors = {
+    'concerts-gig-guide': 'Concerts & Gig Guide',
+    'exhibitions': 'Exhibitions',
+    'lifestyle': 'Festivals & Lifestyle',
+    'arts': 'Performing Arts',
+    'sports': 'Sports & Outdoors',
+    'workshops-conferences-classes': 'Workshops, Conferences & Classes'
+  }
+  return colors[category] || 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
+}
+
 const paginatedEvents = computed(() => {
   const startIndex = (currentPage.value - 1) * eventsPerPage
   const endIndex = startIndex + eventsPerPage
   return filteredEvents.value.slice(startIndex, endIndex)
 })
 
-// 计算总页数
 const totalPages = computed(() => {
   return Math.ceil(filteredEvents.value.length / eventsPerPage)
 })
 
-// Methods
 function hasEventsOnDate(date) {
   return events.some(event => {
     const eventDate = new Date(event.date)
@@ -1023,11 +1028,10 @@ function isSameDay(date1, date2) {
          d1.getFullYear() === d2.getFullYear();
 }
 
-// 选择日期时获取事件
 async function selectDate(dateObj) {
   selectedDate.value = dateObj.date
   showFilters.value = false
-  currentPage.value = 1 // 重置页码
+  currentPage.value = 1
   currentEvents.value = await getEventsForDate(dateObj.date)
   
   setTimeout(() => {
