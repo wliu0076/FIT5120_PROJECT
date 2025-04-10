@@ -6,28 +6,69 @@ import { events as mockEvents } from '../data/events';
  */
 export const getEventCountByMonth = async (year: number, month: number): Promise<any> => {
   try {
-    const response = await fetch(`/api/event-count-by-month?year=${year}&month=${month}`);
+    const apiUrl = `/api/event-count-by-month?year=${year}&month=${month}`;
+    console.log(`Fetching event counts from: ${apiUrl}`);
+    
+    const response = await fetch(apiUrl);
+    
+    // Log more information about the response
+    console.log(`API response status: ${response.status} ${response.statusText}`);
+    console.log(`Content-Type: ${response.headers.get('Content-Type')}`);
+    
     if (!response.ok) {
+      console.error(`API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('API error response:', errorText.substring(0, 200) + '...');
       throw new Error('Failed to fetch event counts');
     }
     
-    const data = await response.json();
+    // Check if content type is JSON
+    const contentType = response.headers.get('Content-Type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error(`Invalid content type: ${contentType}`);
+      const text = await response.text();
+      console.error('Non-JSON response (first 200 chars):', text.substring(0, 200));
+      // 服务器返回HTML而不是JSON，直接使用模拟数据
+      console.log('Server returned HTML instead of JSON, using mock data');
+      return generateMockEventCounts(year, month);
+    }
     
-    // 检查返回的数据格式是否正确
+    let data;
+    try {
+      // Clone response before parsing to avoid consuming the body
+      const clonedResponse = response.clone();
+      data = await response.json();
+      
+      console.log('Parsed JSON data:', data);
+    } catch (jsonError) {
+      console.error('JSON parse error:', jsonError);
+      const text = await response.clone().text();
+      console.error('Response was not valid JSON. First 100 chars:', text.substring(0, 100));
+      // 解析JSON失败，使用模拟数据
+      return generateMockEventCounts(year, month);
+    }
+    
+    // Check if the returned data format is correct
     if (!Array.isArray(data)) {
-      console.error('API返回的数据不是数组格式:', data);
-      throw new Error('API返回的数据格式不正确');
+      console.error('API returned data is not in array format:', data);
+      return generateMockEventCounts(year, month);
     }
     
     return data;
   } catch (error) {
     console.error('Error fetching event counts:', error);
-    // 返回模拟数据作为备用
-    return Array.from({ length: 31 }, (_, i) => ({
-      date: `${year}-${String(month).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`,
-      count: Math.floor(Math.random() * 5)
-    }));
+    // Return mock data as fallback
+    return generateMockEventCounts(year, month);
   }
+};
+
+// 提取生成模拟数据的函数
+const generateMockEventCounts = (year: number, month: number): any[] => {
+  console.log(`Generating mock event counts for ${year}-${month}`);
+  return Array.from({ length: 31 }, (_, i) => ({
+    date: `${year}-${String(month).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`,
+    count: Math.floor(Math.random() * 5)
+  }));
 };
 
 /**
@@ -35,49 +76,91 @@ export const getEventCountByMonth = async (year: number, month: number): Promise
  */
 export const getEventsFromApi = async (date: string): Promise<Event[]> => {
   try {
-    const response = await fetch(`/api/events-by-date?date=${date}`);
+    const apiUrl = `/api/events-by-date?date=${date}`;
+    console.log(`Fetching events from: ${apiUrl}`);
+    
+    const response = await fetch(apiUrl);
+    
+    // Log more information about the response
+    console.log(`API response status: ${response.status} ${response.statusText}`);
+    console.log(`Content-Type: ${response.headers.get('Content-Type')}`);
+    
     if (!response.ok) {
+      console.error(`API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('API error response:', errorText.substring(0, 200) + '...');
       throw new Error('Failed to fetch events');
     }
-    const events = await response.json();
     
-    // 检查events是否是数组
-    if (!Array.isArray(events)) {
-      console.error('API返回的数据不是数组格式:', events);
-      return [];
+    // Check if content type is JSON
+    const contentType = response.headers.get('Content-Type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error(`Invalid content type: ${contentType}`);
+      const text = await response.text();
+      console.error('Non-JSON response (first 200 chars):', text.substring(0, 200));
+      // 服务器返回HTML而不是JSON，使用模拟数据
+      console.log('Server returned HTML instead of JSON, using mock data');
+      return generateMockEvents(date);
     }
     
-    // 如果是空数组，直接返回
+    let events;
+    try {
+      // Clone response before parsing to avoid consuming the body
+      const clonedResponse = response.clone();
+      events = await response.json();
+      
+      console.log('Parsed JSON data:', events);
+    } catch (jsonError) {
+      console.error('JSON parse error:', jsonError);
+      const text = await response.clone().text();
+      console.error('Response was not valid JSON. First 100 chars:', text.substring(0, 100));
+      // 解析JSON失败，使用模拟数据
+      return generateMockEvents(date);
+    }
+    
+    // Check if events is an array
+    if (!Array.isArray(events)) {
+      console.error('API returned data is not in array format:', events);
+      return generateMockEvents(date);
+    }
+    
+    // If it's an empty array, return directly
     if (events.length === 0) {
       return [];
     }
     
     return events.map((event: any) => ({
       ...event,
-      // 确保datetime是ISO格式
+      // Ensure datetime is in ISO format
       datetime: new Date(event.datetime || date + 'T12:00:00').toISOString(),
-      // 如果image为空，使用占位图片
+      // If image is empty, use placeholder image
       image: event.image || getPlaceholderImage()
     }));
   } catch (error) {
     console.error('Error fetching events:', error);
-    // 返回模拟数据作为备用
-    return [
-      {
-        id: Math.floor(Math.random() * 10000),
-        name: '模拟活动 - ' + date,
-        datetime: new Date(date + 'T12:00:00').toISOString(),
-        description: '这是一个模拟活动，因为API请求失败',
-        location: 'Melbourne CBD',
-        category: 'Comedy',
-        link: '#',
-        image: getPlaceholderImage()
-      }
-    ];
+    // Return mock data as fallback
+    return generateMockEvents(date);
   }
 };
 
-// 工具函数：获取占位图像URL
+// 提取生成模拟事件数据的函数
+const generateMockEvents = (date: string): Event[] => {
+  console.log(`Generating mock events for ${date}`);
+  return [
+    {
+      id: Math.floor(Math.random() * 10000),
+      name: 'Mock Event - ' + date,
+      datetime: new Date(date + 'T12:00:00').toISOString(),
+      description: 'This is a mock event because the API request failed',
+      location: 'Melbourne CBD',
+      category: 'Comedy',
+      link: '#',
+      image: getPlaceholderImage()
+    }
+  ];
+};
+
+// Utility function: get placeholder image URL
 const getPlaceholderImage = () => {
   return '/placeholder-event.jpg';
 };
