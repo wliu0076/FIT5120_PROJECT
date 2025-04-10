@@ -73,6 +73,9 @@
         "december": "十二月"
       }
     },
+    "tooltip": {
+      "eventsOnThisDay": "个活动在当天"
+    },
     "actions": {
       "viewDetails": "查看详情",
       "bookTickets": "预订门票",
@@ -84,6 +87,8 @@
     "title": "文化地标",
     "subtitle": "探索墨尔本的文化地标和遗产景点",
     "searchPlaceholder": "搜索地标...",
+    "description": "描述",
+    "imageError": "图片无法加载",
     "filters": {
       "chinese": "中国",
       "indian": "印度"

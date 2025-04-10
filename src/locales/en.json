@@ -73,6 +73,9 @@
         "december": "December"
       }
     },
+    "tooltip": {
+      "eventsOnThisDay": "events on this day"
+    },
     "actions": {
       "viewDetails": "View Details",
       "bookTickets": "Book Tickets",
@@ -85,6 +88,7 @@
     "subtitle": "Explore cultural landmarks and heritage sites in Melbourne",
     "searchPlaceholder": "Search landmark...",
     "description": "Description",
+    "imageError": "Image cannot be loaded",
     "filters": {
       "chinese": "Chinese",
       "indian": "Indian"

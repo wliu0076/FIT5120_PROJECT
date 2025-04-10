@@ -44,63 +44,6 @@
           
           <!-- 右侧操作区 -->
           <div class="flex items-center space-x-3">
-            <!-- 语言切换 -->
-            <div class="relative" v-click-outside="closeLanguageDropdown">
-              <button 
-                @click="toggleLanguageDropdown" 
-                class="flex items-center space-x-1 px-3 py-2 border border-gray-200 rounded-lg shadow-sm hover:border-gray-300 text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 transition-all duration-200"
-              >
-                <span class="text-sm font-medium">
-                  <span class="hidden sm:inline-block">
-                    {{ currentLanguage === 'zh' ? '中文' : 
-                       currentLanguage === 'en' ? 'English' : 
-                       currentLanguage === 'vi' ? 'Tiếng Việt' : 'हिन्दी' }}
-                  </span>
-                  <span class="inline-block sm:hidden">
-                    {{ currentLanguage === 'zh' ? '中' : 
-                       currentLanguage === 'en' ? 'EN' : 
-                       currentLanguage === 'vi' ? 'VI' : 'HI' }}
-                  </span>
-                </span>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  class="h-4 w-4 text-gray-500 transition-transform duration-200"
-                  :class="{ 'transform rotate-180': isLanguageOpen }"
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              <!-- 语言下拉菜单 -->
-              <transition
-                enter-active-class="transition ease-out duration-100"
-                enter-from-class="transform opacity-0 scale-95"
-                enter-to-class="transform opacity-100 scale-100"
-                leave-active-class="transition ease-in duration-75"
-                leave-from-class="transform opacity-100 scale-100"
-                leave-to-class="transform opacity-0 scale-95"
-              >
-                <div v-show="isLanguageOpen" class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-                  <a 
-                    v-for="lang in languages" 
-                    :key="lang.code"
-                    href="#" 
-                    @click.prevent="setLanguage(lang.code)" 
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600"
-                  >
-                    <div class="flex items-center">
-                      <span class="mr-2 flag-icon">{{ lang.flag }}</span>
-                      <span>{{ lang.name }}</span>
-                      <span v-if="currentLanguage === lang.code" class="ml-auto text-orange-500">✓</span>
-                    </div>
-                  </a>
-                </div>
-              </transition>
-            </div>
-            
             <!-- 移动菜单按钮 -->
             <button @click="isMenuOpen = !isMenuOpen" class="md:hidden flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-100 focus:outline-none">
               <svg :class="isMenuOpen ? 'hidden' : 'block'" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,54 +79,17 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <RouterView />
     </main>
-    
-    <!-- Language Selector Modal -->
-    <LanguageSelector :is-open="isLanguageModalOpen" @close="closeLanguageModal" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import LanguageSelector from './components/LanguageSelector.vue'
 
 const route = useRoute()
 const { locale } = useI18n()
-const currentLanguage = ref(locale.value)
-const isLanguageOpen = ref(false)
 const isMenuOpen = ref(false)
-const isLanguageModalOpen = ref(false)
-
-const languages = [
-  { code: 'en', name: 'English', flag: '🇬🇧' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' }
-]
-
-const toggleLanguageDropdown = () => {
-  isLanguageOpen.value = !isLanguageOpen.value
-}
-
-const closeLanguageDropdown = () => {
-  isLanguageOpen.value = false
-}
-
-const setLanguage = (lang) => {
-  currentLanguage.value = lang
-  locale.value = lang
-  localStorage.setItem('language', lang)
-  closeLanguageDropdown()
-  // 当用户选择语言时，显示语言选择器
-  if (route.path === '/landmarks' || route.path === '/events') {
-    isLanguageModalOpen.value = true
-  }
-}
-
-const closeLanguageModal = () => {
-  isLanguageModalOpen.value = false
-}
 
 // 点击外部关闭下拉菜单的指令
 const vClickOutside = {
@@ -199,14 +105,6 @@ const vClickOutside = {
     document.removeEventListener('click', el.clickOutsideEvent)
   }
 }
-
-onMounted(() => {
-  const savedLanguage = localStorage.getItem('language')
-  if (savedLanguage) {
-    currentLanguage.value = savedLanguage
-    locale.value = savedLanguage
-  }
-})
 </script>
 
 <style>

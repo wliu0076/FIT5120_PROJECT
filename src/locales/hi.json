@@ -52,10 +52,26 @@
       "getHelp": "सहायता प्राप्त करें"
     }
   },
+  "events": {
+    "tooltip": {
+      "eventsOnThisDay": "कार्यक्रम इस दिन"
+    }
+  },
   "pagination": {
     "previous": "पिछला",
     "next": "अगला",
     "page": "पृष्ठ",
     "of": "का"
+  },
+  "landmarks": {
+    "title": "सांस्कृतिक स्थल",
+    "subtitle": "मेलबर्न के सांस्कृतिक स्थलों और विरासत स्थलों का अन्वेषण करें",
+    "searchPlaceholder": "स्थल खोजें...",
+    "description": "विवरण",
+    "imageError": "छवि लोड नहीं की जा सकती",
+    "filters": {
+      "chinese": "चीनी",
+      "indian": "भारतीय"
+    }
   }
 } 

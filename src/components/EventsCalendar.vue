@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- Global tooltip element -->
+    <div ref="tooltip" class="tooltip fixed z-50 bg-gray-900 text-white px-3 py-1.5 rounded-lg text-sm shadow-xl opacity-0 pointer-events-none transition-opacity duration-300 whitespace-nowrap transform -translate-y-full mt-[-8px]"></div>
+    
     <!-- Header Navigation section removed to prevent duplication -->
     
     <!-- Banner Section -->
@@ -279,7 +282,9 @@
                   <!-- Event count badge -->
                   <div v-if="date.eventsCount > 0" 
                        class="event-count-badge flex items-center justify-center w-8 h-8 rounded-md transition-transform hover:scale-110"
-                       :class="getEventCountColor(date.eventsCount)">
+                       :class="getEventCountColor(date.eventsCount)"
+                       @mouseenter="showTooltip($event, `${date.eventsCount} ${$t('events.tooltip.eventsOnThisDay') || 'events on this day'}`)"
+                       @mouseleave="hideTooltip()">
                     <span class="text-xs font-bold leading-none">{{ date.eventsCount }}</span>
                   </div>
                 </div>
@@ -1524,6 +1529,43 @@ function setLocale(lang) {
   locale.value = lang
   currentLocale.value = lang
   isLanguageOpen.value = false
+}
+
+// Tooltip functionality
+const tooltip = ref(null)
+
+function showTooltip(event, message) {
+  tooltip.value.textContent = message
+  tooltip.value.style.opacity = '1'
+  tooltip.value.style.pointerEvents = 'auto'
+  
+  // 计算tooltip位置，保持在视口内
+  const tooltipWidth = 200 // 估计的宽度
+  const viewportWidth = window.innerWidth
+  
+  // 默认显示在鼠标上方
+  let leftPos = event.clientX - tooltipWidth / 2
+  let topPos = event.clientY - 40
+  
+  // 防止tooltip超出视口左边界
+  if (leftPos < 10) leftPos = 10
+  
+  // 防止tooltip超出视口右边界
+  if (leftPos + tooltipWidth > viewportWidth - 10) {
+    leftPos = viewportWidth - tooltipWidth - 10
+  }
+  
+  tooltip.value.style.left = `${leftPos}px`
+  tooltip.value.style.top = `${topPos}px`
+  
+  // 添加动画效果
+  tooltip.value.style.transform = 'translateY(0)'
+}
+
+function hideTooltip() {
+  tooltip.value.style.opacity = '0'
+  tooltip.value.style.pointerEvents = 'none'
+  tooltip.value.style.transform = 'translateY(-5px)'
 }
 </script>
 

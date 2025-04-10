@@ -27,6 +27,29 @@
             <span class="text-lg font-medium">{{ isAudioPlaying ? 'Stop Audio' : $t('landmarks.directions.audioGuide')
               }}</span>
           </button>
+          
+          <!-- 语言切换器 -->
+          <div class="relative">
+            <button @click="toggleLanguageDropdown"
+              class="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ease-in-out duration-200 flex items-center justify-center space-x-2 shadow-lg transform hover:scale-105">
+              <i class="mdi mdi-translate text-xl"></i>
+              <span class="text-lg font-medium">{{ currentLanguageDisplay }}</span>
+              <i class="mdi mdi-chevron-down text-sm"></i>
+            </button>
+            
+            <!-- 语言下拉菜单 -->
+            <div v-if="showLanguageDropdown" 
+                 class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-1 z-50">
+              <div v-for="(lang, code) in availableLanguages" :key="code"
+                   @click="changeLanguage(code)"
+                   class="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                   :class="{ 'bg-blue-50': locale === code }">
+                <span class="mr-2">{{ lang.flag }}</span>
+                <span>{{ lang.name }}</span>
+              </div>
+            </div>
+          </div>
+          
           <button @click="savePDF"
             class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
             <i class="mdi mdi-download mr-2"></i>
@@ -96,7 +119,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import html2canvas from 'html2canvas'
@@ -126,6 +149,102 @@ const audioBlobUrl = ref(null)
 const isLoading = ref(true)
 const isDescriptionLoading = ref(true)
 const loadingMessage = ref('加载地标信息')
+
+// 语言切换器相关状态
+const showLanguageDropdown = ref(false)
+const availableLanguages = {
+  en: { name: 'English', flag: '🇬🇧' },
+  zh: { name: '中文', flag: '🇨🇳' },
+  hi: { name: 'हिन्दी', flag: '🇮🇳' }
+}
+
+// 计算当前显示的语言名称
+const currentLanguageDisplay = computed(() => {
+  return availableLanguages[locale.value]?.name || 'English'
+})
+
+// 切换语言下拉菜单显示状态
+function toggleLanguageDropdown() {
+  showLanguageDropdown.value = !showLanguageDropdown.value
+}
+
+// 切换语言
+function changeLanguage(langCode) {
+  if (locale.value !== langCode) {
+    locale.value = langCode
+    
+    // 如果已经获取了地标数据，则重新获取对应语言的描述
+    if (landmark.value?.id) {
+      fetchTranslatedDescription()
+    }
+    
+    // 如果正在播放音频，停止播放并重新请求对应语言的音频
+    if (isAudioPlaying.value) {
+      audioRef.value.pause()
+      isAudioPlaying.value = false
+      // 短暂延迟后请求新语言的音频
+      setTimeout(() => {
+        playAudio()
+      }, 300)
+    }
+
+    // 如果已计算路线，重新计算以获取新语言的导航指示
+    if (routeSteps.value.length > 0) {
+      updateRoute()
+    }
+  }
+  
+  // 关闭下拉菜单
+  showLanguageDropdown.value = false
+}
+
+// 语言下拉菜单相关
+const languageDropdownOpen = ref(false)
+const dropdownRef = ref(null)
+const languageBtnRef = ref(null)
+
+// 设置点击外部关闭下拉菜单的函数
+const setupClickOutsideListener = () => {
+  const handleClickOutside = (event) => {
+    if (
+      dropdownRef.value && 
+      !dropdownRef.value.contains(event.target) &&
+      languageBtnRef.value && 
+      !languageBtnRef.value.contains(event.target)
+    ) {
+      languageDropdownOpen.value = false
+    }
+  }
+  
+  document.addEventListener('click', handleClickOutside)
+  
+  return () => {
+    document.removeEventListener('click', handleClickOutside)
+  }
+}
+
+// 存储清理函数
+let cleanupClickOutside = null
+
+// 监听语言变化
+watch(locale, (newLocale) => {
+  console.log(`Language changed to: ${newLocale}`)
+  
+  // 当语言变化时，重新加载Google Maps脚本
+  if (window.google && window.google.maps) {
+    // 移除之前的Google Maps脚本
+    const scripts = document.querySelectorAll('script[src*="maps.googleapis.com/maps/api/js"]')
+    scripts.forEach(script => script.remove())
+    
+    // 重置Google Maps全局对象
+    window.google = undefined
+    
+    // 延迟一点时间再重新加载地图
+    setTimeout(() => {
+      loadGoogleMapsScript()
+    }, 300)
+  }
+})
 
 // 设置加载状态的辅助函数
 function setLoading(loading, message = '') {
@@ -175,7 +294,8 @@ async function fetchTranslatedDescription() {
     const requestData = {
       id: numericId,
       name: landmark.value.name,
-      address: landmark.value.location || landmark.value.address // Use location while maintaining support for address
+      address: landmark.value.location || landmark.value.address, // Use location while maintaining support for address
+      language: locale.value // 添加当前语言
     }
 
     // Get API base URL
@@ -272,11 +392,53 @@ function initMap() {
   
   map.value = new google.maps.Map(document.getElementById('map'), {
     center: userLocation.value,
-    zoom: 12
+    zoom: 13,
+    mapTypeControl: true,
+    fullscreenControl: true,
+    streetViewControl: true,
+    zoomControl: true
   })
 
   directionsService.value = new google.maps.DirectionsService()
-  directionsRenderer.value = new google.maps.DirectionsRenderer({ map: map.value })
+  directionsRenderer.value = new google.maps.DirectionsRenderer({
+    map: map.value,
+    suppressMarkers: false,
+    polylineOptions: {
+      strokeColor: '#4285F4',
+      strokeWeight: 5,
+      strokeOpacity: 0.8
+    }
+  })
+
+  // 添加用户当前位置标记
+  const userMarker = new google.maps.Marker({
+    position: userLocation.value,
+    map: map.value,
+    title: 'Your Location',
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 10,
+      fillColor: '#4285F4',
+      fillOpacity: 1,
+      strokeColor: '#ffffff',
+      strokeWeight: 2
+    },
+    animation: google.maps.Animation.DROP,
+    zIndex: 2
+  })
+
+  // 为用户位置添加信息窗口
+  const infoWindow = new google.maps.InfoWindow({
+    content: '<div style="padding:5px;"><strong>Your Location</strong></div>'
+  })
+
+  userMarker.addListener('click', () => {
+    infoWindow.open(map.value, userMarker)
+  })
+  
+  // 初始时短暂显示用户位置信息窗口
+  infoWindow.open(map.value, userMarker)
+  setTimeout(() => infoWindow.close(), 3000)
 
   if (landmark.value) {
     updateRoute()
@@ -290,38 +452,112 @@ function savePDF() {
 
   setLoading(true, 'Generating PDF file')
   
+  // 创建一个新的div来准备PDF内容
   const contentDiv = document.createElement('div')
   contentDiv.style.width = '600px'
   contentDiv.style.padding = '20px'
   contentDiv.style.background = 'white'
   contentDiv.style.fontFamily = 'Arial'
 
+  // 创建一个图像元素并等待它加载
+  const img = new Image()
+  img.crossOrigin = 'Anonymous' // 处理跨域图片
+  img.style.width = '100%'
+  img.style.maxWidth = '500px'
+  img.style.borderRadius = '8px'
+  img.style.marginBottom = '15px'
+  img.style.marginTop = '15px'
+
+  // 设置内容
   contentDiv.innerHTML = `
-    <h1>${landmark.value.name}</h1>
+    <h1 style="font-size: 24px; color: #333;">${landmark.value.name}</h1>
     <p><strong>${t('landmarks.directions.location')}:</strong> ${landmark.value.location}</p>
-    <img src="${landmark.value.image}" style="width:100%;border-radius:8px;" />
+    <div id="landmark-image-container" style="width:100%;height:250px;background:#f0f0f0;display:flex;justify-content:center;align-items:center;border-radius:8px;"></div>
     <p><strong>${t('landmarks.directions.description')}:</strong> ${translatedDescription.value || landmark.value.description}</p>
     <p><strong>${t('landmarks.directions.distance')}:</strong> ${routeSummary.value.distance}</p>
     <p><strong>${t('landmarks.directions.time')}:</strong> ${routeSummary.value.duration}</p>
     <p><strong>${t('landmarks.directions.arrival')}:</strong> ${routeSummary.value.arrival}</p>
-    <h2>${t('landmarks.directions.steps')}:</h2>
+    <h2 style="font-size: 20px; margin-top: 20px;">${t('landmarks.directions.steps')}:</h2>
     ${routeSteps.value.map((s, i) => `
       <p><strong>${i + 1}.</strong> ${s.instructions} (${s.distance}, ${s.duration})</p>
     `).join('')}
   `
+  
   document.body.appendChild(contentDiv)
+  const imageContainer = contentDiv.querySelector('#landmark-image-container')
+  
+  // 处理图片加载
+  img.onload = function() {
+    // 图片加载成功后添加到容器中
+    if(imageContainer) {
+      imageContainer.innerHTML = ''
+      imageContainer.appendChild(img)
 
-  html2canvas(contentDiv).then(canvas => {
-    const pdf = new jsPDF()
-    const imgData = canvas.toDataURL('image/png')
-    pdf.addImage(imgData, 'PNG', 0, 0, 210, 0)
-    pdf.save(`${landmark.value.name}-guide.pdf`)
-    document.body.removeChild(contentDiv)
-    setLoading(false)
-  }).catch(error => {
-    console.error('PDF generation error:', error)
-    setLoading(false)
-  })
+      // 等待DOM更新后生成PDF
+      setTimeout(() => {
+        html2canvas(contentDiv, {
+          useCORS: true,
+          allowTaint: true,
+          scale: 2 // 提高PDF质量
+        }).then(canvas => {
+          const imgData = canvas.toDataURL('image/jpeg', 1.0)
+          const pdf = new jsPDF('p', 'mm', 'a4')
+          const pdfWidth = pdf.internal.pageSize.getWidth()
+          const pdfHeight = pdf.internal.pageSize.getHeight()
+          const canvasWidth = canvas.width
+          const canvasHeight = canvas.height
+          const ratio = canvasWidth / canvasHeight
+          let heightForWidth = pdfWidth / ratio
+          
+          if (heightForWidth > pdfHeight) {
+            heightForWidth = pdfHeight
+          }
+          
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, heightForWidth)
+          pdf.save(`${landmark.value.name}-guide.pdf`)
+          
+          // 清理
+          document.body.removeChild(contentDiv)
+          setLoading(false)
+        }).catch(error => {
+          console.error('Canvas error:', error)
+          setLoading(false)
+          document.body.removeChild(contentDiv)
+        })
+      }, 500) // 等待500ms确保DOM更新
+    }
+  }
+  
+  // 处理图片加载失败
+  img.onerror = function() {
+    console.error('Image failed to load')
+    // 在图片容器中放置错误提示，使用当前语言
+    if(imageContainer) {
+      imageContainer.innerHTML = `<div style="text-align:center;padding:20px;color:#666;">${t('landmarks.imageError')}</div>`
+    }
+    
+    // 尽管图片加载失败，仍然尝试生成PDF
+    setTimeout(() => {
+      html2canvas(contentDiv, {
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const pdf = new jsPDF()
+        const imgData = canvas.toDataURL('image/jpeg')
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 0)
+        pdf.save(`${landmark.value.name}-guide.pdf`)
+        document.body.removeChild(contentDiv)
+        setLoading(false)
+      }).catch(error => {
+        console.error('PDF generation error:', error)
+        setLoading(false)
+        document.body.removeChild(contentDiv)
+      })
+    }, 500)
+  }
+  
+  // 开始加载图片
+  img.src = landmark.value.image || defaultImage
 }
 
 function playAudio() {
@@ -435,34 +671,92 @@ function playAudio() {
   }
 }
 
-onMounted(() => {
-  setLoading(true, 'Loading landmark information')
-  
-  // 从路由参数获取地标信息
-  if (route.query.landmark) {
-    try {
-      const landmarkData = JSON.parse(decodeURIComponent(route.query.landmark))
-      console.log('Received landmark data:', landmarkData)
-      
-      landmark.value = landmarkData
-      
-      // 确保所有必需的字段都存在
-      if (landmarkData.id && landmarkData.name && landmarkData.location) {
-        fetchTranslatedDescription()
-      } else {
-        console.error('Missing necessary landmark data:', landmarkData)
+onMounted(async () => {
+  try {
+    // 设置点击外部关闭语言下拉菜单
+    cleanupClickOutside = setupClickOutsideListener()
+    
+    setLoading(true, 'Loading landmark information')
+    
+    // 从路由参数获取地标信息
+    if (route.query.landmark) {
+      try {
+        const landmarkData = JSON.parse(decodeURIComponent(route.query.landmark))
+        console.log('Received landmark data:', landmarkData)
+        
+        landmark.value = landmarkData
+        
+        // 确保所有必需的字段都存在
+        if (landmarkData.name && landmarkData.location) {
+          // 如果没有id，生成一个临时id
+          if (!landmarkData.id) {
+            landmarkData.id = stringToNumericID(landmarkData.name + landmarkData.location).toString()
+            console.log('Generated temporary ID for landmark:', landmarkData.id)
+          }
+          fetchTranslatedDescription()
+        } else {
+          console.error('Missing necessary landmark data:', landmarkData)
+          setLoading(false)
+        }
+      } catch (error) {
+        console.error('Error parsing landmark data:', error)
         setLoading(false)
       }
-    } catch (error) {
-      console.error('Error parsing landmark data:', error)
+    } else {
+      console.error('No landmark data in URL')
       setLoading(false)
     }
-  } else {
-    console.error('No landmark data in URL')
+
+    // 首先获取用户位置
+    getUserLocation()
+  } catch (error) {
+    console.error('Error in onMounted:', error)
     setLoading(false)
   }
+})
 
-  // 初始化地图
+// 单独封装获取用户位置的函数，优先调用
+function getUserLocation() {
+  if (navigator.geolocation) {
+    setLoading(true, 'Getting your location')
+    
+    const options = {
+      enableHighAccuracy: true,  // 请求高精度位置
+      timeout: 10000,            // 10秒超时
+      maximumAge: 0              // 不使用缓存位置
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+      // 成功回调
+      (position) => {
+        console.log('Got user location:', position.coords)
+        userLocation.value = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        }
+        // 成功获取位置后再初始化地图
+        loadGoogleMapsScript()
+      },
+      // 错误回调
+      (error) => {
+        console.warn('Failed to get user location:', error.message)
+        // 显示错误提示，然后使用默认位置
+        alert('Could not access your location. Navigation will use a default starting point.')
+        // 位置获取失败后再初始化地图
+        loadGoogleMapsScript()
+      },
+      // 配置选项
+      options
+    )
+  } else {
+    console.error('Geolocation is not supported by this browser')
+    // 如果浏览器不支持地理定位，直接加载地图
+    loadGoogleMapsScript()
+  }
+}
+
+// 加载Google Maps脚本
+function loadGoogleMapsScript() {
   if (window.google && window.google.maps) {
     initMap()
   } else {
@@ -476,7 +770,7 @@ onMounted(() => {
     }
 
     const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initGoogleMaps`
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMaps&language=${locale.value}`
     script.async = true
     script.defer = true
     
@@ -486,28 +780,7 @@ onMounted(() => {
     
     document.head.appendChild(script)
   }
-
-  // 获取用户位置
-  if (navigator.geolocation) {
-    setLoading(true, 'Getting your location')
-    
-    navigator.geolocation.getCurrentPosition(pos => {
-      userLocation.value = {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude
-      }
-      if (map.value) {
-        updateRoute()
-      }
-    }, error => {
-      console.warn('Failed to get user location:', error)
-      // 继续使用默认位置
-      if (map.value) {
-        updateRoute()
-      }
-    })
-  }
-})
+}
 
 onUnmounted(() => {
   if (window.initGoogleMaps) {
@@ -518,6 +791,11 @@ onUnmounted(() => {
   if (audioBlobUrl.value) {
     URL.revokeObjectURL(audioBlobUrl.value)
     audioBlobUrl.value = null
+  }
+  
+  // 清理点击外部监听器
+  if (cleanupClickOutside) {
+    cleanupClickOutside()
   }
 })
 </script>

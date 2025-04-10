@@ -5,7 +5,7 @@ import vi from '@/locales/vi.json'
 
 const i18n = createI18n({
   legacy: false,
-  locale: 'zh',
+  locale: 'en',
   fallbackLocale: 'en',
   messages: {
     en,
