@@ -1,129 +1,129 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
-    <div class="bg-white shadow-lg rounded-xl p-6 mb-8">
-      <h2 class="text-3xl font-extrabold text-gray-800 mb-4">{{ $t('landmarks.title') }}</h2>
-      <p class="text-lg text-gray-600 mb-6">{{ $t('landmarks.subtitle') }}</p>
+  <div class="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 py-10 px-4 sm:px-6 lg:px-8" style="background-image: url('/new-background.png'); background-size: cover;">
+    <div class="bg-gray-100 shadow-xl rounded-2xl p-8 mb-10" style="background-image: url('/landmarkbc.png'); background-size: cover;">
+      <h2 class="text-4xl font-extrabold text-gray-900 mb-6">Cultural Landmarks</h2>
+      <p class="text-lg text-gray-700 mb-8">Explore the rich cultural landmarks around you.</p>
 
-      <div class="flex flex-wrap gap-3 mb-4">
+      <div class="flex flex-wrap gap-4 mb-6">
         <button v-for="culture in cultures" :key="culture.value" @click="selectCulture(culture.value)"
-          :class="[selectedCulture === culture.value ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200', 'px-4 py-2 rounded-full font-semibold border transition']">
-          {{ $t(`landmarks.filters.${culture.value}`) }}
+          :class="[selectedCulture === culture.value ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300', 'px-5 py-3 rounded-full font-semibold border transition-all duration-300 transform hover:scale-105 shadow-md']">
+          {{ culture.label }}
         </button>
       </div>
 
-      <div class="relative mb-6">
+      <div class="relative mb-8" style="background-image: url('/landmarkbc.png'); background-size: cover;">
         <input 
           v-model="landmarkSearch" 
           type="text" 
-          :placeholder="$t('landmarks.searchPlaceholder')"
-          class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Search for landmarks..."
+          class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           @input="handleSearchInput"
         />
         <div v-if="placeSuggestions.length > 0" 
-          class="absolute z-50 bg-white border border-gray-200 rounded-md mt-1 w-full max-h-60 overflow-auto shadow-lg">
+          class="absolute z-50 bg-white border border-gray-300 rounded-lg mt-2 w-full max-h-60 overflow-auto shadow-lg">
           <div v-for="prediction in placeSuggestions" 
             :key="prediction.place_id" 
             @click="selectPlacePrediction(prediction)"
-            class="px-4 py-2 cursor-pointer hover:bg-gray-100 text-gray-800">
+            class="px-4 py-3 cursor-pointer hover:bg-gray-100 text-gray-900">
             {{ prediction.description }}
           </div>
         </div>
       </div>
     </div>
 
-    <div class="bg-white shadow-md rounded-xl p-4 mb-6">
+    <div class="bg-gray-100 shadow-lg rounded-2xl p-6">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-700">{{ $t('landmarks.viewMode.title') }}</h3>
-        <div class="flex space-x-2">
-          <button @click="toggleView('list')" :class="[viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800', 'px-4 py-1 rounded-lg']">{{ $t('landmarks.viewMode.list') }}</button>
-          <button @click="toggleView('map')" :class="[viewMode === 'map' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800', 'px-4 py-1 rounded-lg']">{{ $t('landmarks.viewMode.map') }}</button>
+        <h3 class="text-xl font-semibold text-gray-800">View Mode</h3>
+        <div class="flex space-x-3">
+          <button @click="toggleView('list')" :class="[viewMode === 'list' ? 'bg-blue-700 text-white' : 'bg-gray-300 text-gray-900', 'px-5 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md']">List</button>
+          <button @click="toggleView('map')" :class="[viewMode === 'map' ? 'bg-blue-700 text-white' : 'bg-gray-300 text-gray-900', 'px-5 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md']">Map</button>
         </div>
       </div>
-      <div v-show="viewMode === 'map'" class="rounded-lg shadow h-96 overflow-hidden">
+      <div v-show="viewMode === 'map'" class="rounded-lg shadow h-96 overflow-hidden mb-8">
         <div id="map" class="w-full h-full rounded-lg" />
       </div>
-    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10" v-show="viewMode === 'list'">
-      <div v-for="landmark in paginatedLandmarks" :key="landmark.id" :ref="el => landmarkRefs[landmark.id] = el"
-        class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition cursor-pointer"
-        @click="handleLandmarkClick(landmark)">
-        <img :src="landmark.image" @error="e => e.target.src = defaultImage"
-          class="w-full h-48 object-cover" />
-        <div class="p-4">
-          <h2 class="text-lg font-bold text-gray-800">{{ landmark.name }}</h2>
-          <p class="text-sm text-gray-500 mt-1">{{ landmark.location }}</p>
-          <div class="mt-4 flex justify-end">
-            <button 
-              @click.stop="navigateToLandmark(landmark)"
-              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-            >
-              <i class="mdi mdi-navigation mr-2"></i>
-              {{ $t('landmarks.actions.navigate') }}
-            </button>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12" v-show="viewMode === 'list'">
+        <div v-for="landmark in paginatedLandmarks" :key="landmark.id" :ref="el => landmarkRefs[landmark.id] = el"
+          class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer w-full h-96"
+          @click="handleLandmarkClick(landmark)">
+          <img :src="landmark.image" @error="e => e.target.src = defaultImage"
+            class="w-full h-52 object-cover" />
+          <div class="p-5 pb-16 relative h-44">
+            <h2 class="text-xl font-bold text-gray-900 mb-2 truncate">{{ landmark.name }}</h2>
+            <p class="text-sm text-gray-600 line-clamp-2">{{ landmark.location }}</p>
+            <div class="absolute bottom-4 right-4">
+              <button 
+                @click.stop="navigateToLandmark(landmark)"
+                class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-full hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 flex items-center space-x-2 w-36 justify-center transform hover:scale-105 shadow-lg"
+              >
+                <i class="mdi mdi-navigation mr-2"></i>
+                Navigate
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div v-if="totalPages > 1" class="flex justify-center items-center space-x-2 mb-10">
+    <div v-if="totalPages > 1" class="flex justify-center items-center space-x-3 mb-12">
       <button 
         @click="currentPage--" 
         :disabled="currentPage === 1"
-        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-5 py-3 rounded-lg border border-gray-300 text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {{ $t('pagination.previous') }}
+        Previous
       </button>
-      <span class="px-4 py-2 text-gray-700">
-        {{ $t('pagination.page') }} {{ currentPage }} {{ $t('pagination.of') }} {{ totalPages }}
+      <span class="px-5 py-3 text-gray-800">
+        Page {{ currentPage }} of {{ totalPages }}
       </span>
       <button 
         @click="currentPage++" 
         :disabled="currentPage === totalPages"
-        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-5 py-3 rounded-lg border border-gray-300 text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {{ $t('pagination.next') }}
+        Next
       </button>
     </div>
 
-    <div v-if="routeSteps.length" class="bg-white shadow-md rounded-xl p-6 mb-10" ref="directionsSection">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-gray-800">{{ $t('landmarks.directions.title') }} {{ activeLandmark?.name }}</h3>
-        <div class="flex justify-end gap-3">
+    <div v-if="routeSteps.length" class="bg-white shadow-lg rounded-2xl p-8 mb-12" ref="directionsSection">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold text-gray-900">Directions to {{ activeLandmark?.name }}</h3>
+        <div class="flex justify-end gap-4">
           <button @click="playAudioGuide"
-            class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center space-x-2">
-            <i class="mdi mdi-volume-high"></i><span>{{ $t('landmarks.directions.audioGuide') }}</span>
+            class="bg-indigo-700 text-white px-5 py-3 rounded-lg hover:bg-indigo-800 transition-all duration-300 flex items-center space-x-2">
+            <i class="mdi mdi-volume-high"></i><span>Audio Guide</span>
           </button>
           <button @click="savePDF"
-            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
-            <i class="mdi mdi-download"></i><span>{{ $t('landmarks.directions.savePdf') }}</span>
+            class="bg-green-700 text-white px-5 py-3 rounded-lg hover:bg-green-800 transition-all duration-300 flex items-center space-x-2">
+            <i class="mdi mdi-download"></i><span>Save PDF</span>
           </button>
         </div>
         <audio ref="audioRef" :src="popupAudio" class="hidden" />
       </div>
 
-      <div class="flex space-x-3 mb-4">
+      <div class="flex space-x-4 mb-6">
         <button v-for="mode in ['TRANSIT', 'WALKING', 'DRIVING']" :key="mode"
           @click="changeTransportMode(mode)"
-          :class="[transportMode === mode ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200', 'px-4 py-2 rounded-full border text-sm font-medium transition']">
-          {{ $t(`landmarks.directions.${mode.toLowerCase()}`) }}
+          :class="[transportMode === mode ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300', 'px-5 py-3 rounded-full border text-sm font-medium transition-all duration-300']">
+          {{ transportModeLabels[mode] }}
         </button>
       </div>
 
-      <div class="text-sm text-gray-600 mb-6">
-        <p><strong>{{ $t('landmarks.directions.distance') }}:</strong> {{ routeSummary.distance }}</p>
-        <p><strong>{{ $t('landmarks.directions.time') }}:</strong> {{ routeSummary.duration }}</p>
-        <p><strong>{{ $t('landmarks.directions.arrival') }}:</strong> {{ routeSummary.arrival }}</p>
+      <div class="text-sm text-gray-700 mb-8">
+        <p><strong>Distance:</strong> {{ routeSummary.distance }}</p>
+        <p><strong>Time:</strong> {{ routeSummary.duration }}</p>
+        <p><strong>Arrival:</strong> {{ routeSummary.arrival }}</p>
       </div>
 
-      <div class="space-y-4">
-        <div v-for="(step, index) in routeSteps" :key="index" class="flex items-start space-x-4">
-          <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+      <div class="space-y-5">
+        <div v-for="(step, index) in routeSteps" :key="index" class="flex items-start space-x-5">
+          <div class="w-10 h-10 rounded-full bg-blue-700 text-white flex items-center justify-center font-semibold">
             {{ index + 1 }}
           </div>
           <div>
-            <p v-html="step.instructions" class="font-medium text-gray-800"></p>
-            <p class="text-sm text-gray-500">{{ step.distance }} • {{ step.duration }}</p>
+            <p v-html="step.instructions" class="font-medium text-gray-900"></p>
+            <p class="text-sm text-gray-600">{{ step.distance }} • {{ step.duration }}</p>
           </div>
         </div>
       </div>

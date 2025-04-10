@@ -37,7 +37,7 @@
             <div class="flex transition-transform duration-700 ease-in-out" :style="{ transform: `translateX(-${currentSlide * 100}%)` }">
               <div v-for="(event, index) in featuredEvents" :key="index" class="min-w-full relative">
                 <!-- Background decoration -->
-                <div class="absolute inset-0 bg-gradient-to-r from-gray-900/70 to-transparent z-0"></div>
+                <div class="absolute inset-0 bg-cover bg-center z-0" style="background-image: url('/events.png');"></div>
                 <div class="flex items-center px-8 py-16 relative z-10">
                   <div class="w-1/2 pr-8 text-white">
                     <div class="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-6 transform -rotate-1 shadow-lg">

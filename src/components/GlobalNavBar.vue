@@ -1,6 +1,6 @@
 <template>
   <!-- Navigation Bar -->
-  <nav class="bg-white shadow-lg">
+  <nav class="bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg transition duration-500 ease-in-out transform hover:scale-105">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <div class="flex">
@@ -10,16 +10,16 @@
             </router-link>
           </div>
           <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-            <router-link to="/" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" :class="{ 'border-blue-500 text-blue-600': $route.path === '/' }">
+            <router-link to="/" class="border-transparent text-white hover:border-white hover:text-gray-200 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" :class="{ 'border-white text-white': $route.path === '/' }">
               {{ $t('nav.home') }}
             </router-link>
-            <router-link to="/events" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" :class="{ 'border-blue-500 text-blue-600': $route.path === '/events' }">
+            <router-link to="/events" class="border-transparent text-white hover:border-white hover:text-gray-200 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" :class="{ 'border-white text-white': $route.path === '/events' }">
               {{ $t('nav.events') }}
             </router-link>
-            <router-link to="/help" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" :class="{ 'border-blue-500 text-blue-600': $route.path === '/help' }">
+            <router-link to="/help" class="border-transparent text-white hover:border-white hover:text-gray-200 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" :class="{ 'border-white text-white': $route.path === '/help' }">
               {{ $t('nav.help') }}
             </router-link>
-            <router-link to="/about" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" :class="{ 'border-blue-500 text-blue-600': $route.path === '/about' }">
+            <router-link to="/about" class="border-transparent text-white hover:border-white hover:text-gray-200 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" :class="{ 'border-white text-white': $route.path === '/about' }">
               {{ $t('nav.about') }}
             </router-link>
           </div>

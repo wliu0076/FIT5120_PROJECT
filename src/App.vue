@@ -1,83 +1,38 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- 全新设计的顶部导航栏 -->
-    <header class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-lg shadow-sm border-b border-gray-100">
+    <!-- Navigation Bar -->
+    <nav class="bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg transition duration-500 ease-in-out transform hover:scale-105 text-lg">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <!-- Logo & Brand -->
+        <div class="flex justify-between h-20">
+          <div class="flex">
+            <div class="flex-shrink-0 flex items-center">
+              <router-link to="/" class="flex items-center">
+                <img class="h-14 w-auto" src="/src/assets/logo.png" alt="Logo" />
+              </router-link>
+            </div>
+            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <router-link to="/" class="border-transparent text-white hover:border-white hover:text-gray-200 inline-flex items-center px-1 pt-1 border-b-2 text-lg font-semibold" :class="{ 'border-white text-white': $route.path === '/' }">
+                Home
+              </router-link>
+              <router-link to="/events" class="border-transparent text-white hover:border-white hover:text-gray-200 inline-flex items-center px-1 pt-1 border-b-2 text-lg font-semibold" :class="{ 'border-white text-white': $route.path === '/events' }">
+                Events
+              </router-link>
+              <router-link to="/landmarks" class="border-transparent text-white hover:border-white hover:text-gray-200 inline-flex items-center px-1 pt-1 border-b-2 text-lg font-semibold" :class="{ 'border-white text-white': $route.path === '/landmarks' }">
+                Landmarks
+              </router-link>
+            </div>
+          </div>
           <div class="flex items-center">
-            <router-link to="/" class="flex items-center space-x-2 group">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 transform group-hover:scale-105">
-                <img src="/logo.png" alt="Logo" class="w-6 h-6 object-contain" />
-              </div>
-              <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600">MelGuide</span>
-            </router-link>
-          </div>
-          
-          <!-- 主导航菜单 -->
-          <nav class="hidden md:flex items-center space-x-1">
-            <div class="relative group">
-              <router-link to="/" class="hover:text-orange-600 px-4 py-2 rounded-lg text-gray-700 font-medium transition-colors duration-200 hover:bg-orange-50/60 relative"
-                :class="$route.path === '/' ? 'text-orange-600 bg-orange-50/80' : ''">
-                {{ $t('navigation.home') }}
-                <span class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-10 h-0.5 rounded-full bg-orange-500"
-                      :class="$route.path === '/' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-all duration-300'"></span>
-              </router-link>
-            </div>
-            <div class="relative group">
-              <router-link to="/events" class="hover:text-orange-600 px-4 py-2 rounded-lg text-gray-700 font-medium transition-colors duration-200 hover:bg-orange-50/60 relative"
-                :class="$route.path === '/events' ? 'text-orange-600 bg-orange-50/80' : ''">
-                {{ $t('navigation.events') }}
-                <span class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-10 h-0.5 rounded-full bg-orange-500"
-                      :class="$route.path === '/events' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-all duration-300'"></span>
-              </router-link>
-            </div>
-            <div class="relative group">
-              <router-link to="/landmarks" class="hover:text-orange-600 px-4 py-2 rounded-lg text-gray-700 font-medium transition-colors duration-200 hover:bg-orange-50/60 relative"
-                :class="$route.path === '/landmarks' ? 'text-orange-600 bg-orange-50/80' : ''">
-                {{ $t('navigation.landmarks') }}
-                <span class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-10 h-0.5 rounded-full bg-orange-500"
-                      :class="$route.path === '/landmarks' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 transition-all duration-300'"></span>
-              </router-link>
-            </div>
-          </nav>
-          
-          <!-- 右侧操作区 -->
-          <div class="flex items-center space-x-3">
-            <!-- 移动菜单按钮 -->
-            <button @click="isMenuOpen = !isMenuOpen" class="md:hidden flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-100 focus:outline-none">
-              <svg :class="isMenuOpen ? 'hidden' : 'block'" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-              <svg :class="isMenuOpen ? 'block' : 'hidden'" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        <!-- 移动端菜单 -->
-        <div :class="isMenuOpen ? 'block' : 'hidden'" class="md:hidden">
-          <div class="pt-2 pb-4 space-y-1">
-            <router-link to="/" class="block px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50/70 transition-colors duration-200"
-              :class="$route.path === '/' ? 'text-orange-600 bg-orange-50/70' : ''">
-              {{ $t('navigation.home') }}
-            </router-link>
-            <router-link to="/events" class="block px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50/70 transition-colors duration-200"
-              :class="$route.path === '/events' ? 'text-orange-600 bg-orange-50/70' : ''">
-              {{ $t('navigation.events') }}
-            </router-link>
-            <router-link to="/landmarks" class="block px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50/70 transition-colors duration-200"
-              :class="$route.path === '/landmarks' ? 'text-orange-600 bg-orange-50/70' : ''">
-              {{ $t('navigation.landmarks') }}
-            </router-link>
+            <!-- Removed translation select box -->
           </div>
         </div>
       </div>
-    </header>
+    </nav>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <RouterView />
+      <transition name="fade" mode="out-in">
+        <RouterView />
+      </transition>
     </main>
   </div>
 </template>
@@ -105,6 +60,13 @@ const vClickOutside = {
     document.removeEventListener('click', el.clickOutsideEvent)
   }
 }
+
+// Loading animation for cultural landmarks
+const isLoading = ref(true)
+
+setTimeout(() => {
+  isLoading.value = false
+}, 2000) // Simulate loading time
 </script>
 
 <style>
@@ -147,5 +109,25 @@ html, body {
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 4px;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0;
+}
+
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 1000;
 }
 </style> 
