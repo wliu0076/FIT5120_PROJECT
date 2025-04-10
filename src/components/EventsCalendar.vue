@@ -699,10 +699,10 @@ const isMenuOpen = ref(false)
 const isLanguageOpen = ref(false)
 
 // Calendar state
-const currentDate = ref(new Date('2024-09-01'))
+const currentDate = ref(new Date())
 const selectedDate = ref(null)
-const monthEvents = ref({}) // 存储每月的事件数据
-const currentEvents = ref([]) // 存储当前选中日期的事件
+const monthEvents = ref({})
+const currentEvents = ref([]) 
 
 // Filters
 const selectedEventType = ref('')

@@ -23,9 +23,6 @@ applications:
             - key: 'Content-Security-Policy'
               value: 'default-src * self blob: data: gap:; style-src * self blob: data: gap:; script-src * self blob: data: gap:; connect-src * self blob: data: gap:; img-src * self blob: data: gap:;'
       redirects:
-        - source: '^/api/event-count-by-month(.*)'
-          destination: 'http://3.107.74.118:5000/event-count-by-month$1'
-          status: 200
-        - source: '^/api/events-by-date(.*)'
-          destination: 'http://3.107.74.118:5000/events-by-date$1'
+        - source: '/api/<*>'
+          destination: 'https://3.107.74.118:5000/<*>'
           status: 200

@@ -7,7 +7,7 @@ export function useAutoTranslation() {
   
   const translateText = async (text: string, targetLang: string) => {
     try {
-      // 获取源语言
+      // Get source language
       const sourceLang = document.documentElement.lang || 'zh'
       const langPair = `${sourceLang}|${targetLang}`
       
@@ -28,7 +28,7 @@ export function useAutoTranslation() {
     isTranslating.value = true
     
     try {
-      // 获取所有文本节点
+      // Get all text nodes
       const walker = document.createTreeWalker(
         document.body,
         NodeFilter.SHOW_TEXT,
@@ -40,7 +40,7 @@ export function useAutoTranslation() {
       
       while (node) {
         const parentElement = node.parentElement
-        // 排除脚本和样式标签中的文本
+        // Exclude text in script and style tags
         if (
           parentElement &&
           !['SCRIPT', 'STYLE'].includes(parentElement.tagName) &&
@@ -52,7 +52,7 @@ export function useAutoTranslation() {
         node = walker.nextNode() as Text
       }
       
-      // 批量翻译文本，每次最多翻译5个节点，避免超出API限制
+      // Batch translate text, max 5 nodes at a time to avoid API limits
       const batchSize = 5
       for (let i = 0; i < textNodes.length; i += batchSize) {
         const batch = textNodes.slice(i, i + batchSize)
@@ -67,7 +67,7 @@ export function useAutoTranslation() {
             }
           })
         )
-        // 添加延迟以避免API限制
+        // Add delay to avoid API limits
         await new Promise(resolve => setTimeout(resolve, 1000))
       }
     } catch (error) {

@@ -145,24 +145,24 @@ function stringToNumericID(str) {
   return Math.abs(hash); // Ensure positive ID
 }
 
-// 获取地标描述翻译
+// Get landmark description translation
 async function fetchTranslatedDescription() {
   if (!landmark.value?.id) {
-    console.error('没有可用的地标 ID')
+    console.error('No landmark ID available')
     isDescriptionLoading.value = false
     return
   }
 
   try {
-    setLoading(true, '获取地标描述翻译')
+    setLoading(true, 'Getting landmark description translation')
     isDescriptionLoading.value = true
     
-    // 检查 ID 是否是 Google Places ID（以 "ChIJ" 开头的字符串）
-    // 如果是，我们需要使用数字索引
+    // Check if ID is a Google Places ID (string starting with "ChIJ")
+    // If so, we need to use a numeric index
     let numericId = landmark.value.id
     if (typeof landmark.value.id === 'string' && landmark.value.id.startsWith('ChIJ')) {
-      // 提取字符串 ID 的最后部分作为数字 ID
-      // 或使用硬编码的映射
+      // Extract the last part of the string ID as a numeric ID
+      // or use hardcoded mapping
       const idMapping = {
         'ChIJt7zSJ8lC1moRIqMuY1-bRIk': 1,
         'ChIJP6r3aZVZ12oRv7HbRFUm5Yg': 2
@@ -175,12 +175,13 @@ async function fetchTranslatedDescription() {
     const requestData = {
       id: numericId,
       name: landmark.value.name,
-      address: landmark.value.location || landmark.value.address // 使用 location 并保留对 address 的支持
+      address: landmark.value.location || landmark.value.address // Use location while maintaining support for address
     }
 
-    // 获取API基础URL
+    // Get API base URL
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
-    console.log('发送翻译请求:', requestData)
+    console.log('Sending translation request:', requestData)
+    console.log('API Base URL:', apiBaseUrl)
 
     const response = await fetch(`${apiBaseUrl}/location`, {
       method: 'POST',
@@ -192,25 +193,28 @@ async function fetchTranslatedDescription() {
     })
 
     if (!response.ok) {
+      console.error(`API error: ${response.status} ${response.statusText}`)
       const errorText = await response.text()
-      console.error('Server response:', errorText)
-      throw new Error(`HTTP error! status: ${response.status}`)
+      console.error(`API response: ${errorText}`)
+      throw new Error(`API error: ${response.status}`)
     }
-    
+
     const data = await response.json()
+    console.log('Translation API response:', data)
+    
     if (data.translated_description) {
       translatedDescription.value = data.translated_description
     } else if (data.description) {
-      // 如果没有翻译但有原始描述，使用原始描述
+      // If no translation but original description exists, use original description
       translatedDescription.value = data.description
     } else {
       console.warn('No description in response:', data)
-      // 回退到地标自己的描述
+      // Fall back to landmark's own description
       translatedDescription.value = landmark.value.description
     }
   } catch (error) {
-    console.error('获取翻译时出错:', error)
-    // 出错时，使用地标自己的描述
+    console.error('Error getting translation:', error)
+    // On error, use landmark's own description
     translatedDescription.value = landmark.value.description
   } finally {
     setLoading(false)
@@ -219,7 +223,7 @@ async function fetchTranslatedDescription() {
 }
 
 function changeTransportMode(mode) {
-  setLoading(true, '更新路线信息')
+  setLoading(true, 'Updating route information')
   transportMode.value = mode
   updateRoute()
 }
@@ -230,7 +234,7 @@ function updateRoute() {
     return
   }
 
-  setLoading(true, '计算最佳路线')
+  setLoading(true, 'Calculating best route')
   
   directionsService.value.route({
     origin: userLocation.value,
@@ -264,7 +268,7 @@ function calculateArrivalTime(seconds) {
 function initMap() {
   if (!google?.maps) return
 
-  setLoading(true, '加载地图')
+  setLoading(true, 'Loading map')
   
   map.value = new google.maps.Map(document.getElementById('map'), {
     center: userLocation.value,
@@ -284,7 +288,7 @@ function initMap() {
 function savePDF() {
   if (!landmark.value) return
 
-  setLoading(true, '生成 PDF 文件')
+  setLoading(true, 'Generating PDF file')
   
   const contentDiv = document.createElement('div')
   contentDiv.style.width = '600px'
@@ -315,7 +319,7 @@ function savePDF() {
     document.body.removeChild(contentDiv)
     setLoading(false)
   }).catch(error => {
-    console.error('PDF 生成错误:', error)
+    console.error('PDF generation error:', error)
     setLoading(false)
   })
 }
@@ -432,13 +436,13 @@ function playAudio() {
 }
 
 onMounted(() => {
-  setLoading(true, '加载地标信息')
+  setLoading(true, 'Loading landmark information')
   
   // 从路由参数获取地标信息
   if (route.query.landmark) {
     try {
       const landmarkData = JSON.parse(decodeURIComponent(route.query.landmark))
-      console.log('接收到的地标数据:', landmarkData)
+      console.log('Received landmark data:', landmarkData)
       
       landmark.value = landmarkData
       
@@ -446,15 +450,15 @@ onMounted(() => {
       if (landmarkData.id && landmarkData.name && landmarkData.location) {
         fetchTranslatedDescription()
       } else {
-        console.error('缺少必要的地标数据:', landmarkData)
+        console.error('Missing necessary landmark data:', landmarkData)
         setLoading(false)
       }
     } catch (error) {
-      console.error('解析地标数据时出错:', error)
+      console.error('Error parsing landmark data:', error)
       setLoading(false)
     }
   } else {
-    console.error('URL 中没有地标数据')
+    console.error('No landmark data in URL')
     setLoading(false)
   }
 
@@ -462,7 +466,7 @@ onMounted(() => {
   if (window.google && window.google.maps) {
     initMap()
   } else {
-    setLoading(true, '加载地图服务')
+    setLoading(true, 'Loading map service')
     
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
     if (!apiKey) {
@@ -485,7 +489,7 @@ onMounted(() => {
 
   // 获取用户位置
   if (navigator.geolocation) {
-    setLoading(true, '获取您的位置')
+    setLoading(true, 'Getting your location')
     
     navigator.geolocation.getCurrentPosition(pos => {
       userLocation.value = {
@@ -496,7 +500,7 @@ onMounted(() => {
         updateRoute()
       }
     }, error => {
-      console.warn('获取用户位置失败:', error)
+      console.warn('Failed to get user location:', error)
       // 继续使用默认位置
       if (map.value) {
         updateRoute()
