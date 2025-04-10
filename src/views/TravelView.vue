@@ -197,7 +197,6 @@ const TRANSPORT_MODE_LABELS = {
   WALKING: 'Walking'
 }
 
-// 添加默认图片常量
 const defaultImage = '/imageerror.png'
 
 const landmarks = {
@@ -403,7 +402,6 @@ function initMap() {
     suppressMarkers: false 
   })
 
-  // 使用新的 AdvancedMarkerElement 替代 Marker
   const { AdvancedMarkerElement } = google.maps.marker
   updateMarkersWithAdvanced(AdvancedMarkerElement)
 }
@@ -526,7 +524,6 @@ onMounted(() => {
   startLocationWatch()
   trackUserProximity()
   
-  // 添加async属性到script标签
   const script = document.createElement('script')
   script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&callback=initMap&loading=async`
   script.async = true

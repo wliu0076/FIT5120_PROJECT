@@ -188,9 +188,8 @@ const routeSummary = ref({
   arrival: ''
 })
 const userLocation = ref({ lat: -37.8136, lng: 144.9631 }) // Melbourne CBD
-const defaultImage = '/imageerror.png' // 添加默认图片常量
+const defaultImage = '/imageerror.png' 
 
-// 搜索相关状态
 const searchQuery = ref('')
 const suggestions = ref([])
 const showSuggestions = ref(false)
@@ -198,7 +197,6 @@ const selectedLocation = ref(null)
 const isLoading = ref(false)
 const nearbyEvents = ref([])
 
-// 从 URL 参数中获取事件信息
 onMounted(() => {
   const params = route.query
   if (params.destination) {
@@ -209,23 +207,20 @@ onMounted(() => {
     }
   }
   
-  // 先获取用户位置，然后再初始化地图
   getUserLocation()
 })
 
-// 获取用户位置
 function getUserLocation() {
   if (navigator.geolocation) {
     isLoading.value = true
     
     const options = {
-      enableHighAccuracy: true,  // 请求高精度位置
-      timeout: 10000,            // 10秒超时
-      maximumAge: 0              // 不使用缓存位置
+      enableHighAccuracy: true,  
+      timeout: 10000,            
+      maximumAge: 0              
     }
     
     navigator.geolocation.getCurrentPosition(
-      // 成功回调
       (position) => {
         console.log('Got user location:', position.coords)
         userLocation.value = {
@@ -233,30 +228,22 @@ function getUserLocation() {
           lng: position.coords.longitude
         }
         
-        // 获取位置后初始化地图
         initializeMap()
       },
-      // 错误回调
       (error) => {
         console.warn('Failed to get user location:', error.message)
         alert(t('travel.locationError'))
-        
-        // 如果获取位置失败，使用默认位置并初始化地图
         initializeMap()
       },
-      // 配置选项
       options
     )
   } else {
     console.error('Geolocation is not supported by this browser')
-    // 如果浏览器不支持地理定位，直接使用默认位置初始化地图
     initializeMap()
   }
 }
 
-// 初始化地图的函数封装
 function initializeMap() {
-  // 初始化地图和服务
   if (window.google && window.google.maps) {
     initMap()
   } else {
@@ -280,7 +267,6 @@ function initializeMap() {
   }
 }
 
-// 初始化地图
 function initMap() {
   try {
     map.value = new google.maps.Map(document.getElementById('map'), {
@@ -305,7 +291,6 @@ function initMap() {
       }
     })
 
-    // 添加用户当前位置标记
     const userMarker = new google.maps.Marker({
       position: userLocation.value,
       map: map.value,
@@ -322,7 +307,6 @@ function initMap() {
       zIndex: 2
     })
 
-    // 为用户位置添加信息窗口
     const infoWindow = new google.maps.InfoWindow({
       content: `<div style="padding:5px;"><strong>${t('travel.yourLocation')}</strong></div>`
     })
@@ -331,11 +315,9 @@ function initMap() {
       infoWindow.open(map.value, userMarker)
     })
     
-    // 初始时短暂显示用户位置信息窗口
     infoWindow.open(map.value, userMarker)
     setTimeout(() => infoWindow.close(), 3000)
 
-    // 如果有初始目的地，计算路线
     if (event.value && event.value.address) {
       geocodeAddress(event.value.address)
     }
@@ -347,14 +329,12 @@ function initMap() {
   }
 }
 
-// 监听语言变化，重新计算路线
 watch(locale, () => {
   if (event.value && event.value.coordinates) {
     calculateRoute()
   }
 })
 
-// 更新 URL 参数的函数
 function updateURLParams(destination) {
   router.replace({
     query: {
@@ -363,7 +343,6 @@ function updateURLParams(destination) {
   })
 }
 
-// 修改交通方式
 function changeTransportMode(mode) {
   transportMode.value = mode
   if (event.value && event.value.coordinates) {
@@ -371,7 +350,6 @@ function changeTransportMode(mode) {
   }
 }
 
-// 计算路线
 async function calculateRoute() {
   if (!directionsService.value || !directionsRenderer.value || !event.value.coordinates) return
 
@@ -386,45 +364,95 @@ async function calculateRoute() {
     directionsRenderer.value.setDirections(result)
 
     const leg = result.routes[0].legs[0]
-    
-    // 翻译路线步骤
-    const translatedSteps = await Promise.all(leg.steps.map(async (step) => {
-      // 提取数字和单位
-      const distanceText = step.distance.text
-      const durationText = step.duration.text
-      
-      // 翻译指令文本
+    const detailedSteps = []
+
+    for (const step of leg.steps) {
+      if (step.travel_mode === 'WALKING') {
+        try {
+          const walkResult = await directionsService.value.route({
+            origin: step.start_location,
+            destination: step.end_location,
+            travelMode: google.maps.TravelMode.WALKING
+          })
+
+          const subSteps = walkResult.routes[0].legs[0].steps.map(subStep => ({
+            instructions: subStep.instructions,
+            distance: subStep.distance.text,
+            duration: subStep.duration.text
+          }))
+
+          detailedSteps.push(...subSteps)
+        } catch (walkError) {
+          console.warn('WALKING detail fetch failed, fallback to original step.')
+          detailedSteps.push({
+            instructions: step.instructions,
+            distance: step.distance?.text || '',
+            duration: step.duration?.text || ''
+          })
+        }
+      } else if (step.travel_mode === 'TRANSIT') {
+        const transitDetails = step.transit
+        let timingInfo = ''
+
+        if (transitDetails) {
+          const departure = transitDetails.departure_time?.text || ''
+          const arrival = transitDetails.arrival_time?.text || ''
+          let lineName = ''
+
+          if (transitDetails.line) {
+            lineName = transitDetails.line.short_name || transitDetails.line.name || ''
+          }
+
+          timingInfo = ` (Depart: ${departure}, Arrive: ${arrival}${lineName ? ', via ' + lineName : ''})`
+        }
+
+        detailedSteps.push({
+          instructions: step.instructions + timingInfo,
+          distance: step.distance?.text || '',
+          duration: step.duration?.text || ''
+        })
+      } else {
+        detailedSteps.push({
+          instructions: step.instructions,
+          distance: step.distance?.text || '',
+          duration: step.duration?.text || ''
+        })
+      }
+    }
+
+    const translatedSteps = detailedSteps.map(step => {
       let translatedInstructions = step.instructions
-      
-      // 根据当前语言替换方向词
+      const distanceText = step.distance
+      const durationText = step.duration
+
       if (locale.value === 'zh') {
         translatedInstructions = translatedInstructions
-          .replace(/Head/g, '出发')
-          .replace(/Turn right/g, '右转')
-          .replace(/Turn left/g, '左转')
-          .replace(/Continue/g, '继续')
-          .replace(/Destination/g, '目的地')
-          .replace(/onto/g, '到')
-          .replace(/toward/g, '朝向')
-          .replace(/for/g, '行驶')
-          .replace(/Take/g, '乘坐')
-          .replace(/Bus/g, '公交车')
-          .replace(/Train/g, '火车')
-          .replace(/Tram/g, '电车')
-          .replace(/Walk/g, '步行')
-          .replace(/Drive/g, '驾驶')
-          .replace(/north/g, '北')
-          .replace(/south/g, '南')
-          .replace(/east/g, '东')
-          .replace(/west/g, '西')
+          .replace(/Head/gi, '出发')
+          .replace(/Turn right/gi, '右转')
+          .replace(/Turn left/gi, '左转')
+          .replace(/Continue/gi, '继续')
+          .replace(/Destination/gi, '目的地')
+          .replace(/onto/gi, '到')
+          .replace(/toward/gi, '朝向')
+          .replace(/for/gi, '行驶')
+          .replace(/Take/gi, '乘坐')
+          .replace(/Bus/gi, '公交车')
+          .replace(/Train/gi, '火车')
+          .replace(/Tram/gi, '电车')
+          .replace(/Walk/gi, '步行')
+          .replace(/Drive/gi, '驾驶')
+          .replace(/north/gi, '北')
+          .replace(/south/gi, '南')
+          .replace(/east/gi, '东')
+          .replace(/west/gi, '西')
+          .replace(/At the roundabout, take the (\d+)(st|nd|rd|th) exit/gi, '在环岛，走第 $1 个出口')
       } else if (locale.value === 'vi') {
         translatedInstructions = translatedInstructions
-          .replace(/Head/g, 'Đi')
-          .replace(/Turn right/g, 'Rẽ phải')
-          .replace(/Turn left/g, 'Rẽ trái')
-          .replace(/Continue/g, 'Tiếp tục')
-          .replace(/Destination/g, 'Điểm đến')
-          // Add more Vietnamese translations as needed
+          .replace(/Head/gi, 'Đi')
+          .replace(/Turn right/gi, 'Rẽ phải')
+          .replace(/Turn left/gi, 'Rẽ trái')
+          .replace(/Continue/gi, 'Tiếp tục')
+          .replace(/Destination/gi, 'Điểm đến')
       }
 
       return {
@@ -432,7 +460,7 @@ async function calculateRoute() {
         distance: distanceText,
         duration: durationText
       }
-    }))
+    })
 
     routeSteps.value = translatedSteps
     routeSummary.value = {
@@ -440,8 +468,11 @@ async function calculateRoute() {
       distance: leg.distance.text,
       arrival: calculateArrivalTime(leg.duration.value)
     }
+
+    console.log('✅ Route updated with translated detailed steps:', translatedSteps)
+
   } catch (error) {
-    console.error('Error calculating route:', error)
+    console.error('❌ Error calculating route:', error)
   }
 }
 
@@ -507,7 +538,6 @@ async function savePDF() {
   }
 }
 
-// 处理搜索输入
 const handleSearchInput = async () => {
   if (!searchQuery.value || !autocompleteService.value || !google?.maps?.places) {
     suggestions.value = []
@@ -545,7 +575,6 @@ const handleSearchInput = async () => {
   }
 }
 
-// 选择地址
 const selectAddress = (prediction) => {
   if (!placesService.value || !google?.maps?.places) {
     console.error("Places service not available")
@@ -566,14 +595,11 @@ const selectAddress = (prediction) => {
         lng: place.geometry.location.lng()
       }
       
-      // 更新地图和路线
       map.value.setCenter(place.geometry.location)
       map.value.setZoom(15)
       
-      // 更新 URL
       updateURLParams(place.formatted_address)
       
-      // 更新事件对象并计算路线
       event.value = {
         address: place.formatted_address,
         coordinates: {
@@ -583,14 +609,12 @@ const selectAddress = (prediction) => {
       }
       calculateRoute()
       
-      // 清除建议列表
       suggestions.value = []
       showSuggestions.value = false
     }
   })
 }
 
-// 地理编码地址
 function geocodeAddress(address) {
   const geocoder = new google.maps.Geocoder()
   geocoder.geocode({ address }, (results, status) => {
@@ -613,8 +637,6 @@ const searchNearbyEvents = async () => {
   isLoading.value = true
   
   try {
-    // TODO: 实现实际的附近活动搜索API调用
-    // 这里使用模拟数据
     await new Promise(resolve => setTimeout(resolve, 1000))
     nearbyEvents.value = [
       {
@@ -647,7 +669,6 @@ const searchNearbyEvents = async () => {
     ]
   } catch (error) {
     console.error('Error fetching nearby events:', error)
-    // TODO: 显示错误消息
   } finally {
     isLoading.value = false
   }
@@ -667,17 +688,15 @@ const formatDate = (dateString) => {
 }
 
 const showDirections = (event) => {
-  // 更新地图上的目的地
   event.value = {
     title: event.name,
     location: event.address,
     coordinates: {
-      lat: -37.818085, // 这里应该使用实际的事件坐标
+      lat: -37.818085, 
       lng: 144.968124
     }
   }
   
-  // 重新计算路线
   calculateRoute()
 }
 
