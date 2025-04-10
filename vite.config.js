@@ -14,7 +14,9 @@ export default defineConfig({
       '/api': {
         target: 'http://3.107.74.118:5000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        secure: false,
+        // 移除路径重写，保留完整的API路径
+        // rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
   }

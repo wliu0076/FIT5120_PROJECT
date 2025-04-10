@@ -23,6 +23,6 @@ applications:
             - key: 'Content-Security-Policy'
               value: 'upgrade-insecure-requests'
       redirects:
-        - source: '/api/<*>'
-          destination: 'http://3.107.74.118:5000/<*>'
+        - source: '/api/*'
+          destination: 'http://3.107.74.118:5000/api/*'
           status: 200
