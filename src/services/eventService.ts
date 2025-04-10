@@ -7,7 +7,7 @@ import { events as mockEvents } from '../data/events';
 export const getEventCountByMonth = async (year: number, month: number): Promise<any> => {
   try {
     const baseUrl = import.meta.env.VITE_API_BASE_URL
-    const apiUrl = `${baseUrl}/api/event-count-by-month?year=${year}&month=${month}`;
+    const apiUrl = `${baseUrl}/event-count-by-month?year=${year}&month=${month}`;
     console.log(`Fetching event counts from: ${apiUrl}`);
     
     const response = await fetch(apiUrl);
@@ -78,7 +78,7 @@ const generateMockEventCounts = (year: number, month: number): any[] => {
 export const getEventsFromApi = async (date: string): Promise<Event[]> => {
   try {
     const baseUrl = import.meta.env.VITE_API_BASE_URL
-    const apiUrl = `${baseUrl}/api/events-by-date?date=${date}`;
+    const apiUrl = `${baseUrl}/events-by-date?date=${date}`;
     console.log(`Fetching events from: ${apiUrl}`);
     
     const response = await fetch(apiUrl);
