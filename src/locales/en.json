@@ -122,6 +122,9 @@
       "gettingLocation": "Getting your location",
       "generatingPdf": "Generating PDF",
       "loadingDescription": "Loading description..."
+    },
+    "proximity": {
+      "nearby": "You are now {distance} meters away from this landmark"
     }
   },
   "travel": {
@@ -152,6 +155,17 @@
     "noAddressSelected": "No address selected",
     "yourLocation": "Your Location",
     "locationError": "Could not access your location. Using default location. Please make sure you've allowed location access."
+  },
+  "location": {
+    "accessEnabled": "Location access is enabled",
+    "usingCurrent": "We're using your current location to provide accurate navigation.",
+    "disable": "Disable Location",
+    "enable": "Enable Location",
+    "tryAgain": "Try Again",
+    "accessDisabled": "Location access is disabled",
+    "needAccess": "We need your location to provide accurate navigation. Please enable location access in your browser settings.",
+    "accessDenied": "Location access denied",
+    "usingDefault": "Without location access, we'll use a default position in Melbourne CBD for your starting point."
   },
   "help": {
     "title": "Help Center",

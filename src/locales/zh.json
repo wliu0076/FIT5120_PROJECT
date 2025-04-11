@@ -122,6 +122,9 @@
       "gettingLocation": "正在获取您的位置",
       "generatingPdf": "正在生成PDF文件",
       "loadingDescription": "正在加载描述信息..."
+    },
+    "proximity": {
+      "nearby": "您距离此地标约 {distance} 米"
     }
   },
   "travel": {
@@ -149,6 +152,17 @@
     "noNearbyEvents": "附近没有找到活动",
     "yourLocation": "您的位置",
     "locationError": "无法获取您的位置，将使用默认位置。请确保您已允许位置访问权限。"
+  },
+  "location": {
+    "accessEnabled": "位置访问已启用",
+    "usingCurrent": "我们正在使用您的当前位置提供准确导航。",
+    "disable": "禁用位置",
+    "enable": "启用位置",
+    "tryAgain": "重试",
+    "accessDisabled": "位置访问已禁用",
+    "needAccess": "我们需要您的位置来提供准确的导航。请在浏览器设置中启用位置访问。",
+    "accessDenied": "位置访问被拒绝",
+    "usingDefault": "没有位置访问权限，我们将使用墨尔本市中心的默认位置作为您的起点。"
   },
   "help": {
     "title": "帮助中心",

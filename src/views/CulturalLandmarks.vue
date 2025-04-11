@@ -1,5 +1,21 @@
 <template>
   <div class="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 py-10 px-4 sm:px-6 lg:px-8" style="background-image: url('/new-background.png'); background-size: cover;">
+    <!-- Location Permission Alert - 只在权限被拒绝且尚未手动禁用时显示 -->
+    <div v-if="showLocationAlert && locationPermissionStatus !== 'granted'" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-lg shadow-md">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <i class="mdi mdi-alert-circle text-2xl text-yellow-500 mr-3"></i>
+        </div>
+        <div>
+          <p class="font-medium">Location access is disabled</p>
+          <p class="text-sm">We need your location to provide accurate navigation. Please enable location access in your browser settings.</p>
+        </div>
+        <button @click="dismissLocationAlert" class="ml-auto text-yellow-500 hover:text-yellow-700">
+          <i class="mdi mdi-close text-xl"></i>
+        </button>
+      </div>
+    </div>
+    
     <div class="bg-gray-100 shadow-xl rounded-2xl p-8 mb-10" style="background-image: url('/landmarkbc.png'); background-size: cover;">
       <h2 class="text-4xl font-extrabold text-gray-900 mb-6">Cultural Landmarks</h2>
       <p class="text-lg text-gray-700 mb-8">Explore the rich cultural landmarks around you.</p>
@@ -29,6 +45,35 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Location Permission Status Banner (when denied) -->
+    <div v-if="locationPermissionDenied" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center shadow-sm">
+      <i class="mdi mdi-map-marker-off text-2xl text-red-500 mr-3"></i>
+      <div>
+        <p class="font-medium text-red-800">Location access denied</p>
+        <p class="text-sm text-red-700">Without location access, we'll use a default position in Melbourne CBD for your starting point.</p>
+      </div>
+      <div class="ml-auto flex space-x-2">
+        <button @click="requestLocationPermission" class="bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-lg transition-colors">
+          Try Again
+        </button>
+        <button v-if="manuallyDisabled" @click="enableLocation" class="bg-green-100 hover:bg-green-200 text-green-800 px-4 py-2 rounded-lg transition-colors">
+          Enable Location
+        </button>
+      </div>
+    </div>
+
+    <!-- Location Permission Controls -->
+    <div v-if="locationPermissionStatus === 'granted'" class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center shadow-sm">
+      <i class="mdi mdi-map-marker text-2xl text-blue-500 mr-3"></i>
+      <div>
+        <p class="font-medium text-blue-800">Location access is enabled</p>
+        <p class="text-sm text-blue-700">We're using your current location to provide accurate navigation.</p>
+      </div>
+      <button @click="disableLocation" class="ml-auto bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg transition-colors">
+        Disable Location
+      </button>
     </div>
 
     <div class="bg-gray-100 shadow-lg rounded-2xl p-6">
@@ -157,6 +202,12 @@ const directionsRenderer = ref(null)
 const autocompleteService = ref(null)
 const mapMarkers = ref([])
 
+// Location permission state
+const locationPermissionDenied = ref(false)
+const showLocationAlert = ref(false)
+const locationPermissionStatus = ref('prompt') // 'prompt', 'granted', 'denied'
+const manuallyDisabled = ref(false)
+
 const selectedCulture = ref('chinese')
 const landmarkSearch = ref('')
 const viewMode = ref('list')
@@ -164,7 +215,7 @@ const landmarks = ref([])
 const placeSuggestions = ref([])
 const routeSteps = ref([])
 const activeLandmark = ref(null)
-const userLocation = ref({ lat: -37.818267, lng: 144.952974 })
+const userLocation = ref({ lat: -37.818267, lng: 144.952974 }) // Default to Melbourne CBD
 const transportMode = ref('TRANSIT')
 const routeSummary = ref({ duration: '', distance: '', arrival: '' })
 const popupAudio = '/src/info.mp3'
@@ -175,6 +226,68 @@ const defaultImage = '/imageerror.png'
 const audioRef = ref(null)
 
 const router = useRouter()
+
+// Function to dismiss location alert
+function dismissLocationAlert() {
+  showLocationAlert.value = false
+  localStorage.setItem('locationAlertDismissed', 'true')
+}
+
+// Function to check location permission status
+async function checkLocationPermission() {
+  try {
+    if (!navigator.permissions) {
+      return 'prompt'
+    }
+    
+    const permission = await navigator.permissions.query({ name: 'geolocation' })
+    return permission.state // 'granted', 'denied', or 'prompt'
+  } catch (error) {
+    console.error('Error checking location permission:', error)
+    return 'prompt'
+  }
+}
+
+// Function to request location permission
+function requestLocationPermission() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        userLocation.value = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        }
+        locationPermissionDenied.value = false
+        locationPermissionStatus.value = 'granted'
+        
+        // 成功获取到位置后，隐藏位置访问禁用通知
+        showLocationAlert.value = false
+        
+        // Update map center if map exists
+        if (map.value) {
+          map.value.setCenter(userLocation.value)
+          
+          // Refetch landmarks with new location
+          fetchLandmarks()
+        }
+      },
+      error => {
+        console.warn('获取用户位置失败:', error)
+        locationPermissionDenied.value = true
+        locationPermissionStatus.value = 'denied'
+        showLocationAlert.value = true
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    )
+  } else {
+    console.warn('Geolocation is not supported by this browser')
+    locationPermissionDenied.value = true
+  }
+}
 
 const transportModeLabels = {
   TRANSIT: t('landmarks.directions.transit'),
@@ -190,8 +303,8 @@ const cultures = [
 // Culture category queries
 const fetchLandmarks = async () => {
   const queries = selectedCulture.value === 'chinese'
-    ? ['chinese museum', 'place_of_worship', 'restaurant', 'tourist_attraction', 'store']
-    : ['hindu_temple', 'restaurant', 'tourist_attraction Melbourne', 'store']
+    ? ['chinese museum', 'place_of_worship', 'chinese restaurant', 'tourist_attraction', 'store']
+    : ['hindu_temple', 'india restaurant', 'tourist_attraction Melbourne', 'store']
 
   try {
     const promises = queries.map(q => searchPlaces(q))
@@ -212,6 +325,7 @@ const fetchLandmarks = async () => {
     updateMarkers()
   } catch (error) {
     console.error("Error fetching landmarks:", error)
+    // 如果API调用失败，使用本地数据作为备份
     landmarks.value = getFallbackLandmarks()
     updateMarkers()
   }
@@ -567,7 +681,27 @@ watch([selectedCulture, landmarkSearch], () => {
   currentPage.value = 1
 })
 
-onMounted(() => {
+onMounted(async () => {
+  // 初始化位置权限状态
+  locationPermissionStatus.value = await checkLocationPermission()
+  
+  // 检查位置权限是否被手动禁用
+  const locationDisabled = localStorage.getItem('locationDisabled') === 'true'
+  if (locationDisabled) {
+    locationPermissionDenied.value = true
+    locationPermissionStatus.value = 'denied'
+    manuallyDisabled.value = true
+    showLocationAlert.value = true
+  } else {
+    // 检查警告是否被关闭过
+    const alertDismissed = localStorage.getItem('locationAlertDismissed') === 'true'
+    
+    // 只有在权限非granted且警告未被关闭过的情况下显示警告
+    if (locationPermissionStatus.value !== 'granted' && !alertDismissed) {
+      showLocationAlert.value = true
+    }
+  }
+  
   if (window.google && window.google.maps) {
     initMap()
   } else {
@@ -589,18 +723,11 @@ onMounted(() => {
     document.head.appendChild(script)
   }
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        userLocation.value = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        }
-      },
-      error => {
-        console.warn('获取用户位置失败:', error)
-      }
-    )
+  // 如果位置未被手动禁用且权限尚未被拒绝，则请求位置权限
+  if (!locationDisabled && locationPermissionStatus.value !== 'denied') {
+    requestLocationPermission()
+  } else if (locationPermissionStatus.value === 'denied') {
+    locationPermissionDenied.value = true
   }
 
   function initMap() {
@@ -664,5 +791,82 @@ function getFallbackLandmarks() {
           description: '展示印度文化艺术和历史的文化中心。' 
         }
       ]
+}
+
+// Function to manually disable location tracking
+function disableLocation() {
+  // Reset to default Melbourne location
+  userLocation.value = { lat: -37.818267, lng: 144.952974 }
+  
+  // Update permission status
+  locationPermissionStatus.value = 'denied'
+  locationPermissionDenied.value = true
+  manuallyDisabled.value = true
+  
+  // Save preference to local storage
+  localStorage.setItem('locationDisabled', 'true')
+  
+  // Revoke geolocation permission if possible
+  if (navigator.permissions && navigator.permissions.revoke) {
+    try {
+      navigator.permissions.revoke({ name: 'geolocation' }).then(() => {
+        console.log('Geolocation permission revoked');
+      }).catch(e => {
+        console.warn('Failed to revoke permission:', e);
+      });
+    } catch (e) {
+      console.warn('Permission revocation not supported:', e);
+    }
+  }
+  
+  // Update map if it exists
+  if (map.value) {
+    map.value.setCenter(userLocation.value)
+    // Refresh landmarks with new location
+    fetchLandmarks()
+  }
+  
+  // Show notification to user
+  showLocationAlert.value = true
+}
+
+// Function to re-enable location tracking
+function enableLocation() {
+  // 移除手动禁用标记
+  manuallyDisabled.value = false
+  
+  // 清除存储的偏好设置
+  localStorage.removeItem('locationDisabled')
+  localStorage.removeItem('locationAlertDismissed') // 重置警告状态，以便在权限再次被拒绝时显示
+  
+  // 重置位置权限状态
+  locationPermissionStatus.value = 'prompt'
+  locationPermissionDenied.value = false
+  
+  // 强制浏览器重新请求权限
+  // 1. 先清除当前状态
+  if (navigator.permissions) {
+    navigator.permissions.query({ name: 'geolocation' })
+      .then(permissionStatus => {
+        console.log('Current permission status:', permissionStatus.state);
+      });
+  }
+  
+  // 2. 通过使用一个一次性调用请求权限
+  navigator.geolocation.getCurrentPosition(
+    () => {
+      // 成功获取位置后，正常调用完整的requestLocationPermission
+      requestLocationPermission();
+    },
+    (error) => {
+      console.log('Initial permission request failed:', error);
+      // 即使初始请求失败，也尝试完整的权限请求流程
+      requestLocationPermission();
+    },
+    { 
+      maximumAge: 0, // 不使用缓存
+      timeout: 5000   // 较短的超时
+    }
+  );
 }
 </script>
