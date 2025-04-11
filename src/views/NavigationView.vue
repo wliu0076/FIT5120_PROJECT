@@ -193,7 +193,18 @@ import { formatEventDate } from '../utils/eventUtils'
 
 const route = useRoute()
 const router = useRouter()
-const { t, locale } = useI18n()
+const { t, locale } = useI18n({
+  useScope: 'local',
+  locale: 'en',
+  messages: {
+    en: {
+      greeting: 'Hello!',
+    },
+    zh: {
+      greeting: '你好！',
+    }
+  }
+})
 
 const event = ref(null)
 const map = ref(null)
