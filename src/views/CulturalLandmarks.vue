@@ -183,8 +183,8 @@ const transportModeLabels = {
 }
 
 const cultures = [
-  { label: t('landmarks.filters.chinese'), value: 'chinese' },
-  { label: t('landmarks.filters.indian'), value: 'indian' }
+  { label: 'Chinese', value: 'chinese' },
+  { label: 'Indian', value: 'indian' }
 ]
 
 // Culture category queries

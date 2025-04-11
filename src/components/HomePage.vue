@@ -46,9 +46,9 @@
             <!-- Feature 1 -->
             <div class="relative">
               <div class="text-4xl mb-4">🗓️</div>
-              <h3 class="text-lg leading-6 font-medium text-gray-900">{{ $t('features.events.title') }}</h3>
+              <h3 class="text-lg leading-6 font-medium text-gray-900">Featured Events</h3>
               <p class="mt-2 text-base text-gray-500">
-                {{ $t('features.events.description') }}
+                Explore the diverse cultural activities and exciting experiences in Melbourne
               </p>
             </div>
 

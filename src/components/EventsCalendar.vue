@@ -11,11 +11,11 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative mb-8">
         <h1 class="text-4xl font-extrabold text-center text-gray-900">
           <span class="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600 inline-block transform -rotate-1">
-            {{ $t('events.featured.title') || 'Featured Events' }}
+            Featured Events
           </span>
         </h1>
         <p class="mt-3 max-w-2xl mx-auto text-center text-lg text-gray-600">
-          {{ $t('events.featured.subtitle') || 'Explore the diverse cultural activities and exciting experiences in Melbourne' }}
+          Explore the diverse cultural activities and exciting experiences in Melbourne
         </p>
       </div>
       
@@ -1054,7 +1054,7 @@ function nextMonth() {
 
 function formatDate(date) {
   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  return date.toLocaleDateString(locale.value, options);
+  return date.toLocaleDateString('en', options);
 }
 
 function toggleFilters() {

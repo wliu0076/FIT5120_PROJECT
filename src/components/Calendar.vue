@@ -1,13 +1,13 @@
 <template>
   <div class="calendar">
     <div class="calendar-header">
-      <button @click="previousMonth">{{ t('events.calendar.previous') }}</button>
+      <button @click="previousMonth">Previous</button>
       <span>{{ currentMonthName }}</span>
-      <button @click="nextMonth">{{ t('events.calendar.next') }}</button>
+      <button @click="nextMonth">Next</button>
     </div>
     <div class="calendar-grid">
       <div class="weekday-header" v-for="day in weekDays" :key="day">
-        {{ t(`events.calendar.${day}`) }}
+        day
       </div>
       <div
         v-for="day in calendarDays"
@@ -42,7 +42,7 @@ const currentMonthName = computed(() => {
     'may', 'june', 'july', 'august',
     'september', 'october', 'november', 'december'
   ]
-  return t(`events.calendar.months.${monthNames[currentDate.value.getMonth()]}`)
+  return monthNames[currentDate.value.getMonth()]
 })
 
 const calendarDays = computed<CalendarDay[]>(() => {

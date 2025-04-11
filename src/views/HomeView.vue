@@ -13,16 +13,12 @@
             <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
               <div class="hero-content flex flex-col md:flex-row items-center justify-between">
                 <div class="text-white mb-8 md:mb-0 md:w-3/4">
-                  <h1 class="font-bold mb-8">{{ $t('home.hero.title') }}</h1>
-                  <p class="text-2xl mb-12 text-gray-100 leading-relaxed">{{ $t('home.hero.subtitle') }}</p>
+                  <h1 class="font-bold mb-8">Discover Melbourne's Best Events in Your Language</h1>
+                  <p class="text-2xl mb-12 text-gray-100 leading-relaxed">Plan your journey and find events with step-by-step help</p>
                   <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
                     <router-link to="/events" class="primary-button bg-blue-600 text-white px-10 py-5 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-all flex items-center justify-center">
                       <i class="mdi mdi-calendar-search text-2xl mr-3"></i>
-                      {{ $t('home.hero.browseEvents') }}
-                    </router-link>
-                    <router-link to="/travel" class="primary-button border-2 border-white text-white px-10 py-5 rounded-xl font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all flex items-center justify-center">
-                      <i class="mdi mdi-map-marker-path text-2xl mr-3"></i>
-                      Explore Melbourne
+                      Browse Events
                     </router-link>
                   </div>
                 </div>
