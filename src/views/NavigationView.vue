@@ -71,11 +71,32 @@
         <!-- Route Summary -->
         <div class="bg-white rounded-lg shadow-sm p-6">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold">{{ $t('travel.routeInfo.estimatedTime') }}</h2>
-            <button @click="savePDF" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
-              <span>{{ $t('travel.actions.savePDF') }}</span>
-            </button>
-          </div>
+  <h2 class="text-xl font-bold">{{ $t('travel.routeInfo.estimatedTime') }}</h2>
+  <div class="flex items-center space-x-3 relative">
+    <!-- Language Button -->
+    <button @click="toggleLanguageDropdown"
+      class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ease-in-out duration-200 flex items-center space-x-2">
+      <i class="mdi mdi-translate text-xl"></i>
+      <span class="text-base font-medium">{{ currentLanguageDisplay }}</span>
+    </button>
+
+    <!-- Language Dropdown -->
+    <div v-if="showLanguageDropdown" class="absolute right-0 top-full mt-2 w-40 bg-white rounded-lg shadow-lg py-1 z-50">
+      <div v-for="(lang, code) in availableLanguages" :key="code"
+           @click="changeLanguage(code)"
+           class="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+           :class="{ 'bg-blue-50': locale === code }">
+        <span class="mr-2">{{ lang.flag }}</span>
+        <span>{{ lang.name }}</span>
+      </div>
+    </div>
+
+    <!-- Save PDF -->
+    <button @click="savePDF" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+      <span>{{ $t('travel.actions.savePDF') }}</span>
+    </button>
+  </div>
+</div>
 
           <div class="bg-gray-50 p-4 rounded-lg mb-6">
             <div class="flex items-center justify-between">
@@ -163,7 +184,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import html2canvas from 'html2canvas/dist/html2canvas.esm.js'
 import { jsPDF } from 'jspdf'
@@ -196,6 +217,74 @@ const showSuggestions = ref(false)
 const selectedLocation = ref(null)
 const isLoading = ref(false)
 const nearbyEvents = ref([])
+const showLanguageDropdown = ref(false)
+const availableLanguages = {
+  en: { name: 'English', flag: '🇬🇧' },
+  zh: { name: '中文', flag: '🇨🇳' },
+  hi: { name: 'हिन्दी', flag: '🇮🇳' }
+}
+
+const currentLanguageDisplay = computed(() => {
+  return availableLanguages[locale.value]?.name || 'English'
+})
+
+function toggleLanguageDropdown() {
+  showLanguageDropdown.value = !showLanguageDropdown.value
+}
+
+function changeLanguage(langCode) {
+  if (locale.value !== langCode) {
+    locale.value = langCode
+    
+    if (landmark.value?.id) {
+      fetchTranslatedDescription()
+    }
+    
+    if (isAudioPlaying.value) {
+      audioRef.value.pause()
+      isAudioPlaying.value = false
+      setTimeout(() => {
+        playAudio()
+      }, 300)
+    }
+
+    if (routeSteps.value.length > 0) {
+      updateRoute()
+    }
+  }
+  
+  showLanguageDropdown.value = false
+}
+
+function loadGoogleMapsScript() {
+  if (window.google && window.google.maps) {
+    initMap()
+  } else {
+    isLoading.value = true
+
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+    if (!apiKey) {
+      console.error("Google Maps API Key not found")
+      isLoading.value = false
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap&language=${locale.value}`
+    script.async = true
+    script.defer = true
+
+    window.initMap = function () {
+      initMap()
+    }
+
+    document.head.appendChild(script)
+  }
+}
+
+const languageDropdownOpen = ref(false)
+const dropdownRef = ref(null)
+const languageBtnRef = ref(null)
 
 onMounted(() => {
   const params = route.query
@@ -244,27 +333,7 @@ function getUserLocation() {
 }
 
 function initializeMap() {
-  if (window.google && window.google.maps) {
-    initMap()
-  } else {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-    if (!apiKey) {
-      console.error("Google Maps API Key not found. Please set VITE_GOOGLE_MAPS_API_KEY in .env file")
-      isLoading.value = false
-      return
-    }
-
-    const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initMap`
-    script.async = true
-    script.defer = true
-    
-    window.initMap = function() {
-      initMap()
-    }
-    
-    document.head.appendChild(script)
-  }
+  loadGoogleMapsScript()
 }
 
 function initMap() {
@@ -328,6 +397,21 @@ function initMap() {
     isLoading.value = false
   }
 }
+
+watch(locale, (newLocale) => {
+  console.log(`Language changed to: ${newLocale}`)
+  
+  if (window.google && window.google.maps) {
+    const scripts = document.querySelectorAll('script[src*="maps.googleapis.com/maps/api/js"]')
+    scripts.forEach(script => script.remove())
+    
+    window.google = undefined
+
+    setTimeout(() => {
+      loadGoogleMapsScript()
+    }, 300)
+  }
+})
 
 watch(locale, () => {
   if (event.value && event.value.coordinates) {
@@ -538,82 +622,82 @@ async function savePDF() {
   }
 }
 
-const handleSearchInput = async () => {
-  if (!searchQuery.value || !autocompleteService.value || !google?.maps?.places) {
-    suggestions.value = []
-    showSuggestions.value = false
-    return
-  }
+// const handleSearchInput = async () => {
+//   if (!searchQuery.value || !autocompleteService.value || !google?.maps?.places) {
+//     suggestions.value = []
+//     showSuggestions.value = false
+//     return
+//   }
 
-  try {
-    const victoriaBounds = new google.maps.LatLngBounds(
-      new google.maps.LatLng(-39.2, 140.8), // Southwest corner (near Portland)
-      new google.maps.LatLng(-33.9, 149.0)  // Northeast corner (near Wodonga)
-    )
+//   try {
+//     const victoriaBounds = new google.maps.LatLngBounds(
+//       new google.maps.LatLng(-39.2, 140.8), // Southwest corner (near Portland)
+//       new google.maps.LatLng(-33.9, 149.0)  // Northeast corner (near Wodonga)
+//     )
 
-    const request = {
-      input: searchQuery.value,
-      bounds: victoriaBounds,
-      location: new google.maps.LatLng(userLocation.value.lat, userLocation.value.lng),
-      radius: 50000, // 50km radius
-      componentRestrictions: { country: 'au' }
-    }
+//     const request = {
+//       input: searchQuery.value,
+//       bounds: victoriaBounds,
+//       location: new google.maps.LatLng(userLocation.value.lat, userLocation.value.lng),
+//       radius: 50000, // 50km radius
+//       componentRestrictions: { country: 'au' }
+//     }
 
-    autocompleteService.value.getPlacePredictions(request, (predictions, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-        suggestions.value = predictions
-        showSuggestions.value = true
-      } else {
-        suggestions.value = []
-        showSuggestions.value = false
-      }
-    })
-  } catch (error) {
-    console.error('Error getting place predictions:', error)
-    suggestions.value = []
-    showSuggestions.value = false
-  }
-}
+//     autocompleteService.value.getPlacePredictions(request, (predictions, status) => {
+//       if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+//         suggestions.value = predictions
+//         showSuggestions.value = true
+//       } else {
+//         suggestions.value = []
+//         showSuggestions.value = false
+//       }
+//     })
+//   } catch (error) {
+//     console.error('Error getting place predictions:', error)
+//     suggestions.value = []
+//     showSuggestions.value = false
+//   }
+// }
 
-const selectAddress = (prediction) => {
-  if (!placesService.value || !google?.maps?.places) {
-    console.error("Places service not available")
-    return
-  }
+// const selectAddress = (prediction) => {
+//   if (!placesService.value || !google?.maps?.places) {
+//     console.error("Places service not available")
+//     return
+//   }
 
-  const request = {
-    placeId: prediction.place_id,
-    fields: ['name', 'geometry', 'formatted_address']
-  }
+//   const request = {
+//     placeId: prediction.place_id,
+//     fields: ['name', 'geometry', 'formatted_address']
+//   }
 
-  placesService.value.getDetails(request, (place, status) => {
-    if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-      searchQuery.value = place.formatted_address
-      selectedLocation.value = {
-        address: place.formatted_address,
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng()
-      }
+//   placesService.value.getDetails(request, (place, status) => {
+//     if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+//       searchQuery.value = place.formatted_address
+//       selectedLocation.value = {
+//         address: place.formatted_address,
+//         lat: place.geometry.location.lat(),
+//         lng: place.geometry.location.lng()
+//       }
       
-      map.value.setCenter(place.geometry.location)
-      map.value.setZoom(15)
+//       map.value.setCenter(place.geometry.location)
+//       map.value.setZoom(15)
       
-      updateURLParams(place.formatted_address)
+//       updateURLParams(place.formatted_address)
       
-      event.value = {
-        address: place.formatted_address,
-        coordinates: {
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng()
-        }
-      }
-      calculateRoute()
+//       event.value = {
+//         address: place.formatted_address,
+//         coordinates: {
+//           lat: place.geometry.location.lat(),
+//           lng: place.geometry.location.lng()
+//         }
+//       }
+//       calculateRoute()
       
-      suggestions.value = []
-      showSuggestions.value = false
-    }
-  })
-}
+//       suggestions.value = []
+//       showSuggestions.value = false
+//     }
+//   })
+// }
 
 function geocodeAddress(address) {
   const geocoder = new google.maps.Geocoder()
@@ -631,74 +715,74 @@ function geocodeAddress(address) {
   })
 }
 
-const searchNearbyEvents = async () => {
-  if (!selectedLocation.value) return
+// const searchNearbyEvents = async () => {
+//   if (!selectedLocation.value) return
 
-  isLoading.value = true
+//   isLoading.value = true
   
-  try {
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    nearbyEvents.value = [
-      {
-        id: 1,
-        name: 'Melbourne Food Festival',
-        category: 'Food & Drink',
-        distance: 0.5,
-        address: '123 Exhibition Street, Melbourne',
-        image: '/events/food-festival.jpg',
-        datetime: '2024-04-15T14:00:00'
-      },
-      {
-        id: 2,
-        name: 'Live Music Night',
-        category: 'Music',
-        distance: 1.2,
-        address: '456 Russell Street, Melbourne',
-        image: '/events/music-event.jpg',
-        datetime: '2024-04-16T19:00:00'
-      },
-      {
-        id: 3,
-        name: 'Art Exhibition',
-        category: 'Arts',
-        distance: 1.8,
-        address: '789 Lonsdale Street, Melbourne',
-        image: '/events/art-exhibition.jpg',
-        datetime: '2024-04-17T10:00:00'
-      }
-    ]
-  } catch (error) {
-    console.error('Error fetching nearby events:', error)
-  } finally {
-    isLoading.value = false
-  }
-}
+//   try {
+//     await new Promise(resolve => setTimeout(resolve, 1000))
+//     nearbyEvents.value = [
+//       {
+//         id: 1,
+//         name: 'Melbourne Food Festival',
+//         category: 'Food & Drink',
+//         distance: 0.5,
+//         address: '123 Exhibition Street, Melbourne',
+//         image: '/events/food-festival.jpg',
+//         datetime: '2024-04-15T14:00:00'
+//       },
+//       {
+//         id: 2,
+//         name: 'Live Music Night',
+//         category: 'Music',
+//         distance: 1.2,
+//         address: '456 Russell Street, Melbourne',
+//         image: '/events/music-event.jpg',
+//         datetime: '2024-04-16T19:00:00'
+//       },
+//       {
+//         id: 3,
+//         name: 'Art Exhibition',
+//         category: 'Arts',
+//         distance: 1.8,
+//         address: '789 Lonsdale Street, Melbourne',
+//         image: '/events/art-exhibition.jpg',
+//         datetime: '2024-04-17T10:00:00'
+//       }
+//     ]
+//   } catch (error) {
+//     console.error('Error fetching nearby events:', error)
+//   } finally {
+//     isLoading.value = false
+//   }
+// }
 
-const getCategoryColor = (category) => {
-  const colors = {
-    'Food & Drink': 'bg-orange-100 text-orange-800',
-    'Music': 'bg-purple-100 text-purple-800',
-    'Arts': 'bg-blue-100 text-blue-800'
-  }
-  return colors[category] || 'bg-gray-100 text-gray-800'
-}
+// const getCategoryColor = (category) => {
+//   const colors = {
+//     'Food & Drink': 'bg-orange-100 text-orange-800',
+//     'Music': 'bg-purple-100 text-purple-800',
+//     'Arts': 'bg-blue-100 text-blue-800'
+//   }
+//   return colors[category] || 'bg-gray-100 text-gray-800'
+// }
 
-const formatDate = (dateString) => {
-  return formatEventDate(dateString)
-}
+// const formatDate = (dateString) => {
+//   return formatEventDate(dateString)
+// }
 
-const showDirections = (event) => {
-  event.value = {
-    title: event.name,
-    location: event.address,
-    coordinates: {
-      lat: -37.818085, 
-      lng: 144.968124
-    }
-  }
+// const showDirections = (event) => {
+//   event.value = {
+//     title: event.name,
+//     location: event.address,
+//     coordinates: {
+//       lat: -37.818085, 
+//       lng: 144.968124
+//     }
+//   }
   
-  calculateRoute()
-}
+//   calculateRoute()
+// }
 
 onUnmounted(() => {
   delete window.initMap

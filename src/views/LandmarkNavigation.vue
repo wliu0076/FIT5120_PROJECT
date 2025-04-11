@@ -383,7 +383,6 @@ function updateRoute() {
         }
       }
 
-      // 翻译所有步骤
       const translatedSteps = detailedSteps.map(step => {
         let translatedInstructions = step.instructions
 
